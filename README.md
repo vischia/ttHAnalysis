@@ -5,4 +5,6 @@
 ```
 cd ${CMSSW_BASE}/src
 git clone -o upstream git@github.com:cp3-llbb/HHAnalysis.git cp3_llbb/HHAnalysis
+cd ${CMSSW_BASE}/src/cp3_llbb/HHAnalysis
+source setup.sh
 ```
