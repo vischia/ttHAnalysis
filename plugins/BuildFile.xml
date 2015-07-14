@@ -1,0 +1,6 @@
+<use name="FWCore/Framework"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ParameterSet"/>
+<use name="cp3_llbb/Framework"/>
+<use name="cp3_llbb/TreeWrapper"/>
+<flags EDM_PLUGIN="1"/>
