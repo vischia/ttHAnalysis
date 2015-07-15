@@ -10,10 +10,11 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 process.GlobalTag.globaltag = "MCRUN2_74_V9"
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 process.source = cms.Source("PoolSource")
 process.source.fileNames = cms.untracked.vstring(
-        'file:///home/fynu/sbrochet/storage/MINIAODSIM/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Asympt25ns_MCRUN2_74_V9_reduced.root'
+        '/store/mc/RunIISpring15DR74/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/10000/50C1DCD3-7013-E511-8A98-008CFA010718.root'
+#        'file:///home/fynu/sbrochet/storage/MINIAODSIM/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Asympt25ns_MCRUN2_74_V9_reduced.root'
         )
 ##### #####
 # Electron ID recipe
