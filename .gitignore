@@ -22,6 +22,9 @@
 *.a
 *.lib
 
+# Compiled bytecode of Python source files
+*.pyc
+
 # Executables
 *.exe
 *.out
