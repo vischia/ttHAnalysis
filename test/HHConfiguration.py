@@ -14,8 +14,8 @@ process.GlobalTag.globaltag = "MCRUN2_74_V9"
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 process.source = cms.Source("PoolSource")
 process.source.fileNames = cms.untracked.vstring(
-        '/store/mc/RunIISpring15DR74/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/10000/50C1DCD3-7013-E511-8A98-008CFA010718.root'
-#        'file:///nfs/user/obondu/MINIAODSIM/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph.root'
+#        '/store/mc/RunIISpring15DR74/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/10000/50C1DCD3-7013-E511-8A98-008CFA010718.root'
+        'file:///nfs/user/obondu/MINIAODSIM/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph.root'
 #        'file:///home/fynu/sbrochet/storage/MINIAODSIM/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Asympt25ns_MCRUN2_74_V9.root'
 #        'file:///home/fynu/sbrochet/storage/MINIAODSIM/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Asympt50ns_MCRUN2_74_V9A.root'
         )
