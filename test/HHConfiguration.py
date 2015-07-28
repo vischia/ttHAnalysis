@@ -11,11 +11,12 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.GlobalTag.globaltag = "MCRUN2_74_V9"
 #process.GlobalTag.globaltag = "74X_dataRun2_Express_v0"
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
 process.source = cms.Source("PoolSource")
 process.source.fileNames = cms.untracked.vstring(
 #        '/store/mc/RunIISpring15DR74/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/10000/50C1DCD3-7013-E511-8A98-008CFA010718.root'
-        'file:///nfs/user/obondu/MINIAODSIM/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph.root'
+        '/store/mc/RunIISpring15DR74/GluGluToRadionToHHTo2B2VTo2L2Nu_M-260_narrow_13TeV-madgraph/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/50000/7846F40B-D912-E511-832C-0CC47A4D99D6.root'
+#        'file:///nfs/user/obondu/MINIAODSIM/GluGluToRadionToHHTo2B2VTo2L2Nu_M-300_narrow_13TeV-madgraph.root'
 #        'file:///home/fynu/sbrochet/storage/MINIAODSIM/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Asympt25ns_MCRUN2_74_V9.root'
 #        'file:///home/fynu/sbrochet/storage/MINIAODSIM/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_Asympt50ns_MCRUN2_74_V9A.root'
         )
@@ -35,7 +36,7 @@ for idmod in my_id_modules:
 # Services
 ##### #####
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 # Producers
 from cp3_llbb.Framework import EventProducer

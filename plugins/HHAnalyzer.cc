@@ -108,10 +108,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         for (unsigned int ip = 0 ; ip < gp.pruned_p4.size() ; ip++) {
             std::bitset<15> flags (gp.pruned_status_flags[ip]);
             if( !flags.test(13) ) continue; // take the last copies
-            if(HHANADEBUG)
-                std::cout << "\tip= " << ip << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[ip] << "\tflags= " << flags << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[ip].Pt() << " , " << gp.pruned_p4[ip].Eta() << " , " << gp.pruned_p4[ip].Phi() << " , " << gp.pruned_p4[ip].E() << " , " << gp.pruned_p4[ip].M() << ")" << std::endl;
             if( flags.test(8) ) // first look at the hard process
             {
+                if(HHANADEBUG)
+                    std::cout << "\tip= " << ip << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[ip] << "\tflags= " << flags << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[ip].Pt() << " , " << gp.pruned_p4[ip].Eta() << " , " << gp.pruned_p4[ip].Phi() << " , " << gp.pruned_p4[ip].E() << " , " << gp.pruned_p4[ip].M() << ")" << std::endl;
                 if( abs(gp.pruned_pdg_id[ip]) == 25 )
                 {
                     if( gen_iH1 == -1 )
@@ -215,9 +215,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                 }
             } // end of loop over pruned gen particles
         } // end of FSR loop
-        // Sanity checks
-        if(isThereFSRforL1) assert(gen_iG1.size() > 0);
-        if(isThereFSRforL2) assert(gen_iG2.size() > 0);
         // new loop to find FSR gluons
         if( isThereFSRforB1 || isThereFSRforB2 )
         {
