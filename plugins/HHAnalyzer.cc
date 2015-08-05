@@ -31,7 +31,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 // ***** ***** *****
 // Get the MC truth information on the hard process
 // ***** ***** *****
-        const GenParticlesProducer& gp = dynamic_cast<const GenParticlesProducer&>(producers.get("gen_particles"));
+        const GenParticlesProducer& gp = producers.get<GenParticlesProducer>("gen_particles");
     
         BRANCH(gen_B1, LorentzVector);
         BRANCH(gen_B2, LorentzVector);
@@ -336,9 +336,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 // ***** ***** *****
 // Matching
 // ***** ***** *****
-        const JetsProducer& jets = dynamic_cast<const JetsProducer&>(producers.get("jets"));
-        const ElectronsProducer& electrons = dynamic_cast<const ElectronsProducer&>(producers.get("electrons"));
-        const MuonsProducer& muons = dynamic_cast<const MuonsProducer&>(producers.get("muons"));
+        const JetsProducer& jets = producers.get<JetsProducer>("jets");
+        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
+        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
         BRANCH(gen_deltaR_jet_B1, std::vector<float>);    
         BRANCH(gen_deltaR_jet_B2, std::vector<float>);    
         BRANCH(gen_deltaR_jet_B1FSR, std::vector<float>);    
