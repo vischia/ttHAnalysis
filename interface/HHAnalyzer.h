@@ -9,8 +9,8 @@
 
 class MuMuCategory: public Category {
     virtual bool event_in_category(const ProducersManager& producers) const override {
-        const MuonsProducer& muons = dynamic_cast<const MuonsProducer&>(producers.get("muons"));
-        const ElectronsProducer& electrons = dynamic_cast<const ElectronsProducer&>(producers.get("electrons"));
+        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
+        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
         if( muons.p4.size() >= 2 )
         {
             if( electrons.p4.size() >= 1 ) // if there is electrons at all, check the muons are the leading leptons
@@ -27,7 +27,7 @@ class MuMuCategory: public Category {
         manager.new_cut("muon_1_pt", "pt > 10");
     };
     virtual void evaluate_cuts(CutManager& manager, const ProducersManager& producers) const override {
-        const MuonsProducer& muons = dynamic_cast<const MuonsProducer&>(producers.get("muons"));
+        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
         if (muons.p4[0].Pt() > 10)
             manager.pass_cut("muon_1_pt");
     }
@@ -35,8 +35,8 @@ class MuMuCategory: public Category {
 
 class MuElCategory: public Category {
     virtual bool event_in_category(const ProducersManager& producers) const override {
-        const MuonsProducer& muons = dynamic_cast<const MuonsProducer&>(producers.get("muons"));
-        const ElectronsProducer& electrons = dynamic_cast<const ElectronsProducer&>(producers.get("electrons"));
+        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
+        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
         if( (muons.p4.size() == 1) && (electrons.p4.size() >= 1) )
         {
             if( muons.p4[0].Pt() > electrons.p4[0].Pt() )
@@ -53,7 +53,7 @@ class MuElCategory: public Category {
         manager.new_cut("muon_1_pt", "pt > 10");
     };
     virtual void evaluate_cuts(CutManager& manager, const ProducersManager& producers) const override {
-        const MuonsProducer& muons = dynamic_cast<const MuonsProducer&>(producers.get("muons"));
+        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
         if (muons.p4[0].Pt() > 10)
             manager.pass_cut("muon_1_pt");
     }
@@ -61,8 +61,8 @@ class MuElCategory: public Category {
 
 class ElMuCategory: public Category {
     virtual bool event_in_category(const ProducersManager& producers) const override {
-        const MuonsProducer& muons = dynamic_cast<const MuonsProducer&>(producers.get("muons"));
-        const ElectronsProducer& electrons = dynamic_cast<const ElectronsProducer&>(producers.get("electrons"));
+        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
+        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
         if( (electrons.p4.size() == 1) && (muons.p4.size() >= 1) )
         {
             if( electrons.p4[0].Pt() > muons.p4[0].Pt() )
@@ -79,7 +79,7 @@ class ElMuCategory: public Category {
         manager.new_cut("electron_1_pt", "pt > 10");
     };
     virtual void evaluate_cuts(CutManager& manager, const ProducersManager& producers) const override {
-        const ElectronsProducer& electrons = dynamic_cast<const ElectronsProducer&>(producers.get("electrons"));
+        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
         if (electrons.p4[0].Pt() > 10)
             manager.pass_cut("electron_1_pt");
     }
@@ -87,8 +87,8 @@ class ElMuCategory: public Category {
 
 class ElElCategory: public Category {
     virtual bool event_in_category(const ProducersManager& producers) const override {
-        const MuonsProducer& muons = dynamic_cast<const MuonsProducer&>(producers.get("muons"));
-        const ElectronsProducer& electrons = dynamic_cast<const ElectronsProducer&>(producers.get("electrons"));
+        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
+        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
         if( electrons.p4.size() >= 2 )
         {
             if( muons.p4.size() >= 1 ) // if there is muons at all, check the electrons are the leading leptons
@@ -105,7 +105,7 @@ class ElElCategory: public Category {
         manager.new_cut("electron_1_pt", "pt > 10");
     };
     virtual void evaluate_cuts(CutManager& manager, const ProducersManager& producers) const override {
-        const ElectronsProducer& electrons = dynamic_cast<const ElectronsProducer&>(producers.get("electrons"));
+        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
         if (electrons.p4[0].Pt() > 10)
             manager.pass_cut("electron_1_pt");
     }
@@ -113,7 +113,7 @@ class ElElCategory: public Category {
 
 class DiJetCategory: public Category {
     virtual bool event_in_category(const ProducersManager& producers) const override {
-        const JetsProducer& jets = dynamic_cast<const JetsProducer&>(producers.get("jets"));
+        const JetsProducer& jets = producers.get<JetsProducer>("jets");
         if( jets.p4.size() >= 2 )
             return true;
         else
@@ -124,7 +124,7 @@ class DiJetCategory: public Category {
         manager.new_cut("jet_2_pt", "pt > 20");
     };
     virtual void evaluate_cuts(CutManager& manager, const ProducersManager& producers) const override {
-        const JetsProducer& jets = dynamic_cast<const JetsProducer&>(producers.get("jets"));
+        const JetsProducer& jets = producers.get<JetsProducer>("jets");
         if (jets.p4[0].Pt() > 20)
             manager.pass_cut("jet_1_pt");
         if (jets.p4[1].Pt() > 20)
