@@ -59,11 +59,7 @@ process.framework = cms.EDProducer("ExTreeMaker",
 
             gen_particles = GenParticlesProducer.default_configuration,
 
-            jets = JetsProducer.default_configuration.clone(
-                parameters = cms.PSet(
-                    cut = cms.untracked.string("pt > 10")
-                    )
-                ),
+            jets = JetsProducer.default_configuration,
 
             met = METProducer.default_configuration,
 
@@ -82,6 +78,8 @@ process.framework = cms.EDProducer("ExTreeMaker",
                 )
             )
         )
+
+process.framework.producers.jets.parameters.cut = cms.untracked.string("pt > 10")
 
 process.p = cms.Path(
         process.egmGsfElectronIDSequence *
