@@ -79,7 +79,10 @@ process.framework = cms.EDProducer("ExTreeMaker",
             )
         )
 
-process.framework.producers.jets.parameters.cut = cms.untracked.string("pt > 10")
+process.framework.producers.jets.parameters.cut = cms.untracked.string("pt > 30")
+process.framework.producers.muons.parameters.cut = cms.untracked.string("pt > 20")
+process.framework.producers.electrons.parameters.cut = cms.untracked.string("pt > 25")
+process.framework.producers.met.parameters.cut = cms.untracked.string("pt > 20")
 
 process.p = cms.Path(
         process.egmGsfElectronIDSequence *
