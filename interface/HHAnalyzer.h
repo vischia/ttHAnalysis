@@ -4,151 +4,6 @@
 #include <cp3_llbb/Framework/interface/Analyzer.h>
 #include <cp3_llbb/Framework/interface/Category.h>
 
-#include <cp3_llbb/Framework/interface/MuonsProducer.h>
-#include <cp3_llbb/Framework/interface/ElectronsProducer.h>
-#include <cp3_llbb/Framework/interface/JetsProducer.h>
-
-class MuMuCategory: public Category {
-    virtual bool event_in_category_pre_analyzers(const ProducersManager& producers) const override {
-        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-        if( muons.p4.size() >= 2 )
-        {
-            if( electrons.p4.size() >= 1 ) // if there is electrons at all, check the muons are the leading leptons
-            {
-                if( muons.p4[1].Pt() > electrons.p4[0].Pt() )
-                    return true;
-            } else {
-                return true;
-            }
-        }
-        return false;
-    };
-    virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override {
-        return true;
-    };
-    virtual void register_cuts(CutManager& manager) override {
-        manager.new_cut("muon_1_pt", "pt > 10");
-    };
-    virtual void evaluate_cuts_pre_analyzers(CutManager& manager, const ProducersManager& producers) const override {
-        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-        if (muons.p4[0].Pt() > 10)
-            manager.pass_cut("muon_1_pt");
-    }
-};
-
-class MuElCategory: public Category {
-    virtual bool event_in_category_pre_analyzers(const ProducersManager& producers) const override {
-        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-        if( (muons.p4.size() == 1) && (electrons.p4.size() >= 1) )
-        {
-            if( muons.p4[0].Pt() > electrons.p4[0].Pt() )
-                return true;
-        }
-        else if( (muons.p4.size() >= 1) && (electrons.p4.size() >= 1) )
-        {
-            if( (muons.p4[0].Pt() > electrons.p4[0].Pt()) && (muons.p4[1].Pt() < electrons.p4[0].Pt()) )
-              return true;
-        }
-        return false;
-    };
-    virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override {
-        return true;
-    };
-    virtual void register_cuts(CutManager& manager) override {
-        manager.new_cut("muon_1_pt", "pt > 10");
-    };
-    virtual void evaluate_cuts_pre_analyzers(CutManager& manager, const ProducersManager& producers) const override {
-        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-        if (muons.p4[0].Pt() > 10)
-            manager.pass_cut("muon_1_pt");
-    }
-};
-
-class ElMuCategory: public Category {
-    virtual bool event_in_category_pre_analyzers(const ProducersManager& producers) const override {
-        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-        if( (electrons.p4.size() == 1) && (muons.p4.size() >= 1) )
-        {
-            if( electrons.p4[0].Pt() > muons.p4[0].Pt() )
-                return true;
-        }
-        else if( (electrons.p4.size() >= 1) && (muons.p4.size() >= 1) )
-        {
-            if( (electrons.p4[0].Pt() > muons.p4[0].Pt()) && (electrons.p4[1].Pt() < muons.p4[0].Pt()) )
-              return true;
-        }
-        return false;
-    };
-    virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override {
-        return true;
-    };
-    virtual void register_cuts(CutManager& manager) override {
-        manager.new_cut("electron_1_pt", "pt > 10");
-    };
-    virtual void evaluate_cuts_pre_analyzers(CutManager& manager, const ProducersManager& producers) const override {
-        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-        if (electrons.p4[0].Pt() > 10)
-            manager.pass_cut("electron_1_pt");
-    }
-};
-
-class ElElCategory: public Category {
-    virtual bool event_in_category_pre_analyzers(const ProducersManager& producers) const override {
-        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-        if( electrons.p4.size() >= 2 )
-        {
-            if( muons.p4.size() >= 1 ) // if there is muons at all, check the electrons are the leading leptons
-            {
-                if( electrons.p4[1].Pt() > muons.p4[0].Pt() )
-                    return true;
-            } else {
-                return true;
-            }
-        }
-        return false;
-    };
-    virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override {
-        return true;
-    };
-    virtual void register_cuts(CutManager& manager) override {
-        manager.new_cut("electron_1_pt", "pt > 10");
-    };
-    virtual void evaluate_cuts_pre_analyzers(CutManager& manager, const ProducersManager& producers) const override {
-        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-        if (electrons.p4[0].Pt() > 10)
-            manager.pass_cut("electron_1_pt");
-    }
-};
-
-class DiJetCategory: public Category {
-    virtual bool event_in_category_pre_analyzers(const ProducersManager& producers) const override {
-        const JetsProducer& jets = producers.get<JetsProducer>("jets");
-        if( jets.p4.size() >= 2 )
-            return true;
-        else
-            return false;
-    };
-    virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override {
-        return true;
-    };
-    virtual void register_cuts(CutManager& manager) override {
-        manager.new_cut("jet_1_pt", "pt > 20");
-        manager.new_cut("jet_2_pt", "pt > 20");
-    };
-    virtual void evaluate_cuts_pre_analyzers(CutManager& manager, const ProducersManager& producers) const override {
-        const JetsProducer& jets = producers.get<JetsProducer>("jets");
-        if (jets.p4[0].Pt() > 20)
-            manager.pass_cut("jet_1_pt");
-        if (jets.p4[1].Pt() > 20)
-            manager.pass_cut("jet_2_pt");
-    }
-};
-
-
 class HHAnalyzer: public Framework::Analyzer {
     public:
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
@@ -158,13 +13,16 @@ class HHAnalyzer: public Framework::Analyzer {
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&) override;
 
-        virtual void registerCategories(CategoryManager& manager) {
-            manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons");
-            manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons");
-            manager.new_category<MuElCategory>("muel", "Category with leading leptons as muon, electron");
-            manager.new_category<ElMuCategory>("elmu", "Category with leading leptons as electron, muon");
-            manager.new_category<DiJetCategory>("dijet", "Category with at least two jets");
-        }
+        virtual void registerCategories(CategoryManager& manager) override;
+
+        BRANCH(dimuons, std::vector<LorentzVector>);
+        BRANCH(dielectrons, std::vector<LorentzVector>);
+        BRANCH(dileptons_emu, std::vector<LorentzVector>);
+        BRANCH(dileptons_mue, std::vector<LorentzVector>);
+        BRANCH(dimuons_indices, std::vector<std::pair<unsigned int,unsigned int>>);
+        BRANCH(dielectrons_indices, std::vector<std::pair<unsigned int,unsigned int>>);
+        BRANCH(dileptons_emu_indices, std::vector<std::pair<unsigned int,unsigned int>>);
+        BRANCH(dileptons_mue_indices, std::vector<std::pair<unsigned int,unsigned int>>);
 
     private:
 
