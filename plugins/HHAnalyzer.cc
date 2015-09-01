@@ -411,11 +411,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Dielectrons
     for( unsigned int ielectron = 0 ; ielectron < electrons.p4.size() ; ielectron++ )
     {
-        if(electrons.ids[ielectron]["cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"])
+        if(electrons.ids[ielectron]["cutBasedElectronID-Spring15-50ns-V1-standalone-veto"])
         {
             for( unsigned int jelectron = ielectron+1 ; jelectron < electrons.p4.size() ; jelectron++ )
             {
-                if( electrons.ids[jelectron]["cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"] && electrons.charge[ielectron] * electrons.charge[jelectron] < 0 )
+                if( electrons.ids[jelectron]["cutBasedElectronID-Spring15-50ns-V1-standalone-veto"] && electrons.charge[ielectron] * electrons.charge[jelectron] < 0 )
                 {
                     LorentzVector dielectron = electrons.p4[ielectron] + electrons.p4[jelectron];
                     dielectrons.push_back(dielectron);
@@ -428,7 +428,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     //Dilepton electron-muon
     for( unsigned int ielectron = 0 ; ielectron < electrons.p4.size() ; ielectron++ )
     {
-        if(electrons.ids[ielectron]["cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"])
+        if(electrons.ids[ielectron]["cutBasedElectronID-Spring15-50ns-V1-standalone-veto"])
         {
             for( unsigned int jmuon = 0 ; jmuon < muons.p4.size() ; jmuon++ )
             {
@@ -452,7 +452,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             for( unsigned int jelectron = 0 ; jelectron < electrons.p4.size() ; jelectron++ )
             {
                 if( electrons.p4[jelectron].pt() < muons.p4[imuon].pt() && 
-                    electrons.ids[jelectron]["cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"] && 
+                    electrons.ids[jelectron]["cutBasedElectronID-Spring15-50ns-V1-standalone-veto"] && 
                     muons.charge[imuon] * electrons.charge[jelectron] < 0 )
                 {
                     LorentzVector dilepton = muons.p4[imuon] + electrons.p4[jelectron];

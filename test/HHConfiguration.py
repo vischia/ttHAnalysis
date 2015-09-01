@@ -8,8 +8,8 @@ process.load("Configuration.EventContent.EventContent_cff")
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
-process.GlobalTag.globaltag = "MCRUN2_74_V9"
-#process.GlobalTag.globaltag = "74X_dataRun2_Express_v0"
+process.GlobalTag.globaltag = "MCRUN2_74_V9" # for Spring15 MC with 25ns asymptotic scenario
+#process.GlobalTag.globaltag = "74X_dataRun2_Prompt_v1" # for Run2015B/C (50/25ns) data taking
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
 process.source = cms.Source("PoolSource")
@@ -27,7 +27,7 @@ from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 dataFormat = DataFormat.MiniAOD
 switchOnVIDElectronIdProducer(process, dataFormat)
 # define which IDs we want to produce
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff','RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff', 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
+my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_50ns_V1_cff','RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff','RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV60_cff']
 #add them to the VID producer
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
