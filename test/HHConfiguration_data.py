@@ -8,8 +8,8 @@ process.load("Configuration.EventContent.EventContent_cff")
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
-process.GlobalTag.globaltag = "MCRUN2_74_V9" # for Spring15 MC with 25ns asymptotic scenario
-#process.GlobalTag.globaltag = "74X_dataRun2_Prompt_v1" # for Run2015B/C (50/25ns) data taking
+#process.GlobalTag.globaltag = "MCRUN2_74_V9" # for Spring15 MC with 25ns asymptotic scenario
+process.GlobalTag.globaltag = "74X_dataRun2_Prompt_v1" # for Run2015B/C (50/25ns) data taking
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
 process.source = cms.Source("PoolSource")
@@ -40,7 +40,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 # Producers
 from cp3_llbb.Framework import EventProducer
-from cp3_llbb.Framework import GenParticlesProducer
+#from cp3_llbb.Framework import GenParticlesProducer
 from cp3_llbb.Framework import HLTProducer
 from cp3_llbb.Framework import JetsProducer
 from cp3_llbb.Framework import METProducer
@@ -57,7 +57,7 @@ process.framework = cms.EDProducer("ExTreeMaker",
 
             hlt = HLTProducer.default_configuration,
 
-            gen_particles = GenParticlesProducer.default_configuration,
+#            gen_particles = GenParticlesProducer.default_configuration,
 
             jets = JetsProducer.default_configuration,
 
