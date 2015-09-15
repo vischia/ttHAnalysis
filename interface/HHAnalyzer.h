@@ -11,18 +11,9 @@ class HHAnalyzer: public Framework::Analyzer {
 
         }
 
-        virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&) override;
+        virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
 
-        virtual void registerCategories(CategoryManager& manager) override;
-
-        BRANCH(dimuons, std::vector<LorentzVector>);
-        BRANCH(dielectrons, std::vector<LorentzVector>);
-        BRANCH(dileptons_emu, std::vector<LorentzVector>);
-        BRANCH(dileptons_mue, std::vector<LorentzVector>);
-        BRANCH(dimuons_indices, std::vector<std::pair<unsigned int,unsigned int>>);
-        BRANCH(dielectrons_indices, std::vector<std::pair<unsigned int,unsigned int>>);
-        BRANCH(dileptons_emu_indices, std::vector<std::pair<unsigned int,unsigned int>>);
-        BRANCH(dileptons_mue_indices, std::vector<std::pair<unsigned int,unsigned int>>);
+        virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
 
     private:
 
