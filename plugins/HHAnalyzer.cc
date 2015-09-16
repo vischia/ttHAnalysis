@@ -6,6 +6,7 @@
 #include <cp3_llbb/Framework/interface/LeptonsProducer.h>
 #include <cp3_llbb/Framework/interface/ElectronsProducer.h>
 #include <cp3_llbb/Framework/interface/MuonsProducer.h>
+#include <cp3_llbb/Framework/interface/METProducer.h>
 
 #define HHANADEBUG 0
 
@@ -14,6 +15,12 @@ void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::Paramet
 
 
 void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const CategoryManager&) {
+
+    const JetsProducer& jets = producers.get<JetsProducer>("jets");
+    const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
+    const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
+    //const METProducer& met = producers.get<METProducer>("met");
+    //const METProducer& met = producers.get<METProducer>("puppimet");
 
     if( !event.isRealData() )
     {
@@ -126,8 +133,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                         gen_iH1 = ip;
                     else if( gen_iH2 == -1 )
                         gen_iH2 = ip;
-                    else
-                        std::cout << "ERROR, more than 2 Higgs in the hard process!" << std::endl;
                 }
                 else if( abs(gp.pruned_pdg_id[ip]) == 5 )
                 {
@@ -143,8 +148,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                             isThereFSRforB2 = true;
                         gen_iB2 = ip;
                     }
-                    else
-                        std::cout << "ERROR, more than 2 bjets in the hard process!" << std::endl;
                 }
                 else if( abs(gp.pruned_pdg_id[ip]) == 11 || abs(gp.pruned_pdg_id[ip]) == 13 )
                 {
@@ -161,8 +164,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                             isThereFSRforL2 = true;
                         gen_iL2 = ip;
                     }
-                    else
-                        std::cout << "ERROR, more than 2 leptons in the hard process!" << std::endl;
                 }
                 else if( abs(gp.pruned_pdg_id[ip]) == 12 || abs(gp.pruned_pdg_id[ip]) == 14 || abs(gp.pruned_pdg_id[ip]) == 16 )
                 {
@@ -170,15 +171,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                         gen_iNu1 = ip;
                     else if( gen_iNu2 == -1 )
                         gen_iNu2 = ip;
-                    else
-                        std::cout << "ERROR, more than 2 neutrinos in the hard process!" << std::endl;
                 }
                 else if( abs(gp.pruned_pdg_id[ip]) == 35 || abs(gp.pruned_pdg_id[ip]) == 39 )
                 {
                     if( gen_iX == -1 )
                         gen_iX = ip;
-                    else
-                        std::cout << "ERROR, more than 1 radion/graviton in the hard process!" << std::endl;
                 }
                 else if( abs(gp.pruned_pdg_id[ip]) == 23 || abs(gp.pruned_pdg_id[ip]) == 24 )
                 {
@@ -186,12 +183,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                         gen_iV1 = ip;
                     else if( gen_iV2 == -1 )
                         gen_iV2 = ip;
-                    else
-                        std::cout << "ERROR, more than 2 vector bosons in the hard process!" << std::endl;
-                }
-                else if( abs(gp.pruned_pdg_id[ip]) != 21 && abs(gp.pruned_pdg_id[ip]) != 22 )
-                {
-                    std::cout << "This belongs to the hard process and was not expected: gp.pruned_pdg_id= " << gp.pruned_pdg_id[ip] << "\tflags= " << flags << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[ip].Pt() << " , " << gp.pruned_p4[ip].Eta() << " , " << gp.pruned_p4[ip].Phi() << " , " << gp.pruned_p4[ip].E() << " , " << gp.pruned_p4[ip].M() << ")" << std::endl;
                 }
             } // end if coming from hard process
         } // end of loop over pruned gen particles
@@ -344,9 +335,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 // ***** ***** *****
 // Matching
 // ***** ***** *****
-        const JetsProducer& jets = producers.get<JetsProducer>("jets");
-        const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-        const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
         BRANCH(gen_deltaR_jet_B1, std::vector<float>);    
         BRANCH(gen_deltaR_jet_B2, std::vector<float>);    
         BRANCH(gen_deltaR_jet_B1FSR, std::vector<float>);    
@@ -380,3 +368,4 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     } // end of if !event.isRealData()
 }
+
