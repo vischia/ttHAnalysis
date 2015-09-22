@@ -8,6 +8,7 @@
 #include <cp3_llbb/Framework/interface/ElectronsProducer.h>
 #include <cp3_llbb/Framework/interface/MuonsProducer.h>
 #include <cp3_llbb/Framework/interface/METProducer.h>
+#include <cp3_llbb/Framework/interface/HLTProducer.h>
 
 #define HHANADEBUG 0
 
@@ -16,8 +17,6 @@ void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::Paramet
     manager.new_category<HHElElCategory>("HHelel", "Category with leading leptons as two electrons", config);
     manager.new_category<HHElMuCategory>("HHelmu", "Category with leading leptons as electron, subleading as muon", config);
     manager.new_category<HHMuElCategory>("HHmuel", "Category with leading leptons as muon, subleading as electron", config);
-    manager.new_category<HHDiJetCategory>("HHjj", "Category with at least two jets", config);
-    manager.new_category<HHDibJetCategory>("HHbb", "Category with at least two b-jets", config);
 }
 
 
@@ -171,7 +170,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(selectedjets_p4[dijets_idx[h_dijet_idx].first], Leptons_p4[diLeptons_idx[0].second]);
         DR_j2l1 = ROOT::Math::VectorUtil::DeltaR(selectedjets_p4[dijets_idx[h_dijet_idx].second], Leptons_p4[diLeptons_idx[0].first]);
         DR_j2l2 = ROOT::Math::VectorUtil::DeltaR(selectedjets_p4[dijets_idx[h_dijet_idx].second], Leptons_p4[diLeptons_idx[0].second]);
-        minDR_jl = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
+        minDR_lj = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
     }
 
     float DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2;
@@ -184,7 +183,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         DR_b1l2 = ROOT::Math::VectorUtil::DeltaR(selectedbjets_p4[dibjets_idx[h_dibjet_idx].first], Leptons_p4[diLeptons_idx[0].second]);
         DR_b2l1 = ROOT::Math::VectorUtil::DeltaR(selectedbjets_p4[dibjets_idx[h_dibjet_idx].second], Leptons_p4[diLeptons_idx[0].first]);
         DR_b2l2 = ROOT::Math::VectorUtil::DeltaR(selectedbjets_p4[dibjets_idx[h_dibjet_idx].second], Leptons_p4[diLeptons_idx[0].second]);
-        minDR_bl = std::min({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
+        minDR_lb = std::min({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
     }    
 
 
@@ -501,9 +500,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             std::cout << "\tgen_LLFSRNuNuBB.M()= " << gen_LLFSRNuNuBB.M() << std::endl;
         }
 
-// ***** ***** *****
-// Matching
-// ***** ***** *****
+        // ***** ***** *****
+        // Matching
+        // ***** ***** *****
         BRANCH(gen_deltaR_jet_B1, std::vector<float>);    
         BRANCH(gen_deltaR_jet_B2, std::vector<float>);    
         BRANCH(gen_deltaR_jet_B1FSR, std::vector<float>);    
@@ -536,5 +535,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             gen_deltaR_muon_L2FSR.push_back(deltaR(p4, gen_L2FSR));
         }
     } // end of if !event.isRealData()
+
+    // ***** ***** *****
+    // Trigger
+    // ***** ***** *****
+    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
+
 }
 

@@ -100,8 +100,8 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(Pt_llbb, float);
         BRANCH(M_llbb, float);
 
-        BRANCH(minDR_jl, float);
-        BRANCH(minDR_bl, float);
+        BRANCH(minDR_lj, float);
+        BRANCH(minDR_lb, float);
 
         BRANCH(DPhi_ll_met, float);
         BRANCH(minDPhi_l_met, float);
