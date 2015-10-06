@@ -10,183 +10,207 @@
 #include <cp3_llbb/Framework/interface/METProducer.h>
 #include <cp3_llbb/Framework/interface/HLTProducer.h>
 
+#include <cmath>
+
 #define HHANADEBUG 0
 
 void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
-    manager.new_category<HHMuMuCategory>("HHmumu", "Category with leading leptons as two muons", config);
-    manager.new_category<HHElElCategory>("HHelel", "Category with leading leptons as two electrons", config);
-    manager.new_category<HHElMuCategory>("HHelmu", "Category with leading leptons as electron, subleading as muon", config);
-    manager.new_category<HHMuElCategory>("HHmuel", "Category with leading leptons as muon, subleading as electron", config);
+    manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", config);
+    manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons", config);
+    manager.new_category<ElMuCategory>("elmu", "Category with leading leptons as electron, subleading as muon", config);
+    manager.new_category<MuElCategory>("muel", "Category with leading leptons as muon, subleading as electron", config);
 }
 
 
 void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const CategoryManager&) {
 
+    const ElectronsProducer& allelectrons = producers.get<ElectronsProducer>("electrons");
+    const MuonsProducer& allmuons = producers.get<MuonsProducer>("muons");
+    const METProducer& met = producers.get<METProducer>("met");
+    const JetsProducer& alljets = producers.get<JetsProducer>("jets");
+    //const METProducer& met = producers.get<METProducer>("puppimet"); 
+    float mh = event.isRealData() ? 125.02 : 125.0;
+
     // ********** 
-    // Leptons
+    // Leptons and dileptons
     // ********** 
 
-    Leptons.clear();
-    diLeptons.clear();
+    leptons.clear();
+    ll.clear();
 
-    const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-    for(unsigned int ielectron = 0; ielectron < electrons.p4.size(); ielectron++)
+    for(unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
-        if( electrons.ids[ielectron][m_electron_tight_wp_name] && electrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut && electrons.p4[ielectron].Pt() > m_electronPtCut && abs(electrons.p4[ielectron].Eta()) < m_electronEtaCut ) {
-            selectedElectrons.push_back(ielectron);
-            lepton ele = { electrons.p4[ielectron], ielectron, false, true };
-            Leptons.push_back(ele);
+        if( allelectrons.ids[ielectron][m_electron_tight_wp_name]
+            && allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut
+            && allelectrons.p4[ielectron].Pt() > m_electronPtCut
+            && abs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut ) 
+            {
+            electrons.push_back(ielectron);
+            Lepton ele = { allelectrons.p4[ielectron], ielectron, false, true };
+            leptons.push_back(ele);
         }
-
-        
     }//end of loop on electrons
 
-    const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-    for(unsigned int imuon = 0; imuon < muons.p4.size(); imuon++)
+    for(unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
-        if( muons.isTight[imuon] && muons.relativeIsoR04_withEA[imuon] < m_muonIsoCut && muons.p4[imuon].Pt() > m_muonPtCut && abs(muons.p4[imuon].Eta()) < m_muonEtaCut ){
-            selectedMuons.push_back(imuon);
-            lepton mu = { muons.p4[imuon], imuon, true, false };
-            Leptons.push_back(mu);
+        if( allmuons.isTight[imuon] 
+            && allmuons.relativeIsoR04_withEA[imuon] < m_muonIsoCut 
+            && allmuons.p4[imuon].Pt() > m_muonPtCut 
+            && abs(allmuons.p4[imuon].Eta()) < m_muonEtaCut )
+            {
+            muons.push_back(imuon);
+            Lepton mu = { allmuons.p4[imuon], imuon, true, false };
+            leptons.push_back(mu);
         }
     }//end of loop on muons
            
-    std::sort( Leptons.begin(), Leptons.end(), [](const lepton& lep1, const lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); } );     
+    std::sort( leptons.begin(), leptons.end(), [](const Lepton& lep1, const Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); } );     
 
-    for(unsigned int ilep1 = 0; ilep1 < Leptons.size(); ilep1++)
+    for(unsigned int ilep1 = 0; ilep1 < leptons.size(); ilep1++)
     {
-        Leptons_p4.push_back(Leptons[ilep1].p4);
-        Leptons_idx.push_back(Leptons[ilep1].idx);
-        Leptons_isMu.push_back(Leptons[ilep1].isMu);
-        Leptons_isEl.push_back(Leptons[ilep1].isEl);
-        for(unsigned int ilep2 = ilep1+1; ilep2 < Leptons.size(); ilep2++)
+        leptons_p4.push_back(leptons[ilep1].p4);
+        leptons_idx.push_back(leptons[ilep1].idx);
+        leptons_isMu.push_back(leptons[ilep1].isMu);
+        leptons_isEl.push_back(leptons[ilep1].isEl);
+        for(unsigned int ilep2 = ilep1+1; ilep2 < leptons.size(); ilep2++)
         {
-            dilepton dilep = { (Leptons[ilep1].p4 + Leptons[ilep2].p4), std::make_pair(ilep1, ilep2), (Leptons[ilep1].isMu && Leptons[ilep2].isMu), (Leptons[ilep1].isEl && Leptons[ilep2].isEl), (Leptons[ilep1].isEl && Leptons[ilep2].isMu), (Leptons[ilep1].isMu && Leptons[ilep2].isEl) };
-            diLeptons.push_back(dilep); 
-            diLeptons_p4.push_back(dilep.p4);
-            diLeptons_idx.push_back(dilep.idxs);
-            diLeptons_isMuMu.push_back(dilep.isMuMu);
-            diLeptons_isElEl.push_back(dilep.isElEl);
-            diLeptons_isElMu.push_back(dilep.isElMu);
-            diLeptons_isMuEl.push_back(dilep.isMuEl);
-            diLeptons_Ptll.push_back((Leptons[ilep1].p4 + Leptons[ilep2].p4).Pt());
-            diLeptons_DRll.push_back( ROOT::Math::VectorUtil::DeltaR( Leptons[ilep1].p4, Leptons[ilep2].p4 ) );
-            diLeptons_DPhill.push_back( ROOT::Math::VectorUtil::DeltaPhi( Leptons[ilep1].p4, Leptons[ilep2].p4 ) );
-            diLeptons_Mll.push_back((Leptons[ilep1].p4 + Leptons[ilep2].p4).M());
+            Dilepton dilep = { leptons[ilep1].p4 + leptons[ilep2].p4, std::make_pair(ilep1, ilep2), (leptons[ilep1].isMu && leptons[ilep2].isMu), (leptons[ilep1].isEl && leptons[ilep2].isEl), (leptons[ilep1].isEl && leptons[ilep2].isMu), (leptons[ilep1].isMu && leptons[ilep2].isEl) };
+            ll.push_back(dilep); 
+            ll_p4.push_back(dilep.p4);
+            ll_idx.push_back(dilep.idxs);
+            ll_isMuMu.push_back(dilep.isMuMu);
+            ll_isElEl.push_back(dilep.isElEl);
+            ll_isElMu.push_back(dilep.isElMu);
+            ll_isMuEl.push_back(dilep.isMuEl);
+            ll_DR.push_back( ROOT::Math::VectorUtil::DeltaR( leptons[ilep1].p4, leptons[ilep2].p4 ) );
+            ll_DPhi.push_back( ROOT::Math::VectorUtil::DeltaPhi( leptons[ilep1].p4, leptons[ilep2].p4 ) );
+            float dphi = ROOT::Math::VectorUtil::DeltaPhi( dilep.p4 , met.p4 );
+            ll_DPhi_met.push_back( dphi );
+            ll_MT.push_back( (dilep.p4 + met.p4).M() );
+            ll_MT_formula.push_back( std::sqrt( 2 * dilep.p4.Pt() * met.p4.Pt() * (1-std::cos(dphi)) ) );
+            float mindphi = std::min( ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, met.p4), ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep2].p4, met.p4));
+            ll_minDPhi_l_met.push_back( mindphi );
+            ll_projectedMet.push_back( mindphi >= M_PI ? met.p4.Pt() : met.p4.Pt() * std::sin(mindphi) );
         }
     }
-    nMu = selectedMuons.size();
-    nEl = selectedElectrons.size();
-    nLep = Leptons.size();
 
     // ***** 
-    // Jets 
+    // Jets and dijets 
     // ***** 
 
-    const JetsProducer& jets = producers.get<JetsProducer>("jets");
-    for(unsigned int ijet = 0; ijet < jets.p4.size(); ijet++)
+    for(unsigned int ijet = 0; ijet < alljets.p4.size(); ijet++)
     {
-        if( ( jets.p4[ijet].Pt() > m_jetPtCut ) && ( abs(jets.p4[ijet].Eta()) < m_jetEtaCut ) ){
-            selectedjets_p4.push_back(jets.p4[ijet]);
-            selectedjets_idx.push_back(ijet);
-            if( jets.getBTagDiscriminant(ijet, m_jet_bDiscrName) > m_jet_bDiscrCut ){
-                selectedbjets_p4.push_back(jets.p4[ijet]);
-                selectedbjets_idx.push_back(ijet);
+        if( ( alljets.p4[ijet].Pt() > m_jetPtCut ) 
+            && ( abs(alljets.p4[ijet].Eta()) < m_jetEtaCut ) )
+            {
+            jets_p4.push_back(alljets.p4[ijet]);
+            jets_idx.push_back(ijet);
+            if( alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName) > m_jet_bDiscrCut ){
+                bjets_p4.push_back(alljets.p4[ijet]);
+                bjets_idx.push_back(ijet);
             }
         }
     }
-    nJet = selectedjets_p4.size();
-    nbJet = selectedbjets_p4.size();
 
-    const float mh = 125.0;
-    float tempMass, diffWithMh = 1000000;
+    float diffWithMh = 14000;
     unsigned int dijetCounter = 0;
-    for(unsigned int ijet1 = 0; ijet1 < selectedjets_p4.size(); ijet1++)
+    // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
+    for(unsigned int ijet1 = 0; ijet1 < jets_p4.size(); ijet1++)
     {  
-        for(unsigned int ijet2 = ijet1+1; ijet2 < selectedjets_p4.size(); ijet2++)
+        for(unsigned int ijet2 = ijet1+1; ijet2 < jets_p4.size(); ijet2++)
         {
-            dijets_p4.push_back(selectedjets_p4[ijet1] + selectedjets_p4[ijet2]);
-            dijets_idx.push_back(std::make_pair(ijet1, ijet2));
-            dijets_Ptjj.push_back((selectedjets_p4[ijet1] + selectedjets_p4[ijet2]).Pt());
-            dijets_DRjj.push_back(ROOT::Math::VectorUtil::DeltaR(selectedjets_p4[ijet1], selectedjets_p4[ijet2]));
-            dijets_DPhijj.push_back(ROOT::Math::VectorUtil::DeltaPhi(selectedjets_p4[ijet1], selectedjets_p4[ijet2]));
-            tempMass = (selectedjets_p4[ijet1] + selectedjets_p4[ijet2]).M();
-            dijets_Mjj.push_back(tempMass);
-            if (abs(tempMass - mh) < diffWithMh ) {
+            LorentzVector jj = jets_p4[ijet1] + jets_p4[ijet2];
+            jj_p4.push_back( jj );
+            jj_idx.push_back(std::make_pair(ijet1, ijet2));
+            jj_DR.push_back(ROOT::Math::VectorUtil::DeltaR(jets_p4[ijet1], jets_p4[ijet2]));
+            jj_DPhi.push_back( ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet1], jets_p4[ijet2]) );
+            jj_DPhi_met.push_back( ROOT::Math::VectorUtil::DeltaPhi( jj, met.p4) );
+            if (abs(jj.M() - mh) < diffWithMh ) {
                 h_dijet_idx = dijetCounter;
-                diffWithMh = abs(tempMass - mh);
+                diffWithMh = abs(jj.M() - mh);
             }
             dijetCounter++;
         }
     }
 
-    diffWithMh = 1000000;
+    diffWithMh = 14000;
     dijetCounter = 0;
-    for(unsigned int ibjet1 = 0; ibjet1 < selectedbjets_p4.size(); ibjet1++)
+    // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
+    for(unsigned int ibjet1 = 0; ibjet1 < bjets_p4.size(); ibjet1++)
     {  
-        for(unsigned int ibjet2 = ibjet1+1; ibjet2 < selectedbjets_p4.size(); ibjet2++)
+        for(unsigned int ibjet2 = ibjet1+1; ibjet2 < bjets_p4.size(); ibjet2++)
         {
-            dibjets_p4.push_back(selectedbjets_p4[ibjet1] + selectedbjets_p4[ibjet2]);
-            dibjets_idx.push_back(std::make_pair(ibjet1, ibjet2));
-            dibjets_Ptbb.push_back((selectedbjets_p4[ibjet1] + selectedbjets_p4[ibjet2]).Pt());
-            dibjets_DRbb.push_back(ROOT::Math::VectorUtil::DeltaR(selectedbjets_p4[ibjet1], selectedbjets_p4[ibjet2]));
-            dibjets_DPhibb.push_back(ROOT::Math::VectorUtil::DeltaPhi(selectedbjets_p4[ibjet1], selectedbjets_p4[ibjet2]));
-            tempMass = (selectedbjets_p4[ibjet1] + selectedbjets_p4[ibjet2]).M();
-            dibjets_Mbb.push_back(tempMass);
-            if (abs(tempMass - mh) < diffWithMh ) {
+            LorentzVector bb = bjets_p4[ibjet1] + bjets_p4[ibjet2];
+            bb_p4.push_back( bb );
+            bb_idx.push_back(std::make_pair(ibjet1, ibjet2));
+            bb_DR.push_back(ROOT::Math::VectorUtil::DeltaR(bjets_p4[ibjet1], bjets_p4[ibjet2]));
+            bb_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet1], bjets_p4[ibjet2]));
+            bb_DPhi_met.push_back( ROOT::Math::VectorUtil::DeltaPhi( bb, met.p4) );
+            if (abs(bb.M() - mh) < diffWithMh ) {
                 h_dibjet_idx = dijetCounter;
-                diffWithMh = abs(tempMass - mh);
+                diffWithMh = abs(bb.M() - mh);
             }
             dijetCounter++;
         }
-    }            
-    
+    }
+            
+    // ********** 
+    // lljj, llbb, +met
+    // ********** 
+    for(unsigned int ill = 0; ill < ll_p4.size(); ill++)
+    {
+        for(unsigned int ijj = 0; ijj < jj_p4.size(); ijj++)
+        {
+            LorentzVector lljj = ll_p4[ill] + jj_p4[ijj];
+            lljj_p4.push_back(lljj);
+            lljj_idx.push_back(std::make_pair(ill, ijj));
+            lljj_DR.push_back(ROOT::Math::VectorUtil::DeltaR( ll_p4[ill], jj_p4[ijj] ));
+            lljj_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll_p4[ill], jj_p4[ijj]));
+            float minDR = 14000;
+            float DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2;
+            DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].first] , leptons_p4[ll_idx[ill].first] );
+            DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].first] , leptons_p4[ll_idx[ill].second]);
+            DR_j2l1 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].second], leptons_p4[ll_idx[ill].first] );
+            DR_j2l2 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].second], leptons_p4[ll_idx[ill].second]);
+            minDR = std::min( {DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2} );
+            lljj_minDR_lj.push_back(minDR);
+            lljjmet_p4.push_back(lljj + met.p4);
+            lljjmet_DR.push_back(ROOT::Math::VectorUtil::DeltaR(lljj, met.p4));
+            lljjmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(lljj, met.p4));
+        }
+    }
+
+    for(unsigned int ill = 0; ill < ll_p4.size(); ill++)
+    {
+        for(unsigned int ibb = 0; ibb < bb_p4.size(); ibb++)
+        {
+            LorentzVector llbb = ll_p4[ill] + bb_p4[ibb];
+            llbb_p4.push_back(llbb);
+            llbb_idx.push_back(std::make_pair(ill, ibb));
+            llbb_DR.push_back(ROOT::Math::VectorUtil::DeltaR(ll_p4[ill], jj_p4[ibb]));
+            llbb_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll_p4[ill], jj_p4[ibb]));
+            float minDR = 14000;
+            float DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2;
+            DR_b1l1 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].first] , leptons_p4[ll_idx[ill].first] );
+            DR_b1l2 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].first] , leptons_p4[ll_idx[ill].second]);
+            DR_b2l1 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].second], leptons_p4[ll_idx[ill].first] );
+            DR_b2l2 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].second], leptons_p4[ll_idx[ill].second]);
+            minDR = std::min( {DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2} );
+            llbb_minDR_lb.push_back(minDR);
+            llbbmet_p4.push_back(llbb + met.p4);
+            llbbmet_DR.push_back(ROOT::Math::VectorUtil::DeltaR(llbb, met.p4));
+            llbbmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(llbb, met.p4));
+        }
+    }
+
     // ***** ***** *****
     // Event variables
     // ***** ***** *****
-
-    const METProducer& met = producers.get<METProducer>("met");
-    //const METProducer& met = producers.get<METProducer>("puppimet");
-    float minDPhi_l_met_temp = 1000000, DPhi_l_met_temp;
-    if (diLeptons_p4.size() > 0){
-        DPhi_l_met_temp = std::abs(ROOT::Math::VectorUtil::DeltaPhi(Leptons_p4[diLeptons_idx[0].first], met.p4));
-        if( DPhi_l_met_temp < minDPhi_l_met_temp){
-            minDPhi_l_met = DPhi_l_met_temp;
-            minDPhi_l_met_temp = DPhi_l_met_temp;
-        }
-        DPhi_ll_met = ROOT::Math::VectorUtil::DeltaPhi(diLeptons_p4[0], met.p4);
-        MT = (met.p4 + diLeptons_p4[0]).M();
-        MT_formula = std::sqrt(2*diLeptons_Ptll[0]*met.p4.Pt()*(1-std::cos(DPhi_ll_met)));
-    }
-    projectedMet = (minDPhi_l_met_temp >= std::acos(-1)/2)? met.p4.Pt() : met.p4.Pt()*std::sin(minDPhi_l_met_temp);
-
-    float DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2;
-    if(dijets_p4.size() > 0 && diLeptons_p4.size() > 0){
-        DR_ll_jj = ROOT::Math::VectorUtil::DeltaR(dijets_p4[h_dijet_idx], diLeptons_p4[0]);
-        DPhi_ll_jj = ROOT::Math::VectorUtil::DeltaPhi(dijets_p4[h_dijet_idx], diLeptons_p4[0]);
-        Pt_lljj = (dijets_p4[h_dijet_idx] + diLeptons_p4[0]).Pt();
-        M_lljj = (dijets_p4[h_dijet_idx] + diLeptons_p4[0]).M();
-        DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(selectedjets_p4[dijets_idx[h_dijet_idx].first], Leptons_p4[diLeptons_idx[0].first]);
-        DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(selectedjets_p4[dijets_idx[h_dijet_idx].first], Leptons_p4[diLeptons_idx[0].second]);
-        DR_j2l1 = ROOT::Math::VectorUtil::DeltaR(selectedjets_p4[dijets_idx[h_dijet_idx].second], Leptons_p4[diLeptons_idx[0].first]);
-        DR_j2l2 = ROOT::Math::VectorUtil::DeltaR(selectedjets_p4[dijets_idx[h_dijet_idx].second], Leptons_p4[diLeptons_idx[0].second]);
-        minDR_lj = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
-    }
-
-    float DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2;
-    if(dibjets_p4.size() > 0 && diLeptons_p4.size() > 0){
-        DR_ll_bb = ROOT::Math::VectorUtil::DeltaR(dibjets_p4[h_dibjet_idx], diLeptons_p4[0]);
-        DPhi_ll_bb = ROOT::Math::VectorUtil::DeltaPhi(dibjets_p4[h_dibjet_idx], diLeptons_p4[0]);
-        Pt_llbb = (dibjets_p4[h_dibjet_idx] + diLeptons_p4[0]).Pt();
-        M_llbb = (dibjets_p4[h_dibjet_idx] + diLeptons_p4[0]).M();
-        DR_b1l1 = ROOT::Math::VectorUtil::DeltaR(selectedbjets_p4[dibjets_idx[h_dibjet_idx].first], Leptons_p4[diLeptons_idx[0].first]);
-        DR_b1l2 = ROOT::Math::VectorUtil::DeltaR(selectedbjets_p4[dibjets_idx[h_dibjet_idx].first], Leptons_p4[diLeptons_idx[0].second]);
-        DR_b2l1 = ROOT::Math::VectorUtil::DeltaR(selectedbjets_p4[dibjets_idx[h_dibjet_idx].second], Leptons_p4[diLeptons_idx[0].first]);
-        DR_b2l2 = ROOT::Math::VectorUtil::DeltaR(selectedbjets_p4[dibjets_idx[h_dibjet_idx].second], Leptons_p4[diLeptons_idx[0].second]);
-        minDR_lb = std::min({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
-    }    
-
-
+    nJets = jets_p4.size();
+    nBJets = bjets_p4.size();
+    nMuons = muons.size();
+    nElectrons = electrons.size();
+    nLeptons = leptons.size();
 
 
 
@@ -516,19 +540,19 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         BRANCH(gen_deltaR_muon_L1FSR, std::vector<float>);    
         BRANCH(gen_deltaR_muon_L2FSR, std::vector<float>);    
     
-        for (auto p4: jets.gen_p4) {
+        for (auto p4: alljets.gen_p4) {
             gen_deltaR_jet_B1.push_back(deltaR(p4, gen_B1));
             gen_deltaR_jet_B2.push_back(deltaR(p4, gen_B2));
             gen_deltaR_jet_B1FSR.push_back(deltaR(p4, gen_B1FSR));
             gen_deltaR_jet_B2FSR.push_back(deltaR(p4, gen_B2FSR));
         }
-        for (auto p4: electrons.gen_p4) {
+        for (auto p4: allelectrons.gen_p4) {
             gen_deltaR_electron_L1.push_back(deltaR(p4, gen_L1));
             gen_deltaR_electron_L2.push_back(deltaR(p4, gen_L2));
             gen_deltaR_electron_L1FSR.push_back(deltaR(p4, gen_L1FSR));
             gen_deltaR_electron_L2FSR.push_back(deltaR(p4, gen_L2FSR));
         }
-        for (auto p4: muons.gen_p4) {
+        for (auto p4: allmuons.gen_p4) {
             gen_deltaR_muon_L1.push_back(deltaR(p4, gen_L1));
             gen_deltaR_muon_L2.push_back(deltaR(p4, gen_L2));
             gen_deltaR_muon_L1FSR.push_back(deltaR(p4, gen_L1FSR));

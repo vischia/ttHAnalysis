@@ -4,14 +4,14 @@
 #include <cp3_llbb/Framework/interface/Analyzer.h>
 #include <cp3_llbb/Framework/interface/Category.h>
 
-struct lepton { 
+struct Lepton { 
     LorentzVector p4; 
     unsigned int idx; 
     bool isMu; 
     bool isEl; 
 };  
 
-struct dilepton { 
+struct Dilepton { 
     LorentzVector p4; 
     std::pair<unsigned int, unsigned int> idxs; 
     bool isMuMu; 
@@ -41,79 +41,88 @@ class HHAnalyzer: public Framework::Analyzer {
             m_jet_bDiscrCut = config.getUntrackedParameter<double>("discr_cut", 0.89);
         }
 
-        std::vector<lepton> Leptons;
-        std::vector<dilepton> diLeptons;
+        std::vector<Lepton> leptons;
+        std::vector<Dilepton> ll;
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
+
+        // jets and dijets stuff
+        BRANCH(jets_p4, std::vector<LorentzVector>);
+        BRANCH(jets_idx, std::vector<unsigned int>);
         
-        BRANCH(selectedjets_p4, std::vector<LorentzVector>);
-        BRANCH(selectedjets_idx, std::vector<unsigned int>);
-        
-        BRANCH(dijets_p4, std::vector<LorentzVector>);
-        BRANCH(dijets_idx, std::vector<std::pair<unsigned int, unsigned int>>);// NB : this index refers, so far, to the entries in selectedjets_p4
-        BRANCH(dijets_Ptjj, std::vector<float>);
-        BRANCH(dijets_DRjj, std::vector<float>);
-        BRANCH(dijets_DPhijj, std::vector<float>);
-        BRANCH(dijets_Mjj, std::vector<float>);
+        BRANCH(jj_p4, std::vector<LorentzVector>);
+        BRANCH(jj_idx, std::vector<std::pair<unsigned int, unsigned int>>);// NB : this index refers, so far, to the entries in jets_p4
+        BRANCH(jj_DR, std::vector<float>);
+        BRANCH(jj_DPhi, std::vector<float>);
+        BRANCH(jj_DPhi_met, std::vector<float>);
 
         BRANCH(h_dijet_idx, unsigned int);
 
-        BRANCH(selectedbjets_p4, std::vector<LorentzVector>);
-        BRANCH(selectedbjets_idx, std::vector<unsigned int>);
+        BRANCH(bjets_p4, std::vector<LorentzVector>);
+        BRANCH(bjets_idx, std::vector<unsigned int>);
 
-        BRANCH(dibjets_p4, std::vector<LorentzVector>);
-        BRANCH(dibjets_idx, std::vector<std::pair<unsigned int, unsigned int>>); // NB : this index refers, so far, to the entries in selectedbjets_p4
-        BRANCH(dibjets_Ptbb, std::vector<float>);
-        BRANCH(dibjets_DRbb, std::vector<float>);
-        BRANCH(dibjets_DPhibb, std::vector<float>);
-        BRANCH(dibjets_Mbb, std::vector<float>);
+        BRANCH(bb_p4, std::vector<LorentzVector>);
+        BRANCH(bb_idx, std::vector<std::pair<unsigned int, unsigned int>>); // NB : this index refers, so far, to the entries in bjets_p4
+        BRANCH(bb_DR, std::vector<float>);
+        BRANCH(bb_DPhi, std::vector<float>);
+        BRANCH(bb_DPhi_met, std::vector<float>);
 
         BRANCH(h_dibjet_idx, unsigned int);
 
-        BRANCH(selectedElectrons, std::vector<unsigned int>);
-        BRANCH(selectedMuons, std::vector<unsigned int>);
+        // leptons and dileptons stuff
+        BRANCH(electrons, std::vector<unsigned int>);
+        BRANCH(muons, std::vector<unsigned int>);
 
-        BRANCH(Leptons_p4, std::vector<LorentzVector>); // list of leptons p4 sorted by pt 
-        BRANCH(Leptons_isMu, std::vector<bool>);
-        BRANCH(Leptons_isEl, std::vector<bool>);
-        BRANCH(Leptons_idx, std::vector<unsigned int>);  
+        BRANCH(leptons_p4, std::vector<LorentzVector>); // list of leptons p4 sorted by pt 
+        BRANCH(leptons_isMu, std::vector<bool>);
+        BRANCH(leptons_isEl, std::vector<bool>);
+        BRANCH(leptons_idx, std::vector<unsigned int>);  
 
-        BRANCH(diLeptons_p4, std::vector<LorentzVector>);
-        BRANCH(diLeptons_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to Lepton indices
-        BRANCH(diLeptons_isMuMu, std::vector<bool>);
-        BRANCH(diLeptons_isElEl, std::vector<bool>);
-        BRANCH(diLeptons_isElMu, std::vector<bool>);
-        BRANCH(diLeptons_isMuEl, std::vector<bool>);
-        BRANCH(diLeptons_Ptll, std::vector<float>);
-        BRANCH(diLeptons_DRll, std::vector<float>);
-        BRANCH(diLeptons_DPhill, std::vector<float>);
-        BRANCH(diLeptons_Mll, std::vector<float>);
+        BRANCH(ll_p4, std::vector<LorentzVector>);
+        BRANCH(ll_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to leptons indices
+        BRANCH(ll_isMuMu, std::vector<bool>);
+        BRANCH(ll_isElEl, std::vector<bool>);
+        BRANCH(ll_isElMu, std::vector<bool>);
+        BRANCH(ll_isMuEl, std::vector<bool>);
+        BRANCH(ll_DR, std::vector<float>);
+        BRANCH(ll_DPhi, std::vector<float>);
+        BRANCH(ll_DPhi_met, std::vector<float>);
+        BRANCH(ll_MT, std::vector<float>);
+        BRANCH(ll_MT_formula, std::vector<float>);
+        BRANCH(ll_projectedMet, std::vector<float>);
+        BRANCH(ll_minDPhi_l_met, std::vector<float>);
 
-        BRANCH(DR_ll_jj, float);
-        BRANCH(DPhi_ll_jj, float);
-        BRANCH(Pt_lljj, float);
-        BRANCH(M_lljj, float);
+        // lljj and llbb stuff
+        BRANCH(lljj_p4, std::vector<LorentzVector>);
+        BRANCH(lljj_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to ll and jj indices
+        BRANCH(lljj_DR, std::vector<float>);
+        BRANCH(lljj_DPhi, std::vector<float>);
+        BRANCH(lljj_minDR_lj, std::vector<float>);
 
-        BRANCH(DR_ll_bb, float);
-        BRANCH(DPhi_ll_bb, float);
-        BRANCH(Pt_llbb, float);
-        BRANCH(M_llbb, float);
+        BRANCH(llbb_p4, std::vector<LorentzVector>);
+        BRANCH(llbb_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to ll and bb indices
+        BRANCH(llbb_DR, std::vector<float>);
+        BRANCH(llbb_DPhi, std::vector<float>);
+        BRANCH(llbb_minDR_lb, std::vector<float>);
+ 
+        // lljjmet and llbbmet stuff
+        // as there is only one met, all the following vectors are in sync with lljj vectors
+        // i.e. no need to store ll and jj indices
+        BRANCH(lljjmet_p4, std::vector<LorentzVector>);
+        BRANCH(lljjmet_DR, std::vector<float>);
+        BRANCH(lljjmet_DPhi, std::vector<float>);
 
-        BRANCH(minDR_lj, float);
-        BRANCH(minDR_lb, float);
+        BRANCH(llbbmet_p4, std::vector<LorentzVector>);
+        BRANCH(llbbmet_DR, std::vector<float>);
+        BRANCH(llbbmet_DPhi, std::vector<float>);
 
-        BRANCH(DPhi_ll_met, float);
-        BRANCH(minDPhi_l_met, float);
-        BRANCH(MT, float);
-        BRANCH(MT_formula, float);
-        BRANCH(projectedMet, float);
-
-        BRANCH(nJet, unsigned int);
-        BRANCH(nbJet, unsigned int);
-        BRANCH(nMu, unsigned int);
-        BRANCH(nEl, unsigned int);
-        BRANCH(nLep, unsigned int);
+        // global event stuff (selected objects multiplicity)
+        BRANCH(nJets, unsigned int);
+        BRANCH(nBJets, unsigned int);
+        BRANCH(nMuons, unsigned int);
+        BRANCH(nElectrons, unsigned int);
+        BRANCH(nLeptons, unsigned int);
 
         float m_electronIsoCut, m_electronEtaCut, m_electronPtCut;
         float m_muonIsoCut, m_muonEtaCut, m_muonPtCut;
