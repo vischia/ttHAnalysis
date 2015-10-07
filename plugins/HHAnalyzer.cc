@@ -127,6 +127,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             jj_DR.push_back(ROOT::Math::VectorUtil::DeltaR(jets_p4[ijet1], jets_p4[ijet2]));
             jj_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet1], jets_p4[ijet2]));
             jj_DPhi_met.push_back(ROOT::Math::VectorUtil::DeltaPhi(jj, met.p4));
+            jj_minDPhi_j_met.push_back(std::min(ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet1], met.p4), ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet2], met.p4)));
+            jj_maxDPhi_j_met.push_back(std::max(ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet1], met.p4), ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet2], met.p4)));
             if (abs(jj.M() - mh) < diffWithMh) {
                 h_dijet_idx = dijetCounter;
                 diffWithMh = abs(jj.M() - mh);
@@ -148,6 +150,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             bb_DR.push_back(ROOT::Math::VectorUtil::DeltaR(bjets_p4[ibjet1], bjets_p4[ibjet2]));
             bb_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet1], bjets_p4[ibjet2]));
             bb_DPhi_met.push_back(ROOT::Math::VectorUtil::DeltaPhi(bb, met.p4));
+            bb_minDPhi_j_met.push_back(std::min(ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet1], met.p4), ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet2], met.p4)));
+            bb_maxDPhi_j_met.push_back(std::max(ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet1], met.p4), ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet2], met.p4)));
             if (abs(bb.M() - mh) < diffWithMh) {
                 h_dibjet_idx = dijetCounter;
                 diffWithMh = abs(bb.M() - mh);

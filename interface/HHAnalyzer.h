@@ -58,6 +58,8 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(jj_DR, std::vector<float>);
         BRANCH(jj_DPhi, std::vector<float>);
         BRANCH(jj_DPhi_met, std::vector<float>);
+        BRANCH(jj_minDPhi_j_met, std::vector<float>);
+        BRANCH(jj_maxDPhi_j_met, std::vector<float>);
 
         BRANCH(h_dijet_idx, unsigned int);
 
@@ -69,6 +71,8 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(bb_DR, std::vector<float>);
         BRANCH(bb_DPhi, std::vector<float>);
         BRANCH(bb_DPhi_met, std::vector<float>);
+        BRANCH(bb_minDPhi_j_met, std::vector<float>);
+        BRANCH(bb_maxDPhi_j_met, std::vector<float>);
 
         BRANCH(h_dibjet_idx, unsigned int);
 
