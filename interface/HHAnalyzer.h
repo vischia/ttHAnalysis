@@ -28,8 +28,8 @@ class HHAnalyzer: public Framework::Analyzer {
             m_jet_bDiscrCut = config.getUntrackedParameter<double>("discr_cut", 0.89);
         }
 
-        std::vector<Lepton> leptons;
-        std::vector<Dilepton> ll;
+        BRANCH(leptons, std::vector<Lepton>);
+        BRANCH(ll, std::vector<Dilepton>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
