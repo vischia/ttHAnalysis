@@ -92,6 +92,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(ll_MT_formula, std::vector<float>);
         BRANCH(ll_projectedMet, std::vector<float>);
         BRANCH(ll_minDPhi_l_met, std::vector<float>);
+        BRANCH(ll_maxDPhi_l_met, std::vector<float>);
 
         // lljj and llbb stuff
         BRANCH(lljj_p4, std::vector<LorentzVector>);
@@ -99,12 +100,14 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(lljj_DR, std::vector<float>);
         BRANCH(lljj_DPhi, std::vector<float>);
         BRANCH(lljj_minDR_lj, std::vector<float>);
+        BRANCH(lljj_maxDR_lj, std::vector<float>);
 
         BRANCH(llbb_p4, std::vector<LorentzVector>);
         BRANCH(llbb_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to ll and bb indices
         BRANCH(llbb_DR, std::vector<float>);
         BRANCH(llbb_DPhi, std::vector<float>);
         BRANCH(llbb_minDR_lb, std::vector<float>);
+        BRANCH(llbb_maxDR_lb, std::vector<float>);
  
         // lljjmet and llbbmet stuff
         // as there is only one met, all the following vectors are in sync with lljj vectors

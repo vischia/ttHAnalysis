@@ -90,6 +90,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ll_MT_formula.push_back(std::sqrt(2 * dilep.p4.Pt() * met.p4.Pt() * (1-std::cos(dphi))));
             float mindphi = std::min(ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, met.p4), ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep2].p4, met.p4));
             ll_minDPhi_l_met.push_back(mindphi);
+            float maxdphi = std::max(ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, met.p4), ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep2].p4, met.p4));
+            ll_maxDPhi_l_met.push_back(maxdphi);
             ll_projectedMet.push_back(mindphi >= M_PI ? met.p4.Pt() : met.p4.Pt() * std::sin(mindphi));
         }
     }
@@ -166,12 +168,15 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             lljj_idx.push_back(std::make_pair(ill, ijj));
             lljj_DR.push_back(ROOT::Math::VectorUtil::DeltaR(ll_p4[ill], jj_p4[ijj]));
             lljj_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll_p4[ill], jj_p4[ijj]));
-            float minDR = 14000;
+            float minDR = 14000.;
+            float maxDR = 0.;
             float DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2;
             DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].first], leptons_p4[ll_idx[ill].first]);
             DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].first], leptons_p4[ll_idx[ill].second]);
             DR_j2l1 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].second], leptons_p4[ll_idx[ill].first]);
             DR_j2l2 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].second], leptons_p4[ll_idx[ill].second]);
+            maxDR = std::max({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
+            lljj_maxDR_lj.push_back(maxDR);
             minDR = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
             lljj_minDR_lj.push_back(minDR);
             lljjmet_p4.push_back(lljj + met.p4);
@@ -189,12 +194,15 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             llbb_idx.push_back(std::make_pair(ill, ibb));
             llbb_DR.push_back(ROOT::Math::VectorUtil::DeltaR(ll_p4[ill], jj_p4[ibb]));
             llbb_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll_p4[ill], jj_p4[ibb]));
-            float minDR = 14000;
+            float minDR = 14000.;
+            float maxDR = 0.;
             float DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2;
             DR_b1l1 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].first], leptons_p4[ll_idx[ill].first]);
             DR_b1l2 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].first], leptons_p4[ll_idx[ill].second]);
             DR_b2l1 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].second], leptons_p4[ll_idx[ill].first]);
             DR_b2l2 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].second], leptons_p4[ll_idx[ill].second]);
+            maxDR = std::max({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
+            llbb_maxDR_lb.push_back(maxDR);
             minDR = std::min({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
             llbb_minDR_lb.push_back(minDR);
             llbbmet_p4.push_back(llbb + met.p4);
