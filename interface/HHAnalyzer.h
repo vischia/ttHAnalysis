@@ -144,21 +144,20 @@ class HHAnalyzer: public Framework::Analyzer {
         std::string m_electron_tight_wp_name;
 
         // utilities
-        float getCosThetaStar_CS(LorentzVector h1, LorentzVector h2, float ebeam = 6500)
+        float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500)
         {// cos theta star angle in the Collins Soper frame
             LorentzVector p1, p2;
             p1.SetPxPyPzE(0, 0,  ebeam, ebeam);
             p2.SetPxPyPzE(0, 0, -ebeam, ebeam);
 
-            LorentzVector hh;
-            hh = h1 + h2;
+            LorentzVector hh = h1 + h2;
             ROOT::Math::Boost boost(-hh.X() / hh.T(), -hh.Y() / hh.T(), -hh.Z() / hh.T());
             p1 = boost(p1);
             p2 = boost(p2);
-            h1 = boost(h1);
+            LorentzVector newh1 = boost(h1);
             ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double>> CSaxis(p1.Vect().Unit() - p2.Vect().Unit());
 
-            return cos(ROOT::Math::VectorUtil::Angle(CSaxis.Unit(), h1.Vect().Unit()));
+            return cos(ROOT::Math::VectorUtil::Angle(CSaxis.Unit(), newh1.Vect().Unit()));
         }
 };
 
