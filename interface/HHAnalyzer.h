@@ -25,13 +25,13 @@ class HHAnalyzer: public Framework::Analyzer {
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
             Analyzer(name, tree_, config)
         {
-            m_muonIsoCut = config.getUntrackedParameter<double>("muonIsoCut", 0.12 );
-            m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4 );
-            m_muonPtCut = config.getUntrackedParameter<double>("muonPtCut", 20 );
+            m_muonIsoCut = config.getUntrackedParameter<double>("muonIsoCut", 0.12);
+            m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4);
+            m_muonPtCut = config.getUntrackedParameter<double>("muonPtCut", 20);
 
-            m_electronIsoCut = config.getUntrackedParameter<double>("electronIsoCut", 0.11 );
-            m_electronEtaCut = config.getUntrackedParameter<double>("electronEtaCut", 2.5 );
-            m_electronPtCut = config.getUntrackedParameter<double>("electronPtCut", 20 );
+            m_electronIsoCut = config.getUntrackedParameter<double>("electronIsoCut", 0.11);
+            m_electronEtaCut = config.getUntrackedParameter<double>("electronEtaCut", 2.5);
+            m_electronPtCut = config.getUntrackedParameter<double>("electronPtCut", 20);
             m_electron_loose_wp_name = config.getUntrackedParameter<std::string>("electrons_loose_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-loose");
             m_electron_tight_wp_name = config.getUntrackedParameter<std::string>("electrons_tight_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-tight");
 
