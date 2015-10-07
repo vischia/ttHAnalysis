@@ -186,7 +186,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             lljj_minDR_lj.push_back(minDR);
             lljjmet_p4.push_back(lljj + met.p4);
             lljjmet_DR.push_back(ROOT::Math::VectorUtil::DeltaR(lljj, met.p4));
-            lljjmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(lljj, met.p4));
+            lljjmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll_p4[ill] + met.p4, jj_p4[ijj]));
+            lljjmet_cosThetaStar_CS.push_back(getCosThetaStar_CS(ll_p4[ill] + met.p4, jj_p4[ijj]));
         }
     }
 
@@ -213,6 +214,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             llbbmet_p4.push_back(llbb + met.p4);
             llbbmet_DR.push_back(ROOT::Math::VectorUtil::DeltaR(llbb, met.p4));
             llbbmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(llbb, met.p4));
+            llbbmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll_p4[ill] + met.p4, bb_p4[ibb]));
             llbbmet_cosThetaStar_CS.push_back(getCosThetaStar_CS(ll_p4[ill] + met.p4, bb_p4[ibb]));
         }
     }

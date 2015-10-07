@@ -122,6 +122,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(lljjmet_p4, std::vector<LorentzVector>);
         BRANCH(lljjmet_DR, std::vector<float>);
         BRANCH(lljjmet_DPhi, std::vector<float>);
+        BRANCH(lljjmet_cosThetaStar_CS, std::vector<float>);
 
         BRANCH(llbbmet_p4, std::vector<LorentzVector>);
         BRANCH(llbbmet_DR, std::vector<float>);
