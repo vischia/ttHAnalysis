@@ -58,8 +58,8 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(jj_DR, std::vector<float>);
         BRANCH(jj_DPhi, std::vector<float>);
         BRANCH(jj_DPhi_met, std::vector<float>);
-        BRANCH(jj_minDPhi_j_met, std::vector<float>);
-        BRANCH(jj_maxDPhi_j_met, std::vector<float>);
+        BRANCH(jj_minDPhi_jmet, std::vector<float>);
+        BRANCH(jj_maxDPhi_jmet, std::vector<float>);
 
         BRANCH(h_dijet_idx, unsigned int);
 
@@ -71,8 +71,8 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(bb_DR, std::vector<float>);
         BRANCH(bb_DPhi, std::vector<float>);
         BRANCH(bb_DPhi_met, std::vector<float>);
-        BRANCH(bb_minDPhi_j_met, std::vector<float>);
-        BRANCH(bb_maxDPhi_j_met, std::vector<float>);
+        BRANCH(bb_minDPhi_jmet, std::vector<float>);
+        BRANCH(bb_maxDPhi_jmet, std::vector<float>);
 
         BRANCH(h_dibjet_idx, unsigned int);
 
@@ -95,11 +95,11 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(ll_DR, std::vector<float>);
         BRANCH(ll_DPhi, std::vector<float>);
         BRANCH(ll_DPhi_met, std::vector<float>);
+        BRANCH(ll_minDPhi_lmet, std::vector<float>);
+        BRANCH(ll_maxDPhi_lmet, std::vector<float>);
         BRANCH(ll_MT, std::vector<float>);
         BRANCH(ll_MT_formula, std::vector<float>);
         BRANCH(ll_projectedMet, std::vector<float>);
-        BRANCH(ll_minDPhi_l_met, std::vector<float>);
-        BRANCH(ll_maxDPhi_l_met, std::vector<float>);
 
         // lljj and llbb stuff
         BRANCH(lljj_p4, std::vector<LorentzVector>);
