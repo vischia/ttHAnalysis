@@ -77,6 +77,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             Dilepton dilep = { leptons[ilep1].p4 + leptons[ilep2].p4, std::make_pair(ilep1, ilep2), (leptons[ilep1].isMu && leptons[ilep2].isMu), (leptons[ilep1].isEl && leptons[ilep2].isEl), (leptons[ilep1].isEl && leptons[ilep2].isMu), (leptons[ilep1].isMu && leptons[ilep2].isEl) };
             ll.push_back(dilep); 
             ll_p4.push_back(dilep.p4);
+            llmet_p4.push_back(dilep.p4 + met.p4);
             ll_idx.push_back(dilep.idxs);
             ll_isMuMu.push_back(dilep.isMuMu);
             ll_isElEl.push_back(dilep.isElEl);

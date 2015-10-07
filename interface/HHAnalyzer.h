@@ -86,6 +86,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(leptons_idx, std::vector<unsigned int>);  
 
         BRANCH(ll_p4, std::vector<LorentzVector>);
+        BRANCH(llmet_p4, std::vector<LorentzVector>);
         BRANCH(ll_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to leptons indices
         BRANCH(ll_isMuMu, std::vector<bool>);
         BRANCH(ll_isElEl, std::vector<bool>);
