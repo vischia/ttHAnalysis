@@ -46,7 +46,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             && abs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
             {
             electrons.push_back(ielectron);
-            Lepton ele = { allelectrons.p4[ielectron], ielectron, false, true };
+            Lepton ele = { allelectrons.p4[ielectron], allelectrons.charge[ielectron], ielectron, false, true };
             leptons.push_back(ele);
         }
     }//end of loop on electrons
@@ -59,7 +59,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             && abs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
             {
             muons.push_back(imuon);
-            Lepton mu = { allmuons.p4[imuon], imuon, true, false };
+            Lepton mu = { allmuons.p4[imuon], allmuons.charge[imuon], imuon, true, false };
             leptons.push_back(mu);
         }
     }//end of loop on muons
@@ -74,7 +74,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         leptons_isEl.push_back(leptons[ilep1].isEl);
         for (unsigned int ilep2 = ilep1+1; ilep2 < leptons.size(); ilep2++)
         {
-            Dilepton dilep = { leptons[ilep1].p4 + leptons[ilep2].p4, std::make_pair(ilep1, ilep2), (leptons[ilep1].isMu && leptons[ilep2].isMu), (leptons[ilep1].isEl && leptons[ilep2].isEl), (leptons[ilep1].isEl && leptons[ilep2].isMu), (leptons[ilep1].isMu && leptons[ilep2].isEl) };
+            Dilepton dilep = { leptons[ilep1].p4 + leptons[ilep2].p4, std::make_pair(ilep1, ilep2), leptons[ilep1].charge * leptons[ilep2].charge, (leptons[ilep1].isMu && leptons[ilep2].isMu), (leptons[ilep1].isEl && leptons[ilep2].isEl), (leptons[ilep1].isEl && leptons[ilep2].isMu), (leptons[ilep1].isMu && leptons[ilep2].isEl) };
             ll.push_back(dilep); 
             ll_p4.push_back(dilep.p4);
             llmet_p4.push_back(dilep.p4 + met.p4);

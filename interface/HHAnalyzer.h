@@ -3,24 +3,9 @@
 
 #include <cp3_llbb/Framework/interface/Analyzer.h>
 #include <cp3_llbb/Framework/interface/Category.h>
+#include <cp3_llbb/HHAnalysis/interface/Types.h>
 
 #include <Math/VectorUtil.h>
-
-struct Lepton { 
-    LorentzVector p4; 
-    unsigned int idx; 
-    bool isMu; 
-    bool isEl; 
-};  
-
-struct Dilepton { 
-    LorentzVector p4; 
-    std::pair<unsigned int, unsigned int> idxs; 
-    bool isMuMu; 
-    bool isElEl; 
-    bool isElMu; 
-    bool isMuEl; 
-};  
 
 class HHAnalyzer: public Framework::Analyzer {
     public:
