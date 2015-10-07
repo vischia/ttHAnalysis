@@ -4,6 +4,8 @@
 #include <cp3_llbb/Framework/interface/Analyzer.h>
 #include <cp3_llbb/Framework/interface/Category.h>
 
+#include <Math/VectorUtil.h>
+
 struct Lepton { 
     LorentzVector p4; 
     unsigned int idx; 
@@ -119,6 +121,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(llbbmet_p4, std::vector<LorentzVector>);
         BRANCH(llbbmet_DR, std::vector<float>);
         BRANCH(llbbmet_DPhi, std::vector<float>);
+        BRANCH(llbbmet_cosThetaStar_CS, std::vector<float>);
 
         // global event stuff (selected objects multiplicity)
         BRANCH(nJets, unsigned int);
@@ -134,6 +137,23 @@ class HHAnalyzer: public Framework::Analyzer {
         std::string m_electron_loose_wp_name;
         std::string m_electron_tight_wp_name;
 
+        // utilities
+        float getCosThetaStar_CS(LorentzVector h1, LorentzVector h2, float ebeam = 6500)
+        {// cos theta star angle in the Collins Soper frame
+            LorentzVector p1, p2;
+            p1.SetPxPyPzE(0, 0,  ebeam, ebeam);
+            p2.SetPxPyPzE(0, 0, -ebeam, ebeam);
+
+            LorentzVector hh;
+            hh = h1 + h2;
+            ROOT::Math::Boost boost(-hh.X() / hh.T(), -hh.Y() / hh.T(), -hh.Z() / hh.T());
+            p1 = boost(p1);
+            p2 = boost(p2);
+            h1 = boost(h1);
+            ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double>> CSaxis(p1.Vect().Unit() - p2.Vect().Unit());
+
+            return cos(ROOT::Math::VectorUtil::Angle(CSaxis.Unit(), h1.Vect().Unit()));
+        }
 };
 
 #endif
