@@ -7,6 +7,8 @@
 
 #include <Math/VectorUtil.h>
 
+using namespace HH;
+
 class HHAnalyzer: public Framework::Analyzer {
     public:
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
@@ -37,7 +39,7 @@ class HHAnalyzer: public Framework::Analyzer {
         // jets and dijets stuff
         BRANCH(jets_p4, std::vector<LorentzVector>);
         BRANCH(jets_idx, std::vector<unsigned int>);
-        
+
         BRANCH(jj_p4, std::vector<LorentzVector>);
         BRANCH(jj_idx, std::vector<std::pair<unsigned int, unsigned int>>);// NB : this index refers, so far, to the entries in jets_p4
         BRANCH(jj_DR, std::vector<float>);
@@ -65,10 +67,10 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(electrons, std::vector<unsigned int>);
         BRANCH(muons, std::vector<unsigned int>);
 
-        BRANCH(leptons_p4, std::vector<LorentzVector>); // list of leptons p4 sorted by pt 
+        BRANCH(leptons_p4, std::vector<LorentzVector>); // list of leptons p4 sorted by pt
         BRANCH(leptons_isMu, std::vector<bool>);
         BRANCH(leptons_isEl, std::vector<bool>);
-        BRANCH(leptons_idx, std::vector<unsigned int>);  
+        BRANCH(leptons_idx, std::vector<unsigned int>);
 
         BRANCH(ll_p4, std::vector<LorentzVector>);
         BRANCH(llmet_p4, std::vector<LorentzVector>);
@@ -100,7 +102,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(llbb_DPhi, std::vector<float>);
         BRANCH(llbb_minDR_lb, std::vector<float>);
         BRANCH(llbb_maxDR_lb, std::vector<float>);
- 
+
         // lljjmet and llbbmet stuff
         // as there is only one met, all the following vectors are in sync with lljj vectors
         // i.e. no need to store ll and jj indices

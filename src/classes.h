@@ -3,9 +3,9 @@
 
 namespace {
     struct dictionnary {
-        Lepton dummy;
-        std::vector<Lepton> dummy2;
-        Dilepton dummy3;
-        std::vector<Dilepton> dummy4;
+        HH::Lepton dummy;
+        std::vector<HH::Lepton> dummy2;
+        HH::Dilepton dummy3;
+        std::vector<HH::Dilepton> dummy4;
     };
 }

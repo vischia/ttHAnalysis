@@ -14,6 +14,8 @@
 
 #define HHANADEBUG 0
 
+using namespace HH;
+
 void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
     manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", config);
     manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons", config);

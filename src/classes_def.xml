@@ -1,6 +1,6 @@
 <lcgdict>
-    <class name="Lepton"/>
-    <class name="std::vector<Lepton>"/>
-    <class name="Dilepton"/>
-    <class name="std::vector<Dilepton>"/>
+    <class name="HH::Lepton"/>
+    <class name="std::vector<HH::Lepton>"/>
+    <class name="HH::Dilepton"/>
+    <class name="std::vector<HH::Dilepton>"/>
 </lcgdict>
