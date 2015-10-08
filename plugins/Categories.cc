@@ -62,13 +62,13 @@ void MuMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     const std::vector<Dilepton>& ll = getDileptons(analyzers);
     for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
     {
-        if ( ll[idilep].isMuMu ) {
-            if (  ll[idilep].p4.M() > m_mll_cut  ) manager.pass_cut("ll_mass");
-            if (  ll[idilep].p4.M() > m_mll_lowerZcut  ) manager.pass_cut("ll_mass_lowerZcut");
+        if (ll[idilep].isMuMu) {
+            if (ll[idilep].p4.M() > m_mll_cut) manager.pass_cut("ll_mass");
+            if (ll[idilep].p4.M() > m_mll_lowerZcut) manager.pass_cut("ll_mass_lowerZcut");
         }
     }
     const unsigned int nBJets = getNBJets(analyzers);
-    if ( nBJets >=2 ) manager.pass_cut("has_two_bJets"); 
+    if (nBJets >=2) manager.pass_cut("has_two_bJets"); 
 }
 
 // ***** ***** *****
@@ -101,13 +101,13 @@ void ElElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     const std::vector<Dilepton>& ll = getDileptons(analyzers);
     for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
     {
-        if ( ll[idilep].isElEl ) {
-            if (  ll[idilep].p4.M() > m_mll_cut  ) manager.pass_cut("ll_mass");
-            if (  ll[idilep].p4.M() > m_mll_lowerZcut  ) manager.pass_cut("ll_mass_lowerZcut");
+        if (ll[idilep].isElEl) {
+            if (ll[idilep].p4.M() > m_mll_cut) manager.pass_cut("ll_mass");
+            if (ll[idilep].p4.M() > m_mll_lowerZcut) manager.pass_cut("ll_mass_lowerZcut");
         }
     }
     const unsigned int nBJets = getNBJets(analyzers);
-    if ( nBJets >=2 ) manager.pass_cut("has_two_bJets"); 
+    if (nBJets >=2) manager.pass_cut("has_two_bJets"); 
 }
 
 // ***** ***** *****
@@ -141,13 +141,13 @@ void ElMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     const std::vector<Dilepton>& ll = getDileptons(analyzers);
     for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
     {
-        if ( ll[idilep].isElMu ) {
-            if (  ll[idilep].p4.M() > m_mll_cut  ) manager.pass_cut("ll_mass");
-            if (  ll[idilep].p4.M() > m_mll_lowerZcut  ) manager.pass_cut("ll_mass_lowerZcut");
+        if (ll[idilep].isElMu) {
+            if (ll[idilep].p4.M() > m_mll_cut) manager.pass_cut("ll_mass");
+            if (ll[idilep].p4.M() > m_mll_lowerZcut) manager.pass_cut("ll_mass_lowerZcut");
         }
     }
     const unsigned int nBJets = getNBJets(analyzers);
-    if ( nBJets >=2 ) manager.pass_cut("has_two_bJets"); 
+    if (nBJets >=2) manager.pass_cut("has_two_bJets"); 
 }
 
 // ***** ***** *****
@@ -181,12 +181,12 @@ void MuElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     const std::vector<Dilepton>& ll = getDileptons(analyzers);
     for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
     {
-        if ( ll[idilep].isMuEl ) {
-            if (  ll[idilep].p4.M() > m_mll_cut  ) manager.pass_cut("ll_mass");
-            if (  ll[idilep].p4.M() > m_mll_lowerZcut  ) manager.pass_cut("ll_mass_lowerZcut");
+        if (ll[idilep].isMuEl) {
+            if (ll[idilep].p4.M() > m_mll_cut) manager.pass_cut("ll_mass");
+            if (ll[idilep].p4.M() > m_mll_lowerZcut) manager.pass_cut("ll_mass_lowerZcut");
         }
     }
     const unsigned int nBJets = getNBJets(analyzers);
-    if ( nBJets >=2 ) manager.pass_cut("has_two_bJets"); 
+    if (nBJets >=2) manager.pass_cut("has_two_bJets"); 
 }
 
