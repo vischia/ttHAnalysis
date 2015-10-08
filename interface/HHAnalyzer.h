@@ -67,18 +67,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(electrons, std::vector<unsigned int>);
         BRANCH(muons, std::vector<unsigned int>);
 
-        BRANCH(leptons_p4, std::vector<LorentzVector>); // list of leptons p4 sorted by pt
-        BRANCH(leptons_isMu, std::vector<bool>);
-        BRANCH(leptons_isEl, std::vector<bool>);
-        BRANCH(leptons_idx, std::vector<unsigned int>);
-
-        BRANCH(ll_p4, std::vector<LorentzVector>);
         BRANCH(llmet_p4, std::vector<LorentzVector>);
-        BRANCH(ll_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to leptons indices
-        BRANCH(ll_isMuMu, std::vector<bool>);
-        BRANCH(ll_isElEl, std::vector<bool>);
-        BRANCH(ll_isElMu, std::vector<bool>);
-        BRANCH(ll_isMuEl, std::vector<bool>);
         BRANCH(ll_DR, std::vector<float>);
         BRANCH(ll_DPhi, std::vector<float>);
         BRANCH(ll_DPhi_met, std::vector<float>);
