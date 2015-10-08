@@ -10,8 +10,8 @@ class DileptonCategory: public Category {
             m_mll_cut = conf.getUntrackedParameter<double>("mll_cut", 20);
             m_mll_lowerZcut = conf.getUntrackedParameter<double>("mll_lowerZcut", 85);
         }
-        const std::vector<Lepton>& getLeptons(const AnalyzersManager& analyzers) const ;
-        const std::vector<Dilepton>& getDileptons(const AnalyzersManager& analyzers) const ;
+        const std::vector<HH::Lepton>& getLeptons(const AnalyzersManager& analyzers) const ;
+        const std::vector<HH::Dilepton>& getDileptons(const AnalyzersManager& analyzers) const ;
         const unsigned int getNJets(const AnalyzersManager& analyzers) const ;
         const unsigned int getNBJets(const AnalyzersManager& analyzers) const ;
 

@@ -7,7 +7,7 @@
 
 #include <Math/VectorUtil.h>
 
-using namespace HH;
+//using namespace HH;
 
 class HHAnalyzer: public Framework::Analyzer {
     public:
@@ -30,8 +30,13 @@ class HHAnalyzer: public Framework::Analyzer {
             m_jet_bDiscrCut = config.getUntrackedParameter<double>("discr_cut", 0.89);
         }
 
-        BRANCH(leptons, std::vector<Lepton>);
-        BRANCH(ll, std::vector<Dilepton>);
+        // leptons and dileptons stuff
+        BRANCH(electrons, std::vector<unsigned int>);
+        BRANCH(muons, std::vector<unsigned int>);
+        BRANCH(leptons, std::vector<HH::Lepton>);
+        BRANCH(ll, std::vector<HH::Dilepton>);
+        BRANCH(met, std::vector<HH::Met>);
+        BRANCH(llmet, std::vector<HH::DileptonMet>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
@@ -62,20 +67,6 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(bb_maxDPhi_jmet, std::vector<float>);
 
         BRANCH(h_dibjet_idx, unsigned int);
-
-        // leptons and dileptons stuff
-        BRANCH(electrons, std::vector<unsigned int>);
-        BRANCH(muons, std::vector<unsigned int>);
-
-        BRANCH(llmet_p4, std::vector<LorentzVector>);
-        BRANCH(ll_DR, std::vector<float>);
-        BRANCH(ll_DPhi, std::vector<float>);
-        BRANCH(ll_DPhi_met, std::vector<float>);
-        BRANCH(ll_minDPhi_lmet, std::vector<float>);
-        BRANCH(ll_maxDPhi_lmet, std::vector<float>);
-        BRANCH(ll_MT, std::vector<float>);
-        BRANCH(ll_MT_formula, std::vector<float>);
-        BRANCH(ll_projectedMet, std::vector<float>);
 
         // lljj and llbb stuff
         BRANCH(lljj_p4, std::vector<LorentzVector>);

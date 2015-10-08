@@ -3,4 +3,8 @@
     <class name="std::vector<HH::Lepton>"/>
     <class name="HH::Dilepton"/>
     <class name="std::vector<HH::Dilepton>"/>
+    <class name="HH::Met"/>
+    <class name="std::vector<HH::Met>"/>
+    <class name="HH::DileptonMet"/>
+    <class name="std::vector<HH::DileptonMet>"/>
 </lcgdict>
