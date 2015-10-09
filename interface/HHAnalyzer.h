@@ -3,24 +3,11 @@
 
 #include <cp3_llbb/Framework/interface/Analyzer.h>
 #include <cp3_llbb/Framework/interface/Category.h>
+#include <cp3_llbb/HHAnalysis/interface/Types.h>
 
 #include <Math/VectorUtil.h>
 
-struct Lepton { 
-    LorentzVector p4; 
-    unsigned int idx; 
-    bool isMu; 
-    bool isEl; 
-};  
-
-struct Dilepton { 
-    LorentzVector p4; 
-    std::pair<unsigned int, unsigned int> idxs; 
-    bool isMuMu; 
-    bool isElEl; 
-    bool isElMu; 
-    bool isMuEl; 
-};  
+//using namespace HH;
 
 class HHAnalyzer: public Framework::Analyzer {
     public:
@@ -43,8 +30,13 @@ class HHAnalyzer: public Framework::Analyzer {
             m_jet_bDiscrCut = config.getUntrackedParameter<double>("discr_cut", 0.89);
         }
 
-        std::vector<Lepton> leptons;
-        std::vector<Dilepton> ll;
+        // leptons and dileptons stuff
+        BRANCH(electrons, std::vector<unsigned int>);
+        BRANCH(muons, std::vector<unsigned int>);
+        BRANCH(leptons, std::vector<HH::Lepton>);
+        BRANCH(ll, std::vector<HH::Dilepton>);
+        BRANCH(met, std::vector<HH::Met>);
+        BRANCH(llmet, std::vector<HH::DileptonMet>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
@@ -52,7 +44,7 @@ class HHAnalyzer: public Framework::Analyzer {
         // jets and dijets stuff
         BRANCH(jets_p4, std::vector<LorentzVector>);
         BRANCH(jets_idx, std::vector<unsigned int>);
-        
+
         BRANCH(jj_p4, std::vector<LorentzVector>);
         BRANCH(jj_idx, std::vector<std::pair<unsigned int, unsigned int>>);// NB : this index refers, so far, to the entries in jets_p4
         BRANCH(jj_DR, std::vector<float>);
@@ -76,31 +68,6 @@ class HHAnalyzer: public Framework::Analyzer {
 
         BRANCH(h_dibjet_idx, unsigned int);
 
-        // leptons and dileptons stuff
-        BRANCH(electrons, std::vector<unsigned int>);
-        BRANCH(muons, std::vector<unsigned int>);
-
-        BRANCH(leptons_p4, std::vector<LorentzVector>); // list of leptons p4 sorted by pt 
-        BRANCH(leptons_isMu, std::vector<bool>);
-        BRANCH(leptons_isEl, std::vector<bool>);
-        BRANCH(leptons_idx, std::vector<unsigned int>);  
-
-        BRANCH(ll_p4, std::vector<LorentzVector>);
-        BRANCH(llmet_p4, std::vector<LorentzVector>);
-        BRANCH(ll_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to leptons indices
-        BRANCH(ll_isMuMu, std::vector<bool>);
-        BRANCH(ll_isElEl, std::vector<bool>);
-        BRANCH(ll_isElMu, std::vector<bool>);
-        BRANCH(ll_isMuEl, std::vector<bool>);
-        BRANCH(ll_DR, std::vector<float>);
-        BRANCH(ll_DPhi, std::vector<float>);
-        BRANCH(ll_DPhi_met, std::vector<float>);
-        BRANCH(ll_minDPhi_lmet, std::vector<float>);
-        BRANCH(ll_maxDPhi_lmet, std::vector<float>);
-        BRANCH(ll_MT, std::vector<float>);
-        BRANCH(ll_MT_formula, std::vector<float>);
-        BRANCH(ll_projectedMet, std::vector<float>);
-
         // lljj and llbb stuff
         BRANCH(lljj_p4, std::vector<LorentzVector>);
         BRANCH(lljj_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to ll and jj indices
@@ -115,7 +82,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(llbb_DPhi, std::vector<float>);
         BRANCH(llbb_minDR_lb, std::vector<float>);
         BRANCH(llbb_maxDR_lb, std::vector<float>);
- 
+
         // lljjmet and llbbmet stuff
         // as there is only one met, all the following vectors are in sync with lljj vectors
         // i.e. no need to store ll and jj indices
