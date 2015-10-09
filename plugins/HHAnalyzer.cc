@@ -84,6 +84,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             HH::Dilepton dilep;
             dilep.p4 = leptons[ilep1].p4 + leptons[ilep2].p4;
             dilep.idxs = std::make_pair(ilep1, ilep2);
+            dilep.ilep1 = leptons[ilep1].idx;
+            dilep.ilep2 = leptons[ilep2].idx;
             dilep.isOS = leptons[ilep1].charge * leptons[ilep2].charge < 0;
             dilep.isMuMu = leptons[ilep1].isMu && leptons[ilep2].isMu;
             dilep.isElEl = leptons[ilep1].isEl && leptons[ilep2].isEl;
@@ -118,7 +120,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 // DileptonMet inherits from Dilepton struct, initalize everything properly
 // FIXME: there is very probably a cleaner way to do
             myllmet.p4 = ll[ill].p4 + met[imet].p4;
-            myllmet.idxs = std::make_pair(ill, imet);
+            // blind copy of the ll content
+            myllmet.idxs = std::make_pair(ll[ill].idxs.first, ll[ill].idxs.second);
+            myllmet.ilep1 = ll[ill].ilep1;
+            myllmet.ilep2 = ll[ill].ilep2;
             myllmet.isOS = ll[ill].isOS;
             myllmet.isMuMu = ll[ill].isMuMu;
             myllmet.isElEl = ll[ill].isElEl;
@@ -131,6 +136,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.isID_TT = ll[ill].isID_TT;
             myllmet.DR = ll[ill].DR;
             myllmet.DPhi = ll[ill].DPhi;
+            // content specific to HH:DileptonMet
+            myllmet.ill = ill;
+            myllmet.imet = imet;
             myllmet.isNoHF = met[imet].isNoHF;
             float dphi = ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, met[imet].p4);
             myllmet.DPhi_ll_met = dphi;
