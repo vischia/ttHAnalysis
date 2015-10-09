@@ -1,9 +1,11 @@
 #pragma once
 
+#include <vector>
 #include <Math/Vector4D.h>
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiE4D<float>> LorentzVector;
 
 namespace HH {
+    typedef std::vector< std::vector<unsigned int> > MapType;
     struct Lepton {
         LorentzVector p4;
         int8_t charge;
@@ -13,7 +15,6 @@ namespace HH {
         bool isID_L; // Loose
         bool isID_T; // Tight
     };
-
     struct Dilepton {
         LorentzVector p4;
         std::pair<unsigned int, unsigned int> idxs; // indices in the collection of HH::Lepton

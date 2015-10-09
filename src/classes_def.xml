@@ -7,4 +7,5 @@
     <class name="std::vector<HH::Met>"/>
     <class name="HH::DileptonMet"/>
     <class name="std::vector<HH::DileptonMet>"/>
+    <class name="std::vector< std::vector<unsigned int> >"/>
 </lcgdict>

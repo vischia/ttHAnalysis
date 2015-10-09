@@ -7,8 +7,6 @@
 
 #include <Math/VectorUtil.h>
 
-//using namespace HH;
-
 class HHAnalyzer: public Framework::Analyzer {
     public:
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
@@ -37,6 +35,10 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(ll, std::vector<HH::Dilepton>);
         BRANCH(met, std::vector<HH::Met>);
         BRANCH(llmet, std::vector<HH::DileptonMet>);
+
+        BRANCH(lepton_ids, HH::MapType);
+        // 0: Loose
+        // 1: Tight
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;

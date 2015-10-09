@@ -14,8 +14,6 @@
 
 #define HHANADEBUG 0
 
-//using namespace HH;
-
 void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
     manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", config);
     manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons", config);
@@ -37,6 +35,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     leptons.clear();
     ll.clear();
 
+    // Fill lepton structures
     for (unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
         if (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut
@@ -74,6 +73,25 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             leptons.push_back(mu);
         }
     }//end of loop on muons
+
+    // Fill lepton maps
+    lepton_ids.clear();
+
+    std::vector<unsigned int> tmp_indices;
+    std::vector<unsigned int> tmp_indices2;
+    tmp_indices.clear();
+    tmp_indices2.clear();
+    for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
+    {
+        if (leptons[ilepton].isID_L)
+            tmp_indices.push_back(ilepton);
+        if (leptons[ilepton].isID_T)
+            tmp_indices2.push_back(ilepton);
+    }
+    // 0: Loose
+    // 1: Tight
+    lepton_ids.push_back(tmp_indices);
+    lepton_ids.push_back(tmp_indices2);
            
     std::sort(leptons.begin(), leptons.end(), [](const HH::Lepton& lep1, const HH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });     
 
@@ -174,7 +192,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
 
-    float diffWithMh = 14000;
+    float diffWithMh = std::numeric_limits<float>::max();
     unsigned int dijetCounter = 0;
     // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
     for (unsigned int ijet1 = 0; ijet1 < jets_p4.size(); ijet1++)
@@ -197,7 +215,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
 
-    diffWithMh = 14000;
+    diffWithMh = std::numeric_limits<float>::max();
     dijetCounter = 0;
     // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
     for (unsigned int ibjet1 = 0; ibjet1 < bjets_p4.size(); ibjet1++)
