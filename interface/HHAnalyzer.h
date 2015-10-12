@@ -16,7 +16,10 @@ class HHAnalyzer: public Framework::Analyzer {
             m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4);
             m_muonPtCut = config.getUntrackedParameter<double>("muonPtCut", 20);
 
-            m_electronIsoCut = config.getUntrackedParameter<double>("electronIsoCut", 0.11);
+            m_electronIsoCut_EB_Loose = config.getUntrackedParameter<double>("electronIsoCut_EB_Loose", 0.0893);
+            m_electronIsoCut_EE_Loose = config.getUntrackedParameter<double>("electronIsoCut_EE_Loose", 0.121);
+            m_electronIsoCut_EB_Tight = config.getUntrackedParameter<double>("electronIsoCut_EB_Tight", 0.0354);
+            m_electronIsoCut_EE_Tight = config.getUntrackedParameter<double>("electronIsoCut_EE_Tight", 0.0646);
             m_electronEtaCut = config.getUntrackedParameter<double>("electronEtaCut", 2.5);
             m_electronPtCut = config.getUntrackedParameter<double>("electronPtCut", 20);
             m_electron_loose_wp_name = config.getUntrackedParameter<std::string>("electrons_loose_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-loose");
@@ -36,9 +39,28 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(met, std::vector<HH::Met>);
         BRANCH(llmet, std::vector<HH::DileptonMet>);
 
-        BRANCH(lepton_ids, HH::MapType);
+        // maps, so far limit their multiplicity because the current formalism is painful
+        BRANCH(leptons_id, HH::MapType);
         // 0: Loose
         // 1: Tight
+        BRANCH(leptons_iso, HH::MapType);
+        // 0: Loose
+        // 1: Tight
+        BRANCH(leptons_idiso, HH::MapType);
+        // 0: idL isoL
+        // 1: idL isoT
+        // 2: idT isoL
+        // 3: idT isoT
+        BRANCH(ll_idiso, HH::MapType);
+        // 0: idL isoL, idL isoL
+        // 1: idL isoL, idT isoT
+        // 2: idT isoT, idL isoL
+        // 3: idT isoT, idT isoT
+        BRANCH(llmet_idiso, HH::MapType);
+        // 0: idL isoL, idL isoL, nohf met
+        // 1: idL isoL, idT isoT, nohf met
+        // 2: idT isoT, idL isoL, nohf met
+        // 3: idT isoT, idT isoT, nohf met
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
@@ -105,7 +127,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nElectrons, unsigned int);
         BRANCH(nLeptons, unsigned int);
 
-        float m_electronIsoCut, m_electronEtaCut, m_electronPtCut;
+        float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_electronPtCut;
         float m_muonIsoCut, m_muonEtaCut, m_muonPtCut;
         float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut;
         std::string m_jet_bDiscrName;

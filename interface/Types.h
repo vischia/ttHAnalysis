@@ -12,8 +12,10 @@ namespace HH {
         unsigned int idx;
         bool isMu;
         bool isEl;
-        bool isID_L; // Loose
-        bool isID_T; // Tight
+        bool id_L; // Loose
+        bool id_T; // Tight
+        bool iso_L; // Loose
+        bool iso_T; // Tight
     };
     struct Dilepton {
         LorentzVector p4;
@@ -26,10 +28,14 @@ namespace HH {
         bool isElMu;
         bool isMuEl;
         bool isSF; // Same Flavour
-        bool isID_LL;
-        bool isID_LT;
-        bool isID_TL;
-        bool isID_TT;
+        bool id_LL;
+        bool id_LT;
+        bool id_TL;
+        bool id_TT;
+        bool iso_LL;
+        bool iso_LT;
+        bool iso_TL;
+        bool iso_TT;
         float DR;
         float DPhi;
     };

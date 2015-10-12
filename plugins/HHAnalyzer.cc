@@ -38,8 +38,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Fill lepton structures
     for (unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
-        if (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut
-            && allelectrons.p4[ielectron].Pt() > m_electronPtCut
+        if (allelectrons.p4[ielectron].Pt() > m_electronPtCut
             && abs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
             {
             electrons.push_back(ielectron);
@@ -49,16 +48,18 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.idx = ielectron;
             ele.isMu = false;
             ele.isEl = true;
-            ele.isID_L = allelectrons.ids[ielectron][m_electron_loose_wp_name];
-            ele.isID_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
+            ele.id_L = allelectrons.ids[ielectron][m_electron_loose_wp_name];
+            ele.id_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
+            // FIXME: distinguish EB / EE cases
+            ele.iso_L = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Loose) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Loose);
+            ele.iso_T = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Tight) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Tight);
             leptons.push_back(ele);
         }
     }//end of loop on electrons
 
     for (unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
-        if (allmuons.relativeIsoR04_withEA[imuon] < m_muonIsoCut 
-            && allmuons.p4[imuon].Pt() > m_muonPtCut 
+        if (allmuons.p4[imuon].Pt() > m_muonPtCut 
             && abs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
             {
             muons.push_back(imuon);
@@ -68,33 +69,78 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             mu.idx = imuon;
             mu.isMu = true;
             mu.isEl = false;
-            mu.isID_L = allmuons.isLoose[imuon];
-            mu.isID_T = allmuons.isTight[imuon];
+            mu.id_L = allmuons.isLoose[imuon];
+            mu.id_T = allmuons.isTight[imuon];
+            // FIXME: Tight is the same as loose
+            mu.iso_L = allmuons.relativeIsoR04_withEA[imuon] < m_muonIsoCut;
+            mu.iso_T = allmuons.relativeIsoR04_withEA[imuon] < m_muonIsoCut;
             leptons.push_back(mu);
         }
     }//end of loop on muons
 
-    // Fill lepton maps
-    lepton_ids.clear();
-
-    std::vector<unsigned int> tmp_indices;
-    std::vector<unsigned int> tmp_indices2;
-    tmp_indices.clear();
-    tmp_indices2.clear();
-    for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
-    {
-        if (leptons[ilepton].isID_L)
-            tmp_indices.push_back(ilepton);
-        if (leptons[ilepton].isID_T)
-            tmp_indices2.push_back(ilepton);
-    }
-    // 0: Loose
-    // 1: Tight
-    lepton_ids.push_back(tmp_indices);
-    lepton_ids.push_back(tmp_indices2);
-           
+    // sort leptons by pt (ignoring flavour, id and iso)
     std::sort(leptons.begin(), leptons.end(), [](const HH::Lepton& lep1, const HH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });     
 
+    // Fill lepton maps
+    leptons_id.clear();
+    leptons_iso.clear();
+    leptons_idiso.clear();
+
+    std::vector<unsigned int> tmp_indices1;
+    std::vector<unsigned int> tmp_indices2;
+    std::vector<unsigned int> tmp_indices3;
+    std::vector<unsigned int> tmp_indices4;
+    std::vector<unsigned int> tmp_indices5;
+    std::vector<unsigned int> tmp_indices6;
+    std::vector<unsigned int> tmp_indices7;
+    std::vector<unsigned int> tmp_indices8;
+    tmp_indices1.clear();
+    tmp_indices2.clear();
+    tmp_indices3.clear();
+    tmp_indices4.clear();
+    tmp_indices5.clear();
+    tmp_indices6.clear();
+    tmp_indices7.clear();
+    tmp_indices8.clear();
+    for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
+    {
+        if (leptons[ilepton].id_L)
+            tmp_indices1.push_back(ilepton);
+        if (leptons[ilepton].id_T)
+            tmp_indices2.push_back(ilepton);
+        if (leptons[ilepton].iso_L)
+            tmp_indices3.push_back(ilepton);
+        if (leptons[ilepton].iso_T)
+            tmp_indices4.push_back(ilepton);
+        if (leptons[ilepton].id_L && leptons[ilepton].iso_L)
+            tmp_indices5.push_back(ilepton);
+        if (leptons[ilepton].id_L && leptons[ilepton].iso_T)
+            tmp_indices6.push_back(ilepton);
+        if (leptons[ilepton].id_T && leptons[ilepton].iso_L)
+            tmp_indices7.push_back(ilepton);
+        if (leptons[ilepton].id_T && leptons[ilepton].iso_T)
+            tmp_indices8.push_back(ilepton);
+    }
+    // ID
+    // 0: Loose
+    // 1: Tight
+    leptons_id.push_back(tmp_indices1);
+    leptons_id.push_back(tmp_indices2);
+    // Iso
+    // 0: Loose
+    // 1: Tight
+    leptons_iso.push_back(tmp_indices3);
+    leptons_iso.push_back(tmp_indices4);
+    // ID & Ido
+    // 0: idL isoL
+    // 1: idL isoT
+    // 2: idT isoL
+    // 3: idT isoT
+    leptons_idiso.push_back(tmp_indices5);
+    leptons_idiso.push_back(tmp_indices6);
+    leptons_idiso.push_back(tmp_indices7);
+    leptons_idiso.push_back(tmp_indices8);
+           
     for (unsigned int ilep1 = 0; ilep1 < leptons.size(); ilep1++)
     {
         for (unsigned int ilep2 = ilep1+1; ilep2 < leptons.size(); ilep2++)
@@ -110,15 +156,44 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.isElMu = leptons[ilep1].isEl && leptons[ilep2].isMu;
             dilep.isMuEl = leptons[ilep1].isMu && leptons[ilep2].isEl;
             dilep.isSF = dilep.isMuMu || dilep.isElEl;
-            dilep.isID_LL = leptons[ilep1].isID_L && leptons[ilep2].isID_L;
-            dilep.isID_LT = leptons[ilep1].isID_L && leptons[ilep2].isID_T;
-            dilep.isID_TL = leptons[ilep1].isID_T && leptons[ilep2].isID_L;
-            dilep.isID_TT = leptons[ilep1].isID_T && leptons[ilep2].isID_T;
+            dilep.id_LL = leptons[ilep1].id_L && leptons[ilep2].id_L;
+            dilep.id_LT = leptons[ilep1].id_L && leptons[ilep2].id_T;
+            dilep.id_TL = leptons[ilep1].id_T && leptons[ilep2].id_L;
+            dilep.id_TT = leptons[ilep1].id_T && leptons[ilep2].id_T;
+            dilep.iso_LL = leptons[ilep1].iso_L && leptons[ilep2].iso_L;
+            dilep.iso_LT = leptons[ilep1].iso_L && leptons[ilep2].iso_T;
+            dilep.iso_TL = leptons[ilep1].iso_T && leptons[ilep2].iso_L;
+            dilep.iso_TT = leptons[ilep1].iso_T && leptons[ilep2].iso_T;
             dilep.DR = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
             dilep.DPhi = ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4);
             ll.push_back(dilep); 
         }
     }
+
+    // Fill dilepton maps
+    tmp_indices1.clear();
+    tmp_indices2.clear();
+    tmp_indices3.clear();
+    tmp_indices4.clear();
+    for (unsigned int ill = 0; ill < ll.size(); ill++)
+    {
+        if (ll[ill].id_LL && ll[ill].iso_LL)
+            tmp_indices1.push_back(ill);
+        if (ll[ill].id_LT && ll[ill].iso_LT)
+            tmp_indices2.push_back(ill);
+        if (ll[ill].id_TL && ll[ill].iso_TL)
+            tmp_indices3.push_back(ill);
+        if (ll[ill].id_TT && ll[ill].iso_TT)
+            tmp_indices4.push_back(ill);
+    }
+    // 0: idL isoL, idL isoL
+    // 1: idL isoL, idT isoT
+    // 2: idT isoT, idL isoL
+    // 3: idT isoT, idT isoT
+    ll_idiso.push_back(tmp_indices1);
+    ll_idiso.push_back(tmp_indices2);
+    ll_idiso.push_back(tmp_indices3);
+    ll_idiso.push_back(tmp_indices4);
 
     // ***** 
     // Adding MET(s)
@@ -148,10 +223,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.isElMu = ll[ill].isElMu;
             myllmet.isMuEl = ll[ill].isMuEl;
             myllmet.isSF = ll[ill].isSF;
-            myllmet.isID_LL = ll[ill].isID_LL;
-            myllmet.isID_LT = ll[ill].isID_LT;
-            myllmet.isID_TL = ll[ill].isID_TL;
-            myllmet.isID_TT = ll[ill].isID_TT;
+            myllmet.id_LL = ll[ill].id_LL;
+            myllmet.id_LT = ll[ill].id_LT;
+            myllmet.id_TL = ll[ill].id_TL;
+            myllmet.id_TT = ll[ill].id_TT;
             myllmet.DR = ll[ill].DR;
             myllmet.DPhi = ll[ill].DPhi;
             // content specific to HH:DileptonMet
@@ -170,6 +245,32 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             llmet.push_back(myllmet);
         }
     }
+
+    // Fill dilepton+met maps
+    tmp_indices1.clear();
+    tmp_indices2.clear();
+    tmp_indices3.clear();
+    tmp_indices4.clear();
+    for (unsigned int illm = 0; illm < llmet.size(); illm++)
+    {
+        if (llmet[illm].id_LL && llmet[illm].iso_LL && llmet[illm].isNoHF)
+            tmp_indices1.push_back(illm);
+        if (llmet[illm].id_LT && llmet[illm].iso_LT && llmet[illm].isNoHF)
+            tmp_indices2.push_back(illm);
+        if (llmet[illm].id_TL && llmet[illm].iso_TL && llmet[illm].isNoHF)
+            tmp_indices3.push_back(illm);
+        if (llmet[illm].id_TT && llmet[illm].iso_TT && llmet[illm].isNoHF)
+            tmp_indices4.push_back(illm);
+    }
+    // 0: idL isoL, idL isoL, nohf met
+    // 1: idL isoL, idT isoT, nohf met
+    // 2: idT isoT, idL isoL, nohf met
+    // 3: idT isoT, idT isoT, nohf met
+    llmet_idiso.push_back(tmp_indices1);
+    llmet_idiso.push_back(tmp_indices2);
+    llmet_idiso.push_back(tmp_indices3);
+    llmet_idiso.push_back(tmp_indices4);
+
 
     // ***** 
     // Jets and dijets 
