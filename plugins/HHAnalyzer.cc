@@ -24,7 +24,7 @@ void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::Paramet
 
 void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const CategoryManager&) {
 
-    float mh = event.isRealData() ? 125.02 : 125.0;
+//    float mh = event.isRealData() ? 125.02 : 125.0;
 
     // ********** 
     // Leptons and dileptons
@@ -164,8 +164,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.iso_LT = leptons[ilep1].iso_L && leptons[ilep2].iso_T;
             dilep.iso_TL = leptons[ilep1].iso_T && leptons[ilep2].iso_L;
             dilep.iso_TT = leptons[ilep1].iso_T && leptons[ilep2].iso_T;
-            dilep.DR = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
-            dilep.DPhi = ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4);
+            dilep.DR_l_l = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
+            dilep.DPhi_l_l = ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4);
             ll.push_back(dilep); 
         }
     }
@@ -227,8 +227,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.id_LT = ll[ill].id_LT;
             myllmet.id_TL = ll[ill].id_TL;
             myllmet.id_TT = ll[ill].id_TT;
-            myllmet.DR = ll[ill].DR;
-            myllmet.DPhi = ll[ill].DPhi;
+            myllmet.DR_l_l = ll[ill].DR_l_l;
+            myllmet.DPhi_l_l = ll[ill].DPhi_l_l;
             // content specific to HH:DileptonMet
             myllmet.ill = ill;
             myllmet.imet = imet;
@@ -275,27 +275,58 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Jets and dijets 
     // ***** 
-    // TODO: loop over possible mets
-
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
+    jets.clear();
 
     for (unsigned int ijet = 0; ijet < alljets.p4.size(); ijet++)
     {
         if ((alljets.p4[ijet].Pt() > m_jetPtCut) 
             && (abs(alljets.p4[ijet].Eta()) < m_jetEtaCut))
             {
-            jets_p4.push_back(alljets.p4[ijet]);
-            jets_idx.push_back(ijet);
-            if (alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName) > m_jet_bDiscrCut){
-                bjets_p4.push_back(alljets.p4[ijet]);
-                bjets_idx.push_back(ijet);
-            }
+            HH::Jet myjet;
+            myjet.p4 = alljets.p4[ijet];
+            myjet.idx = ijet;
+            float mybtag = alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName);
+            myjet.btagL = mybtag > m_jet_bDiscrCut_loose;
+            myjet.btagM = mybtag > m_jet_bDiscrCut_medium;
+            myjet.btagT = mybtag > m_jet_bDiscrCut_tight;
+            jets.push_back(myjet);
         }
     }
 
+    jj.clear();
+    // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
+    for (unsigned int ijet1 = 0; ijet1 < jets.size(); ijet1++)
+    {
+        for (unsigned int ijet2 = ijet1 + 1; ijet2 < jets.size(); ijet2++)
+        {
+            HH::Dijet myjj;
+            myjj.p4 = jets[ijet1].p4 + jets[ijet2].p4;
+            myjj.idxs = std::make_pair(ijet1, ijet2);
+            myjj.ijet1 = jets[ijet1].idx;
+            myjj.ijet2 = jets[ijet2].idx;
+            myjj.btag_LL = jets[ijet1].btagL && jets[ijet2].btagL;
+            myjj.btag_LM = jets[ijet1].btagL && jets[ijet2].btagM;
+            myjj.btag_LT = jets[ijet1].btagL && jets[ijet2].btagT;
+            myjj.btag_ML = jets[ijet1].btagM && jets[ijet2].btagL;
+            myjj.btag_MM = jets[ijet1].btagM && jets[ijet2].btagM;
+            myjj.btag_MT = jets[ijet1].btagM && jets[ijet2].btagT;
+            myjj.btag_TL = jets[ijet1].btagT && jets[ijet2].btagL;
+            myjj.btag_TM = jets[ijet1].btagT && jets[ijet2].btagM;
+            myjj.btag_TT = jets[ijet1].btagT && jets[ijet2].btagT;
+            myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
+            myjj.DPhi_j_j = ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4);
+            jj.push_back(myjj);
+        }
+    }
+
+    // TODO: sort dijets according to combinatorics criteria
+    h_dijet_idx = 0;
+    h_dibjet_idx = 0;
+
+/*
     float diffWithMh = std::numeric_limits<float>::max();
     unsigned int dijetCounter = 0;
-    // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
     for (unsigned int ijet1 = 0; ijet1 < jets_p4.size(); ijet1++)
     {  
         for (unsigned int ijet2 = ijet1+1; ijet2 < jets_p4.size(); ijet2++)
@@ -338,66 +369,94 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dijetCounter++;
         }
     }
+*/
+
             
     // ********** 
     // lljj, llbb, +stdmet
     // ********** 
-    for (unsigned int ill = 0; ill < ll.size(); ill++)
+    llmetjj.clear();
+    for (unsigned int illmet = 0; illmet < llmet.size(); illmet++)
     {
-        for (unsigned int ijj = 0; ijj < jj_p4.size(); ijj++)
+        for (unsigned int ijj = 0; ijj < jj.size(); ijj++)
         {
-            LorentzVector lljj = ll[ill].p4 + jj_p4[ijj];
-            lljj_p4.push_back(lljj);
-            lljj_idx.push_back(std::make_pair(ill, ijj));
-            lljj_DR.push_back(ROOT::Math::VectorUtil::DeltaR(ll[ill].p4, jj_p4[ijj]));
-            lljj_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj_p4[ijj]));
+            unsigned int imet = llmet[illmet].imet;
+            unsigned int ill = llmet[illmet].ill;
+            unsigned int ijet1 = jj[ijj].ijet1;
+            unsigned int ijet2 = jj[ijj].ijet2;
+            unsigned int ilep1 = ll[ill].ilep1;
+            unsigned int ilep2 = ll[ill].ilep2;
+            HH::DileptonMetDijet myllmetjj;
+            myllmetjj.p4 = jj[ijj].p4 + met[imet].p4;
+            // blind copy of the jj content
+            myllmetjj.ijet1 = jj[ijj].ijet1;
+            myllmetjj.ijet2 = jj[ijj].ijet2;
+            myllmetjj.btag_LL = jj[ijj].btag_LL;
+            myllmetjj.btag_LM = jj[ijj].btag_LM;
+            myllmetjj.btag_LT = jj[ijj].btag_LT;
+            myllmetjj.btag_ML = jj[ijj].btag_ML;
+            myllmetjj.btag_MM = jj[ijj].btag_MM;
+            myllmetjj.btag_MT = jj[ijj].btag_MT;
+            myllmetjj.btag_TL = jj[ijj].btag_TL;
+            myllmetjj.btag_TM = jj[ijj].btag_TM;
+            myllmetjj.btag_TT = jj[ijj].btag_TT;
+            myllmetjj.DR_j_j = jj[ijj].DR_j_j;
+            myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
+            // blind copy of the llmet content
+            myllmetjj.ilep1 = ll[ill].ilep1;
+            myllmetjj.ilep2 = ll[ill].ilep2;
+            myllmetjj.isOS = ll[ill].isOS;
+            myllmetjj.isMuMu = ll[ill].isMuMu;
+            myllmetjj.isElEl = ll[ill].isElEl;
+            myllmetjj.isElMu = ll[ill].isElMu;
+            myllmetjj.isMuEl = ll[ill].isMuEl;
+            myllmetjj.isSF = ll[ill].isSF;
+            myllmetjj.id_LL = ll[ill].id_LL;
+            myllmetjj.id_LT = ll[ill].id_LT;
+            myllmetjj.id_TL = ll[ill].id_TL;
+            myllmetjj.id_TT = ll[ill].id_TT;
+            myllmetjj.DR_l_l = ll[ill].DR_l_l;
+            myllmetjj.DPhi_l_l = ll[ill].DPhi_l_l;
+            myllmetjj.ill = ill;
+            myllmetjj.imet = imet;
+            myllmetjj.isNoHF = met[imet].isNoHF;
+            myllmetjj.DPhi_ll_met = llmet[illmet].DPhi_ll_met;
+            myllmetjj.minDPhi_l_met = llmet[illmet].minDPhi_l_met; 
+            myllmetjj.maxDPhi_l_met = llmet[illmet].maxDPhi_l_met;
+            myllmetjj.MT = llmet[illmet].MT;
+            myllmetjj.MT_formula = llmet[illmet].MT_formula;
+            myllmetjj.projectedMet = llmet[illmet].projectedMet;
+            // content specific to HH::DijetMet
+            // NB: computed for the first time here, no intermediate jjmet collection
+            myllmetjj.DPhi_jj_met = ROOT::Math::VectorUtil::DeltaPhi(jj[ijj].p4, met[imet].p4);
+            myllmetjj.minDPhi_j_met = std::min(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4));
+            myllmetjj.minDPhi_j_met = std::max(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4));
+            // content specific to HH::DileptonMetDijet
+            myllmetjj.illmet = illmet;
             float DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2;
-            DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].first], leptons[ll[ill].idxs.first].p4);
-            DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].first], leptons[ll[ill].idxs.second].p4);
-            DR_j2l1 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].second], leptons[ll[ill].idxs.first].p4);
-            DR_j2l2 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].second], leptons[ll[ill].idxs.second].p4);
-            float maxDR = std::max({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
-            lljj_maxDR_lj.push_back(maxDR);
-            float minDR = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
-            lljj_minDR_lj.push_back(minDR);
-            lljjmet_p4.push_back(lljj + stdmet.p4);
-            lljjmet_DR.push_back(ROOT::Math::VectorUtil::DeltaR(lljj, stdmet.p4));
-            lljjmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4 + stdmet.p4, jj_p4[ijj]));
-            lljjmet_cosThetaStar_CS.push_back(getCosThetaStar_CS(ll[ill].p4 + stdmet.p4, jj_p4[ijj]));
-        }
-    }
-
-    for (unsigned int ill = 0; ill < ll.size(); ill++)
-    {
-        for (unsigned int ibb = 0; ibb < bb_p4.size(); ibb++)
-        {
-            LorentzVector llbb = ll[ill].p4 + bb_p4[ibb];
-            llbb_p4.push_back(llbb);
-            llbb_idx.push_back(std::make_pair(ill, ibb));
-            llbb_DR.push_back(ROOT::Math::VectorUtil::DeltaR(ll[ill].p4, jj_p4[ibb]));
-            llbb_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj_p4[ibb]));
-            float DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2;
-            DR_b1l1 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].first], leptons[ll[ill].idxs.first].p4);
-            DR_b1l2 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].first], leptons[ll[ill].idxs.second].p4);
-            DR_b2l1 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].second], leptons[ll[ill].idxs.first].p4);
-            DR_b2l2 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].second], leptons[ll[ill].idxs.second].p4);
-            float maxDR = std::max({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
-            llbb_maxDR_lb.push_back(maxDR);
-            float minDR = std::min({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
-            llbb_minDR_lb.push_back(minDR);
-            llbbmet_p4.push_back(llbb + stdmet.p4);
-            llbbmet_DR.push_back(ROOT::Math::VectorUtil::DeltaR(llbb, stdmet.p4));
-            llbbmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(llbb, stdmet.p4));
-            llbbmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4 + stdmet.p4, bb_p4[ibb]));
-            llbbmet_cosThetaStar_CS.push_back(getCosThetaStar_CS(ll[ill].p4 + stdmet.p4, bb_p4[ibb]));
+            DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, leptons[ilep1].p4);
+            DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, leptons[ilep2].p4);
+            DR_j2l1 = ROOT::Math::VectorUtil::DeltaR(jets[ijet2].p4, leptons[ilep1].p4);
+            DR_j2l2 = ROOT::Math::VectorUtil::DeltaR(jets[ijet2].p4, leptons[ilep2].p4);
+            myllmetjj.maxDR_l_j = std::max({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
+            myllmetjj.minDR_l_j = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
+            myllmetjj.DR_ll_jj = ROOT::Math::VectorUtil::DeltaR(ll[ill].p4, jj[ijj].p4);
+            myllmetjj.DPhi_ll_jj = ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj[ijj].p4);
+            myllmetjj.DR_llmet_jj = ROOT::Math::VectorUtil::DeltaR(llmet[illmet].p4, jj[ijj].p4);
+            myllmetjj.DPhi_llmet_jj = ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4);
+            myllmetjj.cosThetaStar_CS = getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4);
+            llmetjj.push_back(myllmetjj);
         }
     }
 
     // ***** ***** *****
     // Event variables
     // ***** ***** *****
-    nJets = jets_p4.size();
-    nBJets = bjets_p4.size();
+    nJets = jets.size();
+    nBJets = 0;
+    for (unsigned int ijet = 0; ijet < jets.size(); ijet++)
+        if (jets[ijet].btagM)
+            nBJets++;
     nMuons = muons.size();
     nElectrons = electrons.size();
     nLeptons = leptons.size();

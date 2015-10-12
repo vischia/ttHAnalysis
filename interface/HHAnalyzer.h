@@ -28,7 +28,9 @@ class HHAnalyzer: public Framework::Analyzer {
             m_jetEtaCut = config.getUntrackedParameter<double>("jetEtaCut", 2.4);
             m_jetPtCut = config.getUntrackedParameter<double>("jetPtCut", 20);
             m_jet_bDiscrName = config.getUntrackedParameter<std::string>("discr_name", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
-            m_jet_bDiscrCut = config.getUntrackedParameter<double>("discr_cut", 0.89);
+            m_jet_bDiscrCut_loose = config.getUntrackedParameter<double>("discr_cut_loose", 0.605);
+            m_jet_bDiscrCut_medium = config.getUntrackedParameter<double>("discr_cut_medium", 0.89);
+            m_jet_bDiscrCut_tight = config.getUntrackedParameter<double>("discr_cut_tight", 0.97);
         }
 
         // leptons and dileptons stuff
@@ -38,6 +40,9 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(ll, std::vector<HH::Dilepton>);
         BRANCH(met, std::vector<HH::Met>);
         BRANCH(llmet, std::vector<HH::DileptonMet>);
+        BRANCH(jets, std::vector<HH::Jet>);
+        BRANCH(jj, std::vector<HH::Dijet>);
+        BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
 
         // maps, so far limit their multiplicity because the current formalism is painful
         BRANCH(leptons_id, HH::MapType);
@@ -66,59 +71,8 @@ class HHAnalyzer: public Framework::Analyzer {
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
 
         // jets and dijets stuff
-        BRANCH(jets_p4, std::vector<LorentzVector>);
-        BRANCH(jets_idx, std::vector<unsigned int>);
-
-        BRANCH(jj_p4, std::vector<LorentzVector>);
-        BRANCH(jj_idx, std::vector<std::pair<unsigned int, unsigned int>>);// NB : this index refers, so far, to the entries in jets_p4
-        BRANCH(jj_DR, std::vector<float>);
-        BRANCH(jj_DPhi, std::vector<float>);
-        BRANCH(jj_DPhi_met, std::vector<float>);
-        BRANCH(jj_minDPhi_jmet, std::vector<float>);
-        BRANCH(jj_maxDPhi_jmet, std::vector<float>);
-
         BRANCH(h_dijet_idx, unsigned int);
-
-        BRANCH(bjets_p4, std::vector<LorentzVector>);
-        BRANCH(bjets_idx, std::vector<unsigned int>);
-
-        BRANCH(bb_p4, std::vector<LorentzVector>);
-        BRANCH(bb_idx, std::vector<std::pair<unsigned int, unsigned int>>); // NB : this index refers, so far, to the entries in bjets_p4
-        BRANCH(bb_DR, std::vector<float>);
-        BRANCH(bb_DPhi, std::vector<float>);
-        BRANCH(bb_DPhi_met, std::vector<float>);
-        BRANCH(bb_minDPhi_jmet, std::vector<float>);
-        BRANCH(bb_maxDPhi_jmet, std::vector<float>);
-
         BRANCH(h_dibjet_idx, unsigned int);
-
-        // lljj and llbb stuff
-        BRANCH(lljj_p4, std::vector<LorentzVector>);
-        BRANCH(lljj_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to ll and jj indices
-        BRANCH(lljj_DR, std::vector<float>);
-        BRANCH(lljj_DPhi, std::vector<float>);
-        BRANCH(lljj_minDR_lj, std::vector<float>);
-        BRANCH(lljj_maxDR_lj, std::vector<float>);
-
-        BRANCH(llbb_p4, std::vector<LorentzVector>);
-        BRANCH(llbb_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to ll and bb indices
-        BRANCH(llbb_DR, std::vector<float>);
-        BRANCH(llbb_DPhi, std::vector<float>);
-        BRANCH(llbb_minDR_lb, std::vector<float>);
-        BRANCH(llbb_maxDR_lb, std::vector<float>);
-
-        // lljjmet and llbbmet stuff
-        // as there is only one met, all the following vectors are in sync with lljj vectors
-        // i.e. no need to store ll and jj indices
-        BRANCH(lljjmet_p4, std::vector<LorentzVector>);
-        BRANCH(lljjmet_DR, std::vector<float>);
-        BRANCH(lljjmet_DPhi, std::vector<float>);
-        BRANCH(lljjmet_cosThetaStar_CS, std::vector<float>);
-
-        BRANCH(llbbmet_p4, std::vector<LorentzVector>);
-        BRANCH(llbbmet_DR, std::vector<float>);
-        BRANCH(llbbmet_DPhi, std::vector<float>);
-        BRANCH(llbbmet_cosThetaStar_CS, std::vector<float>);
 
         // global event stuff (selected objects multiplicity)
         BRANCH(nJets, unsigned int);
@@ -129,7 +83,7 @@ class HHAnalyzer: public Framework::Analyzer {
 
         float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_electronPtCut;
         float m_muonIsoCut, m_muonEtaCut, m_muonPtCut;
-        float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut;
+        float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut_loose, m_jet_bDiscrCut_medium, m_jet_bDiscrCut_tight;
         std::string m_jet_bDiscrName;
         std::string m_electron_loose_wp_name;
         std::string m_electron_tight_wp_name;

@@ -8,4 +8,10 @@
     <class name="HH::DileptonMet"/>
     <class name="std::vector<HH::DileptonMet>"/>
     <class name="std::vector< std::vector<unsigned int> >"/>
+    <class name="HH::Jet"/>
+    <class name="std::vector<HH::Jet>"/>
+    <class name="HH::Dijet"/>
+    <class name="std::vector<HH::Dijet>"/>
+    <class name="HH::DileptonMetDijet"/>
+    <class name="std::vector<HH::DileptonMetDijet>"/>
 </lcgdict>

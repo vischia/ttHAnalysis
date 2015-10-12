@@ -37,7 +37,9 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             jetEtaCut = cms.untracked.double(2.4),
             jetPtCut = cms.untracked.double(20),
             discr_name =  cms.untracked.string("pfCombinedInclusiveSecondaryVertexV2BJetTags"),
-            discr_cut =  cms.untracked.double(0.89)
+            discr_cut_loose =  cms.untracked.double(0.605),
+            discr_cut_medium =  cms.untracked.double(0.89),
+            discr_cut_tight =  cms.untracked.double(0.97)
             ),
         )
     ), 

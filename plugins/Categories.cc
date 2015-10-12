@@ -3,7 +3,6 @@
 #include <cp3_llbb/Framework/interface/JetsProducer.h>
 
 #include <cp3_llbb/HHAnalysis/interface/Categories.h>
-#include <cp3_llbb/HHAnalysis/interface/HHAnalyzer.h>
 
 // NB : All di-lepton categories require also two jets, as we do not want to store events without at least two leptons and two jets.
 //      The criteria "having two b-jets" is passed as a cut in the category in question.
@@ -24,12 +23,12 @@ const std::vector<HH::Dilepton>& DileptonCategory::getDileptons(const AnalyzersM
 
 const unsigned int DileptonCategory::getNJets(const AnalyzersManager& analyzers) const {
     const HHAnalyzer& hh_analyzer = analyzers.get<HHAnalyzer>("hh_analyzer");
-    return hh_analyzer.jets_p4.size();
+    return hh_analyzer.nJets;
 }
 
 const unsigned int DileptonCategory::getNBJets(const AnalyzersManager& analyzers) const {
     const HHAnalyzer& hh_analyzer = analyzers.get<HHAnalyzer>("hh_analyzer");
-    return hh_analyzer.bjets_p4.size();
+    return hh_analyzer.nBJets;
 }
 
 // ***** ***** *****
@@ -37,8 +36,8 @@ const unsigned int DileptonCategory::getNBJets(const AnalyzersManager& analyzers
 // ***** ***** *****
 bool MuMuCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-    const JetsProducer& jets = producers.get<JetsProducer>("jets");
-    return (muons.p4.size() >= 2 && jets.p4.size() >= 2);
+    const JetsProducer& alljets = producers.get<JetsProducer>("jets");
+    return (muons.p4.size() >= 2 && alljets.p4.size() >= 2);
 };
 
 bool MuMuCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -76,8 +75,8 @@ void MuMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
 // ***** ***** *****
 bool ElElCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
-    const JetsProducer& jets = producers.get<JetsProducer>("jets");
-    return (electrons.p4.size() >= 2  && jets.p4.size() >= 2);
+    const JetsProducer& alljets = producers.get<JetsProducer>("jets");
+    return (electrons.p4.size() >= 2  && alljets.p4.size() >= 2);
 };
 
 bool ElElCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -116,8 +115,8 @@ void ElElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
 bool ElMuCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-    const JetsProducer& jets = producers.get<JetsProducer>("jets");
-    return ((electrons.p4.size() + muons.p4.size() >= 2)  && jets.p4.size() >= 2);
+    const JetsProducer& alljets = producers.get<JetsProducer>("jets");
+    return ((electrons.p4.size() + muons.p4.size() >= 2)  && alljets.p4.size() >= 2);
 };
 
 bool ElMuCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -156,8 +155,8 @@ void ElMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
 bool MuElCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
-    const JetsProducer& jets = producers.get<JetsProducer>("jets");
-    return ((electrons.p4.size() + muons.p4.size() >= 2)  && jets.p4.size() >= 2);
+    const JetsProducer& alljets = producers.get<JetsProducer>("jets");
+    return ((electrons.p4.size() + muons.p4.size() >= 2)  && alljets.p4.size() >= 2);
 };
 
 bool MuElCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
