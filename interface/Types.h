@@ -2,10 +2,11 @@
 
 #include <vector>
 #include <Math/Vector4D.h>
+#include <cp3_llbb/HHAnalysis/interface/Enums.h>
+
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiE4D<float>> LorentzVector;
 
 namespace HH {
-    typedef std::vector< std::vector<unsigned int> > MapType;
     struct Lepton {
         LorentzVector p4;
         int8_t charge;

@@ -44,35 +44,17 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(jj, std::vector<HH::Dijet>);
         BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
 
-        // maps, so far limit their multiplicity because the current formalism is painful
-        BRANCH(leptons_id, HH::MapType);
-        // 0: Loose
-        // 1: Tight
-        BRANCH(leptons_iso, HH::MapType);
-        // 0: Loose
-        // 1: Tight
-        BRANCH(leptons_idiso, HH::MapType);
-        // 0: idL isoL
-        // 1: idL isoT
-        // 2: idT isoL
-        // 3: idT isoT
-        BRANCH(ll_idiso, HH::MapType);
-        // 0: idL isoL, idL isoL
-        // 1: idL isoL, idT isoT
-        // 2: idT isoT, idL isoL
-        // 3: idT isoT, idT isoT
-        BRANCH(llmet_idiso, HH::MapType);
-        // 0: idL isoL, idL isoL, nohf met
-        // 1: idL isoL, idT isoT, nohf met
-        // 2: idT isoT, idL isoL, nohf met
-        // 3: idT isoT, idT isoT, nohf met
+        // maps
+        std::vector<std::vector<int>>& leptons_id_iso = tree["leptons_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& ll_id_iso = tree["ll_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
+        // FIXME: add enum over met
+        std::vector<std::vector<int>>& llmet_id_iso = tree["llmet_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& jets_btagWP = tree["jets_btagWP"].write_with_init<std::vector<std::vector<int>>>(btagWP::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& jj_btagWP_pair = tree["jj_btagWP_pair"].write_with_init<std::vector<std::vector<int>>>(btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& llmetjj_id_iso_btagWP_pair = tree["llmetjj_id_iso_btagWP_pair"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
-
-        // jets and dijets stuff
-        BRANCH(h_dijet_idx, unsigned int);
-        BRANCH(h_dibjet_idx, unsigned int);
 
         // global event stuff (selected objects multiplicity)
         BRANCH(nJets, unsigned int);
@@ -88,7 +70,6 @@ class HHAnalyzer: public Framework::Analyzer {
         std::string m_electron_loose_wp_name;
         std::string m_electron_tight_wp_name;
 
-        // utilities
         float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500)
         {// cos theta star angle in the Collins Soper frame
             LorentzVector p1, p2;

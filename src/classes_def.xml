@@ -7,7 +7,7 @@
     <class name="std::vector<HH::Met>"/>
     <class name="HH::DileptonMet"/>
     <class name="std::vector<HH::DileptonMet>"/>
-    <class name="std::vector< std::vector<unsigned int> >"/>
+    <class name="std::vector< std::vector<int> >"/>
     <class name="HH::Jet"/>
     <class name="std::vector<HH::Jet>"/>
     <class name="HH::Dijet"/>
