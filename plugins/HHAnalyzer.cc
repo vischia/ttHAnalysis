@@ -82,28 +82,30 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     std::sort(leptons.begin(), leptons.end(), [](const HH::Lepton& lep1, const HH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });     
 
     // Fill lepton maps
-    for (unsigned int i_id_iso = 0; i_id_iso < leptons_id_iso.size(); i_id_iso++)
-        leptons_id_iso[i_id_iso].clear();
+    for (unsigned int i_id_iso = 0; i_id_iso < map_l_id_iso.size(); i_id_iso++)
+        map_l_id_iso[i_id_iso].clear();
 
     for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
     {
         if (leptons[ilepton].id_L)
         {
-            leptons_id_iso[lepID::L * lepIso::Count + lepIso::no].push_back(ilepton);
+            map_l_id_iso[lepID::L * lepIso::Count + lepIso::no].push_back(ilepton);
             if (leptons[ilepton].iso_L)
-                leptons_id_iso[lepID::L * lepIso::Count + lepIso::L].push_back(ilepton);
+                map_l_id_iso[lepID::L * lepIso::Count + lepIso::L].push_back(ilepton);
             if (leptons[ilepton].iso_T)
-                leptons_id_iso[lepID::L * lepIso::Count + lepIso::T].push_back(ilepton);
+                map_l_id_iso[lepID::L * lepIso::Count + lepIso::T].push_back(ilepton);
         }
         if (leptons[ilepton].id_T)
         {
-            leptons_id_iso[lepID::T * lepIso::Count + lepIso::no].push_back(ilepton);
+            map_l_id_iso[lepID::T * lepIso::Count + lepIso::no].push_back(ilepton);
             if (leptons[ilepton].iso_L)
-                leptons_id_iso[lepID::T * lepIso::Count + lepIso::L].push_back(ilepton);
+                map_l_id_iso[lepID::T * lepIso::Count + lepIso::L].push_back(ilepton);
             if (leptons[ilepton].iso_T)
-                leptons_id_iso[lepID::T * lepIso::Count + lepIso::T].push_back(ilepton);
+                map_l_id_iso[lepID::T * lepIso::Count + lepIso::T].push_back(ilepton);
         }
     }
+    for (unsigned int i = 0; i < map_l_id_iso.size(); i++)
+        n_map_l_id_iso[i] = map_l_id_iso[i].size();
            
     for (unsigned int ilep1 = 0; ilep1 < leptons.size(); ilep1++)
     {
@@ -135,8 +137,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     }
 
     // Fill dilepton maps
-    for (unsigned int i = 0; i < ll_id_iso.size(); i++)
-        ll_id_iso[i].clear();
+    for (unsigned int i = 0; i < map_ll_id_iso.size(); i++)
+        map_ll_id_iso[i].clear();
 
     // map is stored as lep1_ID, lep1_Iso, lep2_ID, lep2_Iso
     int bitA = lepIso::Count;
@@ -146,101 +148,103 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     {
         if (ll[ill].id_LL)
         {
-            ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+            map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             if (leptons[ll[ill].ilep1].iso_L)
             {
-                ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             }
             if (leptons[ll[ill].ilep1].iso_T)
             {
-                ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             }
         }
         if (ll[ill].id_LT)
         {
-            ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+            map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             if (leptons[ll[ill].ilep1].iso_L)
             {
-                ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             }
             if (leptons[ll[ill].ilep1].iso_T)
             {
-                ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             }
         }
         if (ll[ill].id_TL)
         {
-            ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+            map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             if (leptons[ll[ill].ilep1].iso_L)
             {
-                ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             }
             if (leptons[ll[ill].ilep1].iso_T)
             {
-                ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             }
         }
         if (ll[ill].id_TT)
         {
-            ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+            map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             if (leptons[ll[ill].ilep1].iso_L)
             {
-                ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             }
             if (leptons[ll[ill].ilep1].iso_T)
             {
-                ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             }
         }
     }
+    for (unsigned int i = 0; i < map_ll_id_iso.size(); i++)
+        n_map_ll_id_iso[i] = map_ll_id_iso[i].size();
 
     // ***** 
     // Adding MET(s)
@@ -297,19 +301,21 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Fill dilepton+met maps
     // FIXME: for now only store nohf_met
     // so ll and llmet structures are in sync
-    for (unsigned int i = 0; i < llmet_id_iso.size(); i++)
+    for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
     {
-        llmet_id_iso[i].clear();
-        llmet_id_iso[i] = ll_id_iso[i];
+        map_llmet_id_iso[i].clear();
+        map_llmet_id_iso[i] = map_ll_id_iso[i];
     }
+    for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
+        n_map_llmet_id_iso[i] = map_llmet_id_iso[i].size();
 
     // ***** 
     // Jets and dijets 
     // ***** 
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
     jets.clear();
-    for (unsigned int ibtag = 0; ibtag < jets_btagWP.size(); ibtag++)
-        jets_btagWP[ibtag].clear();
+    for (unsigned int ibtag = 0; ibtag < map_j_btagWP.size(); ibtag++)
+        map_j_btagWP[ibtag].clear();
 
     // (The following include filling up the jets map
     int count = 0;
@@ -327,21 +333,23 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.btagT = mybtag > m_jet_bDiscrCut_tight;
             jets.push_back(myjet);
             // filling maps
-            jets_btagWP[btagWP::no].push_back(count);
+            map_j_btagWP[btagWP::no].push_back(count);
             if (myjet.btagL)
-                jets_btagWP[btagWP::L].push_back(count);
+                map_j_btagWP[btagWP::L].push_back(count);
             if (myjet.btagM)
-                jets_btagWP[btagWP::M].push_back(count);
+                map_j_btagWP[btagWP::M].push_back(count);
             if (myjet.btagT)
-                jets_btagWP[btagWP::T].push_back(count);
+                map_j_btagWP[btagWP::T].push_back(count);
             count++;
         }
     }
+    for (unsigned int i = 0; i < map_j_btagWP.size(); i++)
+        n_map_j_btagWP[i] = map_j_btagWP[i].size();
 
     jj.clear();
     // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
-    for (unsigned int ijj = 0; ijj < jj_btagWP_pair.size(); ijj++)
-        jj_btagWP_pair[ijj].clear();
+    for (unsigned int ijj = 0; ijj < map_jj_btagWP_pair.size(); ijj++)
+        map_jj_btagWP_pair[ijj].clear();
     bitA = jetPair::Count;
     bitB = bitA * btagWP::Count;
     count = 0;
@@ -368,29 +376,29 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.DPhi_j_j = ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4);
             jj.push_back(myjj);
             // fill dijet map
-            jj_btagWP_pair[btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
+            map_jj_btagWP_pair[btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
             if (jets[ijet1].btagL)
-                jj_btagWP_pair[btagWP::L * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
             if (jets[ijet2].btagL)
-                jj_btagWP_pair[btagWP::no * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::no * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LL)
-                jj_btagWP_pair[btagWP::L * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LM)
-                jj_btagWP_pair[btagWP::L * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LT)
-                jj_btagWP_pair[btagWP::L * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_ML)
-                jj_btagWP_pair[btagWP::M * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_MM)
-                jj_btagWP_pair[btagWP::M * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_MT)
-                jj_btagWP_pair[btagWP::M * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TL)
-                jj_btagWP_pair[btagWP::T * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TM)
-                jj_btagWP_pair[btagWP::T * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TT)
-                jj_btagWP_pair[btagWP::T * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
             count++;
         }
     }
@@ -405,17 +413,19 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             int iht = ibtag1 * bitB + ibtag2 * bitA + jetPair::ht;
             int jpt = ibtag1 * bitB + ibtag2 * bitA + jetPair::pt;
             int jmh = ibtag1 * bitB + ibtag2 * bitA + jetPair::mh;
-            std::vector<int> tmp = jj_btagWP_pair[iht];
+            std::vector<int> tmp = map_jj_btagWP_pair[iht];
             // do the ptjj sorted maps
             std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].p4.Pt() > jj[b].p4.Pt();});
-            jj_btagWP_pair[jpt] = tmp;
+            map_jj_btagWP_pair[jpt] = tmp;
             // do the closest to mh sorted maps
-            tmp = jj_btagWP_pair[iht];
+            tmp = map_jj_btagWP_pair[iht];
             std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return abs(jj[a].p4.M() - mh) < abs(jj[b].p4.M() - mh);});
-            jj_btagWP_pair[jmh] = tmp;
+            map_jj_btagWP_pair[jmh] = tmp;
         }
     }
-            
+    for (unsigned int i = 0; i < map_jj_btagWP_pair.size(); i++)
+        n_map_jj_btagWP_pair[i] = map_jj_btagWP_pair[i].size();
+ 
     // ********** 
     // lljj, llbb, +stdmet
     // ********** 
@@ -496,8 +506,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     }
 
     // llmetjj maps: cross product of llmet and jj maps
-    for (unsigned int i = 0; i < llmetjj_id_iso_btagWP_pair.size(); i++)
-        llmetjj_id_iso_btagWP_pair[i].clear();
+    for (unsigned int i = 0; i < map_llmetjj_id_iso_btagWP_pair.size(); i++)
+        map_llmetjj_id_iso_btagWP_pair[i].clear();
 
     bitA = jetPair::Count;
     bitB = bitA * btagWP::Count;
@@ -542,11 +552,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                                     + ipair;
                                 for (unsigned int i = 0; i < llmetjj.size(); i++)
                                 {
-                                    if (std::find(llmet_id_iso[illmet].begin(), llmet_id_iso[illmet].end(), llmetjj[i].illmet) == llmet_id_iso[illmet].end())
+                                    if (std::find(map_llmet_id_iso[illmet].begin(), map_llmet_id_iso[illmet].end(), llmetjj[i].illmet) == map_llmet_id_iso[illmet].end())
                                         continue;
-                                    if (std::find(jj_btagWP_pair[ijj].begin(), jj_btagWP_pair[ijj].end(), llmetjj[i].ijj) == jj_btagWP_pair[ijj].end())
+                                    if (std::find(map_jj_btagWP_pair[ijj].begin(), map_jj_btagWP_pair[ijj].end(), llmetjj[i].ijj) == map_jj_btagWP_pair[ijj].end())
                                         continue;
-                                    llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
+                                    map_llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
                                 }
                             }
                         }
@@ -555,6 +565,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             }
         }
     }
+    for (unsigned int i = 0; i < map_llmetjj_id_iso_btagWP_pair.size(); i++)
+        n_map_llmetjj_id_iso_btagWP_pair[i] = map_llmetjj_id_iso_btagWP_pair[i].size();
 
     // ***** ***** *****
     // Event variables
