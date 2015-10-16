@@ -341,7 +341,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     jj.clear();
     // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
     for (unsigned int ijj = 0; ijj < jj_btagWP_pair.size(); ijj++)
-        jj_btagWP_pair.clear();
+        jj_btagWP_pair[ijj].clear();
     bitA = jetPair::Count;
     bitB = bitA * btagWP::Count;
     count = 0;
