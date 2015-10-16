@@ -39,7 +39,8 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             discr_name =  cms.untracked.string("pfCombinedInclusiveSecondaryVertexV2BJetTags"),
             discr_cut_loose =  cms.untracked.double(0.605),
             discr_cut_medium =  cms.untracked.double(0.89),
-            discr_cut_tight =  cms.untracked.double(0.97)
+            discr_cut_tight =  cms.untracked.double(0.97),
+            minDR_l_j_Cut = cms.untracked.double(0.3)
             ),
         )
     ), 

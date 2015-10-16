@@ -300,8 +300,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     for (unsigned int i = 0; i < llmet_id_iso.size(); i++)
     {
         llmet_id_iso[i].clear();
-        for (unsigned int j = 0; j < ll_id_iso[i].size(); j++)
-            llmet_id_iso[i].push_back(ll_id_iso[i][j]);
+        llmet_id_iso[i] = ll_id_iso[i];
     }
 
     // ***** 
@@ -490,7 +489,70 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.DR_llmet_jj = ROOT::Math::VectorUtil::DeltaR(llmet[illmet].p4, jj[ijj].p4);
             myllmetjj.DPhi_llmet_jj = ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4);
             myllmetjj.cosThetaStar_CS = getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4);
+            if (myllmetjj.minDR_l_j > m_minDR_l_j_Cut)
+                continue;
             llmetjj.push_back(myllmetjj);
+        }
+    }
+
+    // llmetjj maps: cross product of llmet and jj maps
+    for (unsigned int i = 0; i < llmetjj_id_iso_btagWP_pair.size(); i++)
+        llmetjj_id_iso_btagWP_pair[i].clear();
+
+    bitA = jetPair::Count;
+    bitB = bitA * btagWP::Count;
+    bitC = bitB * btagWP::Count;
+    int bitD = bitC * lepIso::Count;
+    int bitE = bitD * lepID::Count;
+    int bitF = bitE * lepIso::Count;
+
+    int bit0 = lepIso::Count;
+    int bit1 = bit0 * lepID::Count;
+    int bit2 = bit1 * lepIso::Count;
+
+    int bitX = jetPair::Count;
+    int bitY = bitX * btagWP::Count;
+    for (int il1id = 0; il1id < lepID::Count; il1id++)
+    {
+        for (int il1iso = 0; il1iso < lepIso::Count; il1iso++)
+        {
+            for (int il2id = 0; il2id < lepID::Count; il2id++)
+            {
+                for (int il2iso = 0; il2iso < lepIso::Count; il2iso++)
+                {
+                    for(int ibtag1 = 0; ibtag1 < btagWP::Count; ibtag1++)
+                    {
+                        for(int ibtag2 = 0; ibtag2 < btagWP::Count; ibtag2++)
+                        {
+                            for(int ipair = 0; ipair < jetPair::Count; ipair++)
+                            {
+                                int illmetjj = il1id * bitF
+                                    + il1iso * bitE
+                                    + il2id * bitD
+                                    + il2iso * bitC
+                                    + ibtag1 * bitB
+                                    + ibtag2 * bitA
+                                    + ipair;
+                                int illmet = il1id * bit2
+                                    + il1iso * bit1
+                                    + il2id * bit0
+                                    + il2iso;
+                                int ijj = ibtag1 * bitY
+                                    + ibtag2 * bitX
+                                    + ipair;
+                                for (unsigned int i = 0; i < llmetjj.size(); i++)
+                                {
+                                    if (std::find(llmet_id_iso[illmet].begin(), llmet_id_iso[illmet].end(), llmetjj[i].illmet) == llmet_id_iso[illmet].end())
+                                        continue;
+                                    if (std::find(jj_btagWP_pair[ijj].begin(), jj_btagWP_pair[ijj].end(), llmetjj[i].ijj) == jj_btagWP_pair[ijj].end())
+                                        continue;
+                                    llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

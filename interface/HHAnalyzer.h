@@ -31,6 +31,7 @@ class HHAnalyzer: public Framework::Analyzer {
             m_jet_bDiscrCut_loose = config.getUntrackedParameter<double>("discr_cut_loose", 0.605);
             m_jet_bDiscrCut_medium = config.getUntrackedParameter<double>("discr_cut_medium", 0.89);
             m_jet_bDiscrCut_tight = config.getUntrackedParameter<double>("discr_cut_tight", 0.97);
+            m_minDR_l_j_Cut = config.getUntrackedParameter<double>("minDR_l_j_Cut", 0.3);
         }
 
         // leptons and dileptons stuff
@@ -47,7 +48,7 @@ class HHAnalyzer: public Framework::Analyzer {
         // maps
         std::vector<std::vector<int>>& leptons_id_iso = tree["leptons_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count, std::vector<int>(0));
         std::vector<std::vector<int>>& ll_id_iso = tree["ll_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
-        // FIXME: add enum over met
+        // FIXME: add enum over met?
         std::vector<std::vector<int>>& llmet_id_iso = tree["llmet_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
         std::vector<std::vector<int>>& jets_btagWP = tree["jets_btagWP"].write_with_init<std::vector<std::vector<int>>>(btagWP::Count, std::vector<int>(0));
         std::vector<std::vector<int>>& jj_btagWP_pair = tree["jj_btagWP_pair"].write_with_init<std::vector<std::vector<int>>>(btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
@@ -66,6 +67,7 @@ class HHAnalyzer: public Framework::Analyzer {
         float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_electronPtCut;
         float m_muonIsoCut, m_muonEtaCut, m_muonPtCut;
         float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut_loose, m_jet_bDiscrCut_medium, m_jet_bDiscrCut_tight;
+        float m_minDR_l_j_Cut;
         std::string m_jet_bDiscrName;
         std::string m_electron_loose_wp_name;
         std::string m_electron_tight_wp_name;
