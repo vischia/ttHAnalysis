@@ -62,7 +62,7 @@ class HHAnalyzer: public Framework::Analyzer {
         std::vector<unsigned int>& n_map_llmetjj_id_iso_btagWP_pair = tree["n_map_llmetjj_id_iso_btagWP_pair"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * btagWP::Count * jetPair::Count, 0);
 
 
-        virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
+        virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
 
         // global event stuff (selected objects multiplicity)

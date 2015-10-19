@@ -22,7 +22,7 @@ void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::Paramet
 }
 
 
-void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const CategoryManager&) {
+void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const AnalyzersManager&, const CategoryManager&) {
 
     float mh = event.isRealData() ? 125.02 : 125.0;
 
