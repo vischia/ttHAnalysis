@@ -9,8 +9,10 @@ runOnData = False
 
 if runOnData :
     globalTag = '74X_dataRun2_v2'
+    processName = 'RECO'
 else : 
     globalTag = '74X_mcRun2_asymptotic_v2'
+    processName = None
 
 process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
 
@@ -46,6 +48,7 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
     ), 
     
     redoJEC=True,
+    process_name=processName
 
     )
 
