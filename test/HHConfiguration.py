@@ -23,10 +23,13 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             ),
         parameters = cms.PSet(
             # Here are the default value (just to show what is configurable)
-            electronIsoCut = cms.untracked.double(.11),
+            electronIsoCut_EB_Loose = cms.untracked.double(0.0893), # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
+            electronIsoCut_EE_Loose = cms.untracked.double(0.121),
+            electronIsoCut_EB_Tight = cms.untracked.double(0.0354),
+            electronIsoCut_EE_Tight = cms.untracked.double(0.0646),
             electronPtCut = cms.untracked.double(20),
             electronEtaCut = cms.untracked.double(2.5),
-            muonIsoCut = cms.untracked.double(.12), # https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO 
+            muonIsoCut = cms.untracked.double(.20), # https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO 
             muonPtCut = cms.untracked.double(20),
             muonEtaCut = cms.untracked.double(2.4),
             electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
@@ -34,7 +37,10 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             jetEtaCut = cms.untracked.double(2.4),
             jetPtCut = cms.untracked.double(20),
             discr_name =  cms.untracked.string("pfCombinedInclusiveSecondaryVertexV2BJetTags"),
-            discr_cut =  cms.untracked.double(0.89)
+            discr_cut_loose =  cms.untracked.double(0.605),
+            discr_cut_medium =  cms.untracked.double(0.89),
+            discr_cut_tight =  cms.untracked.double(0.97),
+            minDR_l_j_Cut = cms.untracked.double(0.3)
             ),
         )
     ), 

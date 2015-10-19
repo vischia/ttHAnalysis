@@ -14,8 +14,6 @@
 
 #define HHANADEBUG 0
 
-//using namespace HH;
-
 void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
     manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", config);
     manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons", config);
@@ -37,12 +35,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     leptons.clear();
     ll.clear();
 
+    // Fill lepton structures
     for (unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
-        if (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut
-            && allelectrons.p4[ielectron].Pt() > m_electronPtCut
+        if (allelectrons.p4[ielectron].Pt() > m_electronPtCut
             && abs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
-            {
+        {
             electrons.push_back(ielectron);
             HH::Lepton ele;
             ele.p4 = allelectrons.p4[ielectron];
@@ -50,18 +48,20 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.idx = ielectron;
             ele.isMu = false;
             ele.isEl = true;
-            ele.isID_L = allelectrons.ids[ielectron][m_electron_loose_wp_name];
-            ele.isID_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
+            ele.id_L = allelectrons.ids[ielectron][m_electron_loose_wp_name];
+            ele.id_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
+            // FIXME: distinguish EB / EE cases
+            ele.iso_L = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Loose) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Loose);
+            ele.iso_T = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Tight) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Tight);
             leptons.push_back(ele);
         }
     }//end of loop on electrons
 
     for (unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
-        if (allmuons.relativeIsoR04_withEA[imuon] < m_muonIsoCut 
-            && allmuons.p4[imuon].Pt() > m_muonPtCut 
+        if (allmuons.p4[imuon].Pt() > m_muonPtCut 
             && abs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
-            {
+        {
             muons.push_back(imuon);
             HH::Lepton mu;
             mu.p4 = allmuons.p4[imuon];
@@ -69,14 +69,44 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             mu.idx = imuon;
             mu.isMu = true;
             mu.isEl = false;
-            mu.isID_L = allmuons.isLoose[imuon];
-            mu.isID_T = allmuons.isTight[imuon];
+            mu.id_L = allmuons.isLoose[imuon];
+            mu.id_T = allmuons.isTight[imuon];
+            // FIXME: Tight is the same as loose
+            mu.iso_L = allmuons.relativeIsoR04_withEA[imuon] < m_muonIsoCut;
+            mu.iso_T = allmuons.relativeIsoR04_withEA[imuon] < m_muonIsoCut;
             leptons.push_back(mu);
         }
     }//end of loop on muons
-           
+
+    // sort leptons by pt (ignoring flavour, id and iso)
     std::sort(leptons.begin(), leptons.end(), [](const HH::Lepton& lep1, const HH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });     
 
+    // Fill lepton maps
+    for (unsigned int i_id_iso = 0; i_id_iso < map_l_id_iso.size(); i_id_iso++)
+        map_l_id_iso[i_id_iso].clear();
+
+    for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
+    {
+        if (leptons[ilepton].id_L)
+        {
+            map_l_id_iso[lepID::L * lepIso::Count + lepIso::no].push_back(ilepton);
+            if (leptons[ilepton].iso_L)
+                map_l_id_iso[lepID::L * lepIso::Count + lepIso::L].push_back(ilepton);
+            if (leptons[ilepton].iso_T)
+                map_l_id_iso[lepID::L * lepIso::Count + lepIso::T].push_back(ilepton);
+        }
+        if (leptons[ilepton].id_T)
+        {
+            map_l_id_iso[lepID::T * lepIso::Count + lepIso::no].push_back(ilepton);
+            if (leptons[ilepton].iso_L)
+                map_l_id_iso[lepID::T * lepIso::Count + lepIso::L].push_back(ilepton);
+            if (leptons[ilepton].iso_T)
+                map_l_id_iso[lepID::T * lepIso::Count + lepIso::T].push_back(ilepton);
+        }
+    }
+    for (unsigned int i = 0; i < map_l_id_iso.size(); i++)
+        n_map_l_id_iso[i] = map_l_id_iso[i].size();
+           
     for (unsigned int ilep1 = 0; ilep1 < leptons.size(); ilep1++)
     {
         for (unsigned int ilep2 = ilep1+1; ilep2 < leptons.size(); ilep2++)
@@ -92,21 +122,136 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.isElMu = leptons[ilep1].isEl && leptons[ilep2].isMu;
             dilep.isMuEl = leptons[ilep1].isMu && leptons[ilep2].isEl;
             dilep.isSF = dilep.isMuMu || dilep.isElEl;
-            dilep.isID_LL = leptons[ilep1].isID_L && leptons[ilep2].isID_L;
-            dilep.isID_LT = leptons[ilep1].isID_L && leptons[ilep2].isID_T;
-            dilep.isID_TL = leptons[ilep1].isID_T && leptons[ilep2].isID_L;
-            dilep.isID_TT = leptons[ilep1].isID_T && leptons[ilep2].isID_T;
-            dilep.DR = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
-            dilep.DPhi = ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4);
+            dilep.id_LL = leptons[ilep1].id_L && leptons[ilep2].id_L;
+            dilep.id_LT = leptons[ilep1].id_L && leptons[ilep2].id_T;
+            dilep.id_TL = leptons[ilep1].id_T && leptons[ilep2].id_L;
+            dilep.id_TT = leptons[ilep1].id_T && leptons[ilep2].id_T;
+            dilep.iso_LL = leptons[ilep1].iso_L && leptons[ilep2].iso_L;
+            dilep.iso_LT = leptons[ilep1].iso_L && leptons[ilep2].iso_T;
+            dilep.iso_TL = leptons[ilep1].iso_T && leptons[ilep2].iso_L;
+            dilep.iso_TT = leptons[ilep1].iso_T && leptons[ilep2].iso_T;
+            dilep.DR_l_l = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
+            dilep.DPhi_l_l = ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4);
             ll.push_back(dilep); 
         }
     }
 
+    // Fill dilepton maps
+    for (unsigned int i = 0; i < map_ll_id_iso.size(); i++)
+        map_ll_id_iso[i].clear();
+
+    // map is stored as lep1_ID, lep1_Iso, lep2_ID, lep2_Iso
+    int bitA = lepIso::Count;
+    int bitB = bitA * lepID::Count;
+    int bitC = bitB * lepIso::Count;
+    for (unsigned int ill = 0; ill < ll.size(); ill++)
+    {
+        if (ll[ill].id_LL)
+        {
+            map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+            if (leptons[ll[ill].ilep2].iso_L)
+                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+            if (leptons[ll[ill].ilep2].iso_L)
+                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+            if (leptons[ll[ill].ilep1].iso_L)
+            {
+                map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+            }
+            if (leptons[ll[ill].ilep1].iso_T)
+            {
+                map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+            }
+        }
+        if (ll[ill].id_LT)
+        {
+            map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+            if (leptons[ll[ill].ilep2].iso_L)
+                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+            if (leptons[ll[ill].ilep2].iso_L)
+                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+            if (leptons[ll[ill].ilep1].iso_L)
+            {
+                map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+            }
+            if (leptons[ll[ill].ilep1].iso_T)
+            {
+                map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+            }
+        }
+        if (ll[ill].id_TL)
+        {
+            map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+            if (leptons[ll[ill].ilep2].iso_L)
+                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+            if (leptons[ll[ill].ilep2].iso_L)
+                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+            if (leptons[ll[ill].ilep1].iso_L)
+            {
+                map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+            }
+            if (leptons[ll[ill].ilep1].iso_T)
+            {
+                map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+            }
+        }
+        if (ll[ill].id_TT)
+        {
+            map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+            if (leptons[ll[ill].ilep2].iso_L)
+                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+            if (leptons[ll[ill].ilep2].iso_L)
+                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+            if (leptons[ll[ill].ilep1].iso_L)
+            {
+                map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+            }
+            if (leptons[ll[ill].ilep1].iso_T)
+            {
+                map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                if (leptons[ll[ill].ilep2].iso_L)
+                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+            }
+        }
+    }
+    for (unsigned int i = 0; i < map_ll_id_iso.size(); i++)
+        n_map_ll_id_iso[i] = map_ll_id_iso[i].size();
+
     // ***** 
     // Adding MET(s)
     // ***** 
-    const METProducer& stdmet = producers.get<METProducer>("met");
-    met.push_back({stdmet.p4, false});
+    // FIXME: add back standard MET
+//    const METProducer& stdmet = producers.get<METProducer>("met");
+//    met.push_back({stdmet.p4, false});
     const METProducer& nohf_met = producers.get<METProducer>("nohf_met");
     met.push_back({nohf_met.p4, true});
 //    const METProducer& nohf_met = producers.get<METProducer>("puppimet");
@@ -130,12 +275,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.isElMu = ll[ill].isElMu;
             myllmet.isMuEl = ll[ill].isMuEl;
             myllmet.isSF = ll[ill].isSF;
-            myllmet.isID_LL = ll[ill].isID_LL;
-            myllmet.isID_LT = ll[ill].isID_LT;
-            myllmet.isID_TL = ll[ill].isID_TL;
-            myllmet.isID_TT = ll[ill].isID_TT;
-            myllmet.DR = ll[ill].DR;
-            myllmet.DPhi = ll[ill].DPhi;
+            myllmet.id_LL = ll[ill].id_LL;
+            myllmet.id_LT = ll[ill].id_LT;
+            myllmet.id_TL = ll[ill].id_TL;
+            myllmet.id_TT = ll[ill].id_TT;
+            myllmet.DR_l_l = ll[ill].DR_l_l;
+            myllmet.DPhi_l_l = ll[ill].DPhi_l_l;
             // content specific to HH:DileptonMet
             myllmet.ill = ill;
             myllmet.imet = imet;
@@ -153,132 +298,284 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
 
+    // Fill dilepton+met maps
+    // FIXME: for now only store nohf_met
+    // so ll and llmet structures are in sync
+    for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
+    {
+        map_llmet_id_iso[i].clear();
+        map_llmet_id_iso[i] = map_ll_id_iso[i];
+    }
+    for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
+        n_map_llmet_id_iso[i] = map_llmet_id_iso[i].size();
+
     // ***** 
     // Jets and dijets 
     // ***** 
-    // TODO: loop over possible mets
-
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
+    jets.clear();
+    for (unsigned int ibtag = 0; ibtag < map_j_btagWP.size(); ibtag++)
+        map_j_btagWP[ibtag].clear();
 
+    // (The following include filling up the jets map
+    int count = 0;
     for (unsigned int ijet = 0; ijet < alljets.p4.size(); ijet++)
     {
         if ((alljets.p4[ijet].Pt() > m_jetPtCut) 
             && (abs(alljets.p4[ijet].Eta()) < m_jetEtaCut))
-            {
-            jets_p4.push_back(alljets.p4[ijet]);
-            jets_idx.push_back(ijet);
-            if (alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName) > m_jet_bDiscrCut){
-                bjets_p4.push_back(alljets.p4[ijet]);
-                bjets_idx.push_back(ijet);
-            }
+        {
+            HH::Jet myjet;
+            myjet.p4 = alljets.p4[ijet];
+            myjet.idx = ijet;
+            float mybtag = alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName);
+            myjet.btagL = mybtag > m_jet_bDiscrCut_loose;
+            myjet.btagM = mybtag > m_jet_bDiscrCut_medium;
+            myjet.btagT = mybtag > m_jet_bDiscrCut_tight;
+            jets.push_back(myjet);
+            // filling maps
+            map_j_btagWP[btagWP::no].push_back(count);
+            if (myjet.btagL)
+                map_j_btagWP[btagWP::L].push_back(count);
+            if (myjet.btagM)
+                map_j_btagWP[btagWP::M].push_back(count);
+            if (myjet.btagT)
+                map_j_btagWP[btagWP::T].push_back(count);
+            count++;
+        }
+    }
+    for (unsigned int i = 0; i < map_j_btagWP.size(); i++)
+        n_map_j_btagWP[i] = map_j_btagWP[i].size();
+
+    jj.clear();
+    // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
+    for (unsigned int ijj = 0; ijj < map_jj_btagWP_pair.size(); ijj++)
+        map_jj_btagWP_pair[ijj].clear();
+    bitA = jetPair::Count;
+    bitB = bitA * btagWP::Count;
+    count = 0;
+
+    for (unsigned int ijet1 = 0; ijet1 < jets.size(); ijet1++)
+    {
+        for (unsigned int ijet2 = ijet1 + 1; ijet2 < jets.size(); ijet2++)
+        {
+            HH::Dijet myjj;
+            myjj.p4 = jets[ijet1].p4 + jets[ijet2].p4;
+            myjj.idxs = std::make_pair(ijet1, ijet2);
+            myjj.ijet1 = jets[ijet1].idx;
+            myjj.ijet2 = jets[ijet2].idx;
+            myjj.btag_LL = jets[ijet1].btagL && jets[ijet2].btagL;
+            myjj.btag_LM = jets[ijet1].btagL && jets[ijet2].btagM;
+            myjj.btag_LT = jets[ijet1].btagL && jets[ijet2].btagT;
+            myjj.btag_ML = jets[ijet1].btagM && jets[ijet2].btagL;
+            myjj.btag_MM = jets[ijet1].btagM && jets[ijet2].btagM;
+            myjj.btag_MT = jets[ijet1].btagM && jets[ijet2].btagT;
+            myjj.btag_TL = jets[ijet1].btagT && jets[ijet2].btagL;
+            myjj.btag_TM = jets[ijet1].btagT && jets[ijet2].btagM;
+            myjj.btag_TT = jets[ijet1].btagT && jets[ijet2].btagT;
+            myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
+            myjj.DPhi_j_j = ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4);
+            jj.push_back(myjj);
+            // fill dijet map
+            map_jj_btagWP_pair[btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
+            if (jets[ijet1].btagL)
+                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
+            if (jets[ijet2].btagL)
+                map_jj_btagWP_pair[btagWP::no * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_LL)
+                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_LM)
+                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_LT)
+                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_ML)
+                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_MM)
+                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_MT)
+                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_TL)
+                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_TM)
+                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+            if (myjj.btag_TT)
+                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+            count++;
         }
     }
 
-    float diffWithMh = 14000;
-    unsigned int dijetCounter = 0;
-    // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
-    for (unsigned int ijet1 = 0; ijet1 < jets_p4.size(); ijet1++)
-    {  
-        for (unsigned int ijet2 = ijet1+1; ijet2 < jets_p4.size(); ijet2++)
+    // Fill the rest of dijet combinatoric maps
+    bitA = jetPair::Count;
+    bitB = bitA * btagWP::Count;
+    for (int ibtag1 = 0; ibtag1 < btagWP::Count; ibtag1++)
+    {
+        for (int ibtag2 = 0; ibtag2 < btagWP::Count; ibtag2++)
         {
-            LorentzVector jj = jets_p4[ijet1] + jets_p4[ijet2];
-            jj_p4.push_back(jj);
-            jj_idx.push_back(std::make_pair(ijet1, ijet2));
-            jj_DR.push_back(ROOT::Math::VectorUtil::DeltaR(jets_p4[ijet1], jets_p4[ijet2]));
-            jj_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet1], jets_p4[ijet2]));
-            jj_DPhi_met.push_back(ROOT::Math::VectorUtil::DeltaPhi(jj, stdmet.p4));
-            jj_minDPhi_jmet.push_back(std::min(ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet1], stdmet.p4), ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet2], stdmet.p4)));
-            jj_maxDPhi_jmet.push_back(std::max(ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet1], stdmet.p4), ROOT::Math::VectorUtil::DeltaPhi(jets_p4[ijet2], stdmet.p4)));
-            if (abs(jj.M() - mh) < diffWithMh) {
-                h_dijet_idx = dijetCounter;
-                diffWithMh = abs(jj.M() - mh);
-            }
-            dijetCounter++;
+            int iht = ibtag1 * bitB + ibtag2 * bitA + jetPair::ht;
+            int jpt = ibtag1 * bitB + ibtag2 * bitA + jetPair::pt;
+            int jmh = ibtag1 * bitB + ibtag2 * bitA + jetPair::mh;
+            std::vector<int> tmp = map_jj_btagWP_pair[iht];
+            // do the ptjj sorted maps
+            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].p4.Pt() > jj[b].p4.Pt();});
+            map_jj_btagWP_pair[jpt] = tmp;
+            // do the closest to mh sorted maps
+            tmp = map_jj_btagWP_pair[iht];
+            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return abs(jj[a].p4.M() - mh) < abs(jj[b].p4.M() - mh);});
+            map_jj_btagWP_pair[jmh] = tmp;
         }
     }
-
-    diffWithMh = 14000;
-    dijetCounter = 0;
-    // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
-    for (unsigned int ibjet1 = 0; ibjet1 < bjets_p4.size(); ibjet1++)
-    {  
-        for (unsigned int ibjet2 = ibjet1+1; ibjet2 < bjets_p4.size(); ibjet2++)
-        {
-            LorentzVector bb = bjets_p4[ibjet1] + bjets_p4[ibjet2];
-            bb_p4.push_back(bb);
-            bb_idx.push_back(std::make_pair(ibjet1, ibjet2));
-            bb_DR.push_back(ROOT::Math::VectorUtil::DeltaR(bjets_p4[ibjet1], bjets_p4[ibjet2]));
-            bb_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet1], bjets_p4[ibjet2]));
-            bb_DPhi_met.push_back(ROOT::Math::VectorUtil::DeltaPhi(bb, stdmet.p4));
-            bb_minDPhi_jmet.push_back(std::min(ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet1], stdmet.p4), ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet2], stdmet.p4)));
-            bb_maxDPhi_jmet.push_back(std::max(ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet1], stdmet.p4), ROOT::Math::VectorUtil::DeltaPhi(bjets_p4[ibjet2], stdmet.p4)));
-            if (abs(bb.M() - mh) < diffWithMh) {
-                h_dibjet_idx = dijetCounter;
-                diffWithMh = abs(bb.M() - mh);
-            }
-            dijetCounter++;
-        }
-    }
-            
+    for (unsigned int i = 0; i < map_jj_btagWP_pair.size(); i++)
+        n_map_jj_btagWP_pair[i] = map_jj_btagWP_pair[i].size();
+ 
     // ********** 
     // lljj, llbb, +stdmet
     // ********** 
-    for (unsigned int ill = 0; ill < ll.size(); ill++)
+    llmetjj.clear();
+    for (unsigned int illmet = 0; illmet < llmet.size(); illmet++)
     {
-        for (unsigned int ijj = 0; ijj < jj_p4.size(); ijj++)
+        for (unsigned int ijj = 0; ijj < jj.size(); ijj++)
         {
-            LorentzVector lljj = ll[ill].p4 + jj_p4[ijj];
-            lljj_p4.push_back(lljj);
-            lljj_idx.push_back(std::make_pair(ill, ijj));
-            lljj_DR.push_back(ROOT::Math::VectorUtil::DeltaR(ll[ill].p4, jj_p4[ijj]));
-            lljj_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj_p4[ijj]));
+            unsigned int imet = llmet[illmet].imet;
+            unsigned int ill = llmet[illmet].ill;
+            unsigned int ijet1 = jj[ijj].ijet1;
+            unsigned int ijet2 = jj[ijj].ijet2;
+            unsigned int ilep1 = ll[ill].ilep1;
+            unsigned int ilep2 = ll[ill].ilep2;
+            HH::DileptonMetDijet myllmetjj;
+            myllmetjj.p4 = jj[ijj].p4 + met[imet].p4;
+            // blind copy of the jj content
+            myllmetjj.ijet1 = jj[ijj].ijet1;
+            myllmetjj.ijet2 = jj[ijj].ijet2;
+            myllmetjj.btag_LL = jj[ijj].btag_LL;
+            myllmetjj.btag_LM = jj[ijj].btag_LM;
+            myllmetjj.btag_LT = jj[ijj].btag_LT;
+            myllmetjj.btag_ML = jj[ijj].btag_ML;
+            myllmetjj.btag_MM = jj[ijj].btag_MM;
+            myllmetjj.btag_MT = jj[ijj].btag_MT;
+            myllmetjj.btag_TL = jj[ijj].btag_TL;
+            myllmetjj.btag_TM = jj[ijj].btag_TM;
+            myllmetjj.btag_TT = jj[ijj].btag_TT;
+            myllmetjj.DR_j_j = jj[ijj].DR_j_j;
+            myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
+            // blind copy of the llmet content
+            myllmetjj.ilep1 = ll[ill].ilep1;
+            myllmetjj.ilep2 = ll[ill].ilep2;
+            myllmetjj.isOS = ll[ill].isOS;
+            myllmetjj.isMuMu = ll[ill].isMuMu;
+            myllmetjj.isElEl = ll[ill].isElEl;
+            myllmetjj.isElMu = ll[ill].isElMu;
+            myllmetjj.isMuEl = ll[ill].isMuEl;
+            myllmetjj.isSF = ll[ill].isSF;
+            myllmetjj.id_LL = ll[ill].id_LL;
+            myllmetjj.id_LT = ll[ill].id_LT;
+            myllmetjj.id_TL = ll[ill].id_TL;
+            myllmetjj.id_TT = ll[ill].id_TT;
+            myllmetjj.DR_l_l = ll[ill].DR_l_l;
+            myllmetjj.DPhi_l_l = ll[ill].DPhi_l_l;
+            myllmetjj.ill = ill;
+            myllmetjj.imet = imet;
+            myllmetjj.isNoHF = met[imet].isNoHF;
+            myllmetjj.DPhi_ll_met = llmet[illmet].DPhi_ll_met;
+            myllmetjj.minDPhi_l_met = llmet[illmet].minDPhi_l_met; 
+            myllmetjj.maxDPhi_l_met = llmet[illmet].maxDPhi_l_met;
+            myllmetjj.MT = llmet[illmet].MT;
+            myllmetjj.MT_formula = llmet[illmet].MT_formula;
+            myllmetjj.projectedMet = llmet[illmet].projectedMet;
+            // content specific to HH::DijetMet
+            // NB: computed for the first time here, no intermediate jjmet collection
+            myllmetjj.DPhi_jj_met = ROOT::Math::VectorUtil::DeltaPhi(jj[ijj].p4, met[imet].p4);
+            myllmetjj.minDPhi_j_met = std::min(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4));
+            myllmetjj.minDPhi_j_met = std::max(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4));
+            // content specific to HH::DileptonMetDijet
+            myllmetjj.illmet = illmet;
             float DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2;
-            DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].first], leptons[ll[ill].idxs.first].p4);
-            DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].first], leptons[ll[ill].idxs.second].p4);
-            DR_j2l1 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].second], leptons[ll[ill].idxs.first].p4);
-            DR_j2l2 = ROOT::Math::VectorUtil::DeltaR(jets_p4[jj_idx[ijj].second], leptons[ll[ill].idxs.second].p4);
-            float maxDR = std::max({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
-            lljj_maxDR_lj.push_back(maxDR);
-            float minDR = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
-            lljj_minDR_lj.push_back(minDR);
-            lljjmet_p4.push_back(lljj + stdmet.p4);
-            lljjmet_DR.push_back(ROOT::Math::VectorUtil::DeltaR(lljj, stdmet.p4));
-            lljjmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4 + stdmet.p4, jj_p4[ijj]));
-            lljjmet_cosThetaStar_CS.push_back(getCosThetaStar_CS(ll[ill].p4 + stdmet.p4, jj_p4[ijj]));
+            DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, leptons[ilep1].p4);
+            DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, leptons[ilep2].p4);
+            DR_j2l1 = ROOT::Math::VectorUtil::DeltaR(jets[ijet2].p4, leptons[ilep1].p4);
+            DR_j2l2 = ROOT::Math::VectorUtil::DeltaR(jets[ijet2].p4, leptons[ilep2].p4);
+            myllmetjj.maxDR_l_j = std::max({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
+            myllmetjj.minDR_l_j = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
+            myllmetjj.DR_ll_jj = ROOT::Math::VectorUtil::DeltaR(ll[ill].p4, jj[ijj].p4);
+            myllmetjj.DPhi_ll_jj = ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj[ijj].p4);
+            myllmetjj.DR_llmet_jj = ROOT::Math::VectorUtil::DeltaR(llmet[illmet].p4, jj[ijj].p4);
+            myllmetjj.DPhi_llmet_jj = ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4);
+            myllmetjj.cosThetaStar_CS = getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4);
+            if (myllmetjj.minDR_l_j > m_minDR_l_j_Cut)
+                continue;
+            llmetjj.push_back(myllmetjj);
         }
     }
 
-    for (unsigned int ill = 0; ill < ll.size(); ill++)
+    // llmetjj maps: cross product of llmet and jj maps
+    for (unsigned int i = 0; i < map_llmetjj_id_iso_btagWP_pair.size(); i++)
+        map_llmetjj_id_iso_btagWP_pair[i].clear();
+
+    bitA = jetPair::Count;
+    bitB = bitA * btagWP::Count;
+    bitC = bitB * btagWP::Count;
+    int bitD = bitC * lepIso::Count;
+    int bitE = bitD * lepID::Count;
+    int bitF = bitE * lepIso::Count;
+
+    int bit0 = lepIso::Count;
+    int bit1 = bit0 * lepID::Count;
+    int bit2 = bit1 * lepIso::Count;
+
+    int bitX = jetPair::Count;
+    int bitY = bitX * btagWP::Count;
+    for (int il1id = 0; il1id < lepID::Count; il1id++)
     {
-        for (unsigned int ibb = 0; ibb < bb_p4.size(); ibb++)
+        for (int il1iso = 0; il1iso < lepIso::Count; il1iso++)
         {
-            LorentzVector llbb = ll[ill].p4 + bb_p4[ibb];
-            llbb_p4.push_back(llbb);
-            llbb_idx.push_back(std::make_pair(ill, ibb));
-            llbb_DR.push_back(ROOT::Math::VectorUtil::DeltaR(ll[ill].p4, jj_p4[ibb]));
-            llbb_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj_p4[ibb]));
-            float DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2;
-            DR_b1l1 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].first], leptons[ll[ill].idxs.first].p4);
-            DR_b1l2 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].first], leptons[ll[ill].idxs.second].p4);
-            DR_b2l1 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].second], leptons[ll[ill].idxs.first].p4);
-            DR_b2l2 = ROOT::Math::VectorUtil::DeltaR(bjets_p4[bb_idx[ibb].second], leptons[ll[ill].idxs.second].p4);
-            float maxDR = std::max({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
-            llbb_maxDR_lb.push_back(maxDR);
-            float minDR = std::min({DR_b1l1, DR_b1l2, DR_b2l1, DR_b2l2});
-            llbb_minDR_lb.push_back(minDR);
-            llbbmet_p4.push_back(llbb + stdmet.p4);
-            llbbmet_DR.push_back(ROOT::Math::VectorUtil::DeltaR(llbb, stdmet.p4));
-            llbbmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(llbb, stdmet.p4));
-            llbbmet_DPhi.push_back(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4 + stdmet.p4, bb_p4[ibb]));
-            llbbmet_cosThetaStar_CS.push_back(getCosThetaStar_CS(ll[ill].p4 + stdmet.p4, bb_p4[ibb]));
+            for (int il2id = 0; il2id < lepID::Count; il2id++)
+            {
+                for (int il2iso = 0; il2iso < lepIso::Count; il2iso++)
+                {
+                    for(int ibtag1 = 0; ibtag1 < btagWP::Count; ibtag1++)
+                    {
+                        for(int ibtag2 = 0; ibtag2 < btagWP::Count; ibtag2++)
+                        {
+                            for(int ipair = 0; ipair < jetPair::Count; ipair++)
+                            {
+                                int illmetjj = il1id * bitF
+                                    + il1iso * bitE
+                                    + il2id * bitD
+                                    + il2iso * bitC
+                                    + ibtag1 * bitB
+                                    + ibtag2 * bitA
+                                    + ipair;
+                                int illmet = il1id * bit2
+                                    + il1iso * bit1
+                                    + il2id * bit0
+                                    + il2iso;
+                                int ijj = ibtag1 * bitY
+                                    + ibtag2 * bitX
+                                    + ipair;
+                                for (unsigned int i = 0; i < llmetjj.size(); i++)
+                                {
+                                    if (std::find(map_llmet_id_iso[illmet].begin(), map_llmet_id_iso[illmet].end(), llmetjj[i].illmet) == map_llmet_id_iso[illmet].end())
+                                        continue;
+                                    if (std::find(map_jj_btagWP_pair[ijj].begin(), map_jj_btagWP_pair[ijj].end(), llmetjj[i].ijj) == map_jj_btagWP_pair[ijj].end())
+                                        continue;
+                                    map_llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
+    for (unsigned int i = 0; i < map_llmetjj_id_iso_btagWP_pair.size(); i++)
+        n_map_llmetjj_id_iso_btagWP_pair[i] = map_llmetjj_id_iso_btagWP_pair[i].size();
 
     // ***** ***** *****
     // Event variables
     // ***** ***** *****
-    nJets = jets_p4.size();
-    nBJets = bjets_p4.size();
+    nJets = jets.size();
+    nBJets = 0;
+    for (unsigned int ijet = 0; ijet < jets.size(); ijet++)
+        if (jets[ijet].btagM)
+            nBJets++;
     nMuons = muons.size();
     nElectrons = electrons.size();
     nLeptons = leptons.size();

@@ -7,8 +7,6 @@
 
 #include <Math/VectorUtil.h>
 
-//using namespace HH;
-
 class HHAnalyzer: public Framework::Analyzer {
     public:
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
@@ -18,7 +16,10 @@ class HHAnalyzer: public Framework::Analyzer {
             m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4);
             m_muonPtCut = config.getUntrackedParameter<double>("muonPtCut", 20);
 
-            m_electronIsoCut = config.getUntrackedParameter<double>("electronIsoCut", 0.11);
+            m_electronIsoCut_EB_Loose = config.getUntrackedParameter<double>("electronIsoCut_EB_Loose", 0.0893);
+            m_electronIsoCut_EE_Loose = config.getUntrackedParameter<double>("electronIsoCut_EE_Loose", 0.121);
+            m_electronIsoCut_EB_Tight = config.getUntrackedParameter<double>("electronIsoCut_EB_Tight", 0.0354);
+            m_electronIsoCut_EE_Tight = config.getUntrackedParameter<double>("electronIsoCut_EE_Tight", 0.0646);
             m_electronEtaCut = config.getUntrackedParameter<double>("electronEtaCut", 2.5);
             m_electronPtCut = config.getUntrackedParameter<double>("electronPtCut", 20);
             m_electron_loose_wp_name = config.getUntrackedParameter<std::string>("electrons_loose_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-loose");
@@ -27,7 +28,10 @@ class HHAnalyzer: public Framework::Analyzer {
             m_jetEtaCut = config.getUntrackedParameter<double>("jetEtaCut", 2.4);
             m_jetPtCut = config.getUntrackedParameter<double>("jetPtCut", 20);
             m_jet_bDiscrName = config.getUntrackedParameter<std::string>("discr_name", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
-            m_jet_bDiscrCut = config.getUntrackedParameter<double>("discr_cut", 0.89);
+            m_jet_bDiscrCut_loose = config.getUntrackedParameter<double>("discr_cut_loose", 0.605);
+            m_jet_bDiscrCut_medium = config.getUntrackedParameter<double>("discr_cut_medium", 0.89);
+            m_jet_bDiscrCut_tight = config.getUntrackedParameter<double>("discr_cut_tight", 0.97);
+            m_minDR_l_j_Cut = config.getUntrackedParameter<double>("minDR_l_j_Cut", 0.3);
         }
 
         // leptons and dileptons stuff
@@ -37,64 +41,29 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(ll, std::vector<HH::Dilepton>);
         BRANCH(met, std::vector<HH::Met>);
         BRANCH(llmet, std::vector<HH::DileptonMet>);
+        BRANCH(jets, std::vector<HH::Jet>);
+        BRANCH(jj, std::vector<HH::Dijet>);
+        BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
+
+        // maps
+        std::vector<std::vector<int>>& map_l_id_iso = tree["map_l_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& map_ll_id_iso = tree["map_ll_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
+        // FIXME: add enum over met?
+        std::vector<std::vector<int>>& map_llmet_id_iso = tree["map_llmet_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& map_j_btagWP = tree["map_j_btagWP"].write_with_init<std::vector<std::vector<int>>>(btagWP::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& map_jj_btagWP_pair = tree["map_jj_btagWP_pair"].write_with_init<std::vector<std::vector<int>>>(btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& map_llmetjj_id_iso_btagWP_pair = tree["map_llmetjj_id_iso_btagWP_pair"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
+        // associated multiplicities
+        std::vector<unsigned int>& n_map_l_id_iso = tree["n_map_l_id_iso"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count, 0);
+        std::vector<unsigned int>& n_map_ll_id_iso = tree["n_map_ll_id_iso"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, 0);
+        std::vector<unsigned int>& n_map_llmet_id_iso = tree["n_map_llmet_id_iso"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, 0);
+        std::vector<unsigned int>& n_map_j_btagWP = tree["n_map_j_btagWP"].write_with_init<std::vector<unsigned int>>(btagWP::Count, 0);
+        std::vector<unsigned int>& n_map_jj_btagWP_pair = tree["n_map_jj_btagWP_pair"].write_with_init<std::vector<unsigned int>>(btagWP::Count * btagWP::Count * jetPair::Count, 0);
+        std::vector<unsigned int>& n_map_llmetjj_id_iso_btagWP_pair = tree["n_map_llmetjj_id_iso_btagWP_pair"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * btagWP::Count * jetPair::Count, 0);
+
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
-
-        // jets and dijets stuff
-        BRANCH(jets_p4, std::vector<LorentzVector>);
-        BRANCH(jets_idx, std::vector<unsigned int>);
-
-        BRANCH(jj_p4, std::vector<LorentzVector>);
-        BRANCH(jj_idx, std::vector<std::pair<unsigned int, unsigned int>>);// NB : this index refers, so far, to the entries in jets_p4
-        BRANCH(jj_DR, std::vector<float>);
-        BRANCH(jj_DPhi, std::vector<float>);
-        BRANCH(jj_DPhi_met, std::vector<float>);
-        BRANCH(jj_minDPhi_jmet, std::vector<float>);
-        BRANCH(jj_maxDPhi_jmet, std::vector<float>);
-
-        BRANCH(h_dijet_idx, unsigned int);
-
-        BRANCH(bjets_p4, std::vector<LorentzVector>);
-        BRANCH(bjets_idx, std::vector<unsigned int>);
-
-        BRANCH(bb_p4, std::vector<LorentzVector>);
-        BRANCH(bb_idx, std::vector<std::pair<unsigned int, unsigned int>>); // NB : this index refers, so far, to the entries in bjets_p4
-        BRANCH(bb_DR, std::vector<float>);
-        BRANCH(bb_DPhi, std::vector<float>);
-        BRANCH(bb_DPhi_met, std::vector<float>);
-        BRANCH(bb_minDPhi_jmet, std::vector<float>);
-        BRANCH(bb_maxDPhi_jmet, std::vector<float>);
-
-        BRANCH(h_dibjet_idx, unsigned int);
-
-        // lljj and llbb stuff
-        BRANCH(lljj_p4, std::vector<LorentzVector>);
-        BRANCH(lljj_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to ll and jj indices
-        BRANCH(lljj_DR, std::vector<float>);
-        BRANCH(lljj_DPhi, std::vector<float>);
-        BRANCH(lljj_minDR_lj, std::vector<float>);
-        BRANCH(lljj_maxDR_lj, std::vector<float>);
-
-        BRANCH(llbb_p4, std::vector<LorentzVector>);
-        BRANCH(llbb_idx, std::vector<std::pair<unsigned int, unsigned int>>);  // refers to ll and bb indices
-        BRANCH(llbb_DR, std::vector<float>);
-        BRANCH(llbb_DPhi, std::vector<float>);
-        BRANCH(llbb_minDR_lb, std::vector<float>);
-        BRANCH(llbb_maxDR_lb, std::vector<float>);
-
-        // lljjmet and llbbmet stuff
-        // as there is only one met, all the following vectors are in sync with lljj vectors
-        // i.e. no need to store ll and jj indices
-        BRANCH(lljjmet_p4, std::vector<LorentzVector>);
-        BRANCH(lljjmet_DR, std::vector<float>);
-        BRANCH(lljjmet_DPhi, std::vector<float>);
-        BRANCH(lljjmet_cosThetaStar_CS, std::vector<float>);
-
-        BRANCH(llbbmet_p4, std::vector<LorentzVector>);
-        BRANCH(llbbmet_DR, std::vector<float>);
-        BRANCH(llbbmet_DPhi, std::vector<float>);
-        BRANCH(llbbmet_cosThetaStar_CS, std::vector<float>);
 
         // global event stuff (selected objects multiplicity)
         BRANCH(nJets, unsigned int);
@@ -103,14 +72,14 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nElectrons, unsigned int);
         BRANCH(nLeptons, unsigned int);
 
-        float m_electronIsoCut, m_electronEtaCut, m_electronPtCut;
+        float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_electronPtCut;
         float m_muonIsoCut, m_muonEtaCut, m_muonPtCut;
-        float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut;
+        float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut_loose, m_jet_bDiscrCut_medium, m_jet_bDiscrCut_tight;
+        float m_minDR_l_j_Cut;
         std::string m_jet_bDiscrName;
         std::string m_electron_loose_wp_name;
         std::string m_electron_tight_wp_name;
 
-        // utilities
         float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500)
         {// cos theta star angle in the Collins Soper frame
             LorentzVector p1, p2;
