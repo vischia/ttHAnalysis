@@ -26,7 +26,7 @@ namespace HH {
         std::pair<unsigned int, unsigned int> idxs; // indices in the collection of HH::Lepton
         unsigned int ilep1; // index in the corresponding framework collection
         unsigned int ilep2; // index in the corresponding framework collection
-        std::pair<int8_t, int8_t> hlt_idxs; // Stores indices of matched online objects. (-1,-1) if no match
+        std::pair<int8_t, int8_t> hlt_idxs = std::make_pair(-1,-1); // Stores indices of matched online objects. (-1,-1) if no match
         bool isOS; // Opposite Sign
         bool isMuMu;
         bool isElEl;
