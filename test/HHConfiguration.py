@@ -42,7 +42,9 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             discr_cut_loose =  cms.untracked.double(0.605),
             discr_cut_medium =  cms.untracked.double(0.89),
             discr_cut_tight =  cms.untracked.double(0.97),
-            minDR_l_j_Cut = cms.untracked.double(0.3)
+            minDR_l_j_Cut = cms.untracked.double(0.3),
+            hltDRCut = cms.untracked.double(9),
+            hltDPtCut = cms.untracked.double(1000)
             ),
         )
     ), 
@@ -70,7 +72,8 @@ if runOnData :
         )
 else : 
     process.source.fileNames = cms.untracked.vstring(
-        '/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/00000/0014DC94-DC5C-E511-82FB-7845C4FC39F5.root'
+        #'/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/00000/0014DC94-DC5C-E511-82FB-7845C4FC39F5.root'
+        'file:////storage/data/cms/store/user/brfranco/testFiles/TTTo2L2Nu_13TeV-powheg_RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2-v1.root'
         )
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
