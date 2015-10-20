@@ -14,6 +14,7 @@ namespace HH {
         int8_t hlt_idx = -1; // Index to the matched HLT object. -1 if no match. 
                              // Example : t->Draw("hh_leptons.p4.Pt() - hlt_object_p4[hh_leptons.hlt_idx].Pt()","hh_leptons.hlt_idx != -1","")
         bool hlt_already_tried_matching = false; // do the matching only once, even when the lepton is in several Dilepton
+        float hlt_DR_matchedObject = std::numeric_limits<float>::max();
         bool isMu;
         bool isEl;
         bool id_L; // Loose
@@ -62,9 +63,13 @@ namespace HH {
     struct Jet {
         LorentzVector p4;
         unsigned idx;
+        bool id_L;
+        bool id_T;
         bool btagL;
         bool btagM;
         bool btagT;
+        float CSV;
+        float JP;
     };
     struct Dijet {
         LorentzVector p4;
