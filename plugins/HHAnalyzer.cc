@@ -60,6 +60,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
         lepton.hlt_idx = index;
         lepton.hlt_already_tried_matching = true;
+        lepton.hlt_DR_matchedObject = min_dr;
         return index;
     };
 
