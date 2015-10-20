@@ -63,9 +63,13 @@ namespace HH {
     struct Jet {
         LorentzVector p4;
         unsigned idx;
+        bool id_L;
+        bool id_T;
         bool btagL;
         bool btagM;
         bool btagT;
+        float CSV;
+        float JP;
     };
     struct Dijet {
         LorentzVector p4;

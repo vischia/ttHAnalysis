@@ -367,6 +367,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             HH::Jet myjet;
             myjet.p4 = alljets.p4[ijet];
             myjet.idx = ijet;
+            myjet.id_L = alljets.passLooseID[ijet];
+            myjet.id_T = alljets.passTightID[ijet];
+            myjet.CSV = alljets.getBTagDiscriminant(ijet, "pfCombinedInclusiveSecondaryVertexV2BJetTags");
+            myjet.JP = alljets.getBTagDiscriminant(ijet, "pfJetProbabilityBJetTags");
             float mybtag = alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName);
             myjet.btagL = mybtag > m_jet_bDiscrCut_loose;
             myjet.btagM = mybtag > m_jet_bDiscrCut_medium;
