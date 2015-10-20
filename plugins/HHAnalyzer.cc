@@ -26,6 +26,44 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
     float mh = event.isRealData() ? 125.02 : 125.0;
 
+    // ***** ***** *****
+    // Trigger Matching
+    // ***** ***** *****
+
+    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
+
+    //Function that tries to match `lepton` with an online object, using a deltaR and a deltaPt cut   
+    //Returns the index inside the HLTProducer collection, or -1 if no match is found.
+    //(Taken from https://github.com/blinkseb/TTAnalysis/blob/c2a2d5de3e4281943c19c582afb452b8ef6457f1/plugins/TTAnalyzer.cc#L533)
+    auto matchOfflineLepton = [&](HH::Lepton& lepton) {
+
+        if (lepton.hlt_already_tried_matching)
+            return lepton.hlt_idx;
+        float min_dr = std::numeric_limits<float>::max();
+
+        int8_t index = -1;
+        for (size_t hlt_object = 0; hlt_object < hlt.object_p4.size(); hlt_object++) {
+
+            float dr = ROOT::Math::VectorUtil::DeltaR(lepton.p4, hlt.object_p4[hlt_object]);
+            float dpt_over_pt = std::abs(lepton.p4.Pt() - hlt.object_p4[hlt_object].Pt()) / lepton.p4.Pt();
+
+            if (dr > m_hltDRCut)
+                continue;
+
+            if (dpt_over_pt > m_hltDPtCut)
+                continue;
+
+            if (dr < min_dr) {
+                min_dr = dr;
+                index = hlt_object;
+            }
+        }
+        lepton.hlt_idx = index;
+        lepton.hlt_already_tried_matching = true;
+        return index;
+    };
+
+
     // ********** 
     // Leptons and dileptons
     // ********** 
@@ -132,6 +170,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.iso_TT = leptons[ilep1].iso_T && leptons[ilep2].iso_T;
             dilep.DR_l_l = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
             dilep.DPhi_l_l = ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4);
+            if (!hlt.paths.empty()) dilep.hlt_idxs = std::make_pair(matchOfflineLepton(leptons[ilep1]),matchOfflineLepton(leptons[ilep2]));
             ll.push_back(dilep); 
         }
     }
@@ -927,11 +966,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             gen_deltaR_muon_L2FSR.push_back(deltaR(p4, gen_L2FSR));
         }
     } // end of if !event.isRealData()
-
-    // ***** ***** *****
-    // Trigger
-    // ***** ***** *****
-    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
 
 }
 

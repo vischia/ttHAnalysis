@@ -1,5 +1,8 @@
 <lcgdict>
     <class name="HH::Lepton"/>
+    <class name="HH::Lepton">
+        <field name="hlt_already_tried_matching" transient="true"/>
+    </class>
     <class name="std::vector<HH::Lepton>"/>
     <class name="HH::Dilepton"/>
     <class name="std::vector<HH::Dilepton>"/>
@@ -14,4 +17,5 @@
     <class name="std::vector<HH::Dijet>"/>
     <class name="HH::DileptonMetDijet"/>
     <class name="std::vector<HH::DileptonMetDijet>"/>
+    <class name="std::pair<int8_t, int8_t>"/>
 </lcgdict>

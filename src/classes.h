@@ -18,5 +18,6 @@ namespace {
         std::vector<HH::Dijet> dummy13;
         HH::DileptonMetDijet dummy14;
         std::vector<HH::DileptonMetDijet> dummy15;
+        std::pair<int8_t, int8_t>  dummy16;
     };
 }

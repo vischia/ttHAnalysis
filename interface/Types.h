@@ -11,6 +11,9 @@ namespace HH {
         LorentzVector p4;
         int8_t charge;
         unsigned int idx;
+        int8_t hlt_idx = -1; // Index to the matched HLT object. -1 if no match. 
+                             // Example : t->Draw("hh_leptons.p4.Pt() - hlt_object_p4[hh_leptons.hlt_idx].Pt()","hh_leptons.hlt_idx != -1","")
+        bool hlt_already_tried_matching = false; // do the matching only once, even when the lepton is in several Dilepton
         bool isMu;
         bool isEl;
         bool id_L; // Loose
@@ -23,6 +26,7 @@ namespace HH {
         std::pair<unsigned int, unsigned int> idxs; // indices in the collection of HH::Lepton
         unsigned int ilep1; // index in the corresponding framework collection
         unsigned int ilep2; // index in the corresponding framework collection
+        std::pair<int8_t, int8_t> hlt_idxs = std::make_pair(-1,-1); // Stores indices of matched online objects. (-1,-1) if no match
         bool isOS; // Opposite Sign
         bool isMuMu;
         bool isElEl;

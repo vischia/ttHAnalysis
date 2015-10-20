@@ -32,6 +32,9 @@ class HHAnalyzer: public Framework::Analyzer {
             m_jet_bDiscrCut_medium = config.getUntrackedParameter<double>("discr_cut_medium", 0.89);
             m_jet_bDiscrCut_tight = config.getUntrackedParameter<double>("discr_cut_tight", 0.97);
             m_minDR_l_j_Cut = config.getUntrackedParameter<double>("minDR_l_j_Cut", 0.3);
+
+            m_hltDRCut = config.getUntrackedParameter<double>("hltDRCut", std::numeric_limits<float>::max());
+            m_hltDPtCut = config.getUntrackedParameter<double>("hltDPtCut", std::numeric_limits<float>::max());
         }
 
         // leptons and dileptons stuff
@@ -76,6 +79,7 @@ class HHAnalyzer: public Framework::Analyzer {
         float m_muonIsoCut, m_muonEtaCut, m_muonPtCut;
         float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut_loose, m_jet_bDiscrCut_medium, m_jet_bDiscrCut_tight;
         float m_minDR_l_j_Cut;
+        float m_hltDRCut, m_hltDPtCut;
         std::string m_jet_bDiscrName;
         std::string m_electron_loose_wp_name;
         std::string m_electron_tight_wp_name;
