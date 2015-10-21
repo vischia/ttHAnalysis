@@ -152,9 +152,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         {
             HH::Dilepton dilep;
             dilep.p4 = leptons[ilep1].p4 + leptons[ilep2].p4;
-            dilep.idxs = std::make_pair(ilep1, ilep2);
-            dilep.ilep1 = leptons[ilep1].idx;
-            dilep.ilep2 = leptons[ilep2].idx;
+            dilep.idxs = std::make_pair(leptons[ilep1].idx, leptons[ilep2].idx);
+            dilep.ilep1 = ilep1;
+            dilep.ilep2 = ilep2;
             dilep.isOS = leptons[ilep1].charge * leptons[ilep2].charge < 0;
             dilep.isMuMu = leptons[ilep1].isMu && leptons[ilep2].isMu;
             dilep.isElEl = leptons[ilep1].isEl && leptons[ilep2].isEl;
@@ -404,9 +404,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         {
             HH::Dijet myjj;
             myjj.p4 = jets[ijet1].p4 + jets[ijet2].p4;
-            myjj.idxs = std::make_pair(ijet1, ijet2);
-            myjj.ijet1 = jets[ijet1].idx;
-            myjj.ijet2 = jets[ijet2].idx;
+            myjj.idxs = std::make_pair(jets[ijet1].idx, jets[ijet2].idx);
+            myjj.ijet1 = ijet1;
+            myjj.ijet2 = ijet2;
             myjj.btag_LL = jets[ijet1].btagL && jets[ijet2].btagL;
             myjj.btag_LM = jets[ijet1].btagL && jets[ijet2].btagM;
             myjj.btag_LT = jets[ijet1].btagL && jets[ijet2].btagT;
