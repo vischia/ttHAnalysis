@@ -543,7 +543,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.DR_llmet_jj = ROOT::Math::VectorUtil::DeltaR(llmet[illmet].p4, jj[ijj].p4);
             myllmetjj.DPhi_llmet_jj = ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4);
             myllmetjj.cosThetaStar_CS = getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4);
-            if (myllmetjj.minDR_l_j > m_minDR_l_j_Cut)
+            if (myllmetjj.minDR_l_j < m_minDR_l_j_Cut)
                 continue;
             llmetjj.push_back(myllmetjj);
         }
