@@ -24,3 +24,5 @@ git remote add vidalm https://github.com/vidalm/HHAnalysis.git
 git remote add camillebeluffi https://github.com/camillebeluffi/HHAnalysis.git
 git remote add acaudron https://github.com/acaudron/HHAnalysis.git
 git remote add AlexandreMertens https://github.com/AlexandreMertens/HHAnalysis.git
+git remote add mdelcourt https://github.com/mdelcourt/HHAnalysis.git
+
