@@ -85,6 +85,8 @@ namespace HH {
         bool btag_TL;
         bool btag_TM;
         bool btag_TT;
+        float sumCSV;
+        float sumJP;
         float DR_j_j;
         float DPhi_j_j;
     };

@@ -416,6 +416,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.btag_TL = jets[ijet1].btagT && jets[ijet2].btagL;
             myjj.btag_TM = jets[ijet1].btagT && jets[ijet2].btagM;
             myjj.btag_TT = jets[ijet1].btagT && jets[ijet2].btagT;
+            myjj.sumCSV = jets[ijet1].CSV + jets[ijet2].CSV;
+            myjj.sumJP = jets[ijet1].JP + jets[ijet2].JP;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
             myjj.DPhi_j_j = ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4);
             jj.push_back(myjj);
@@ -457,6 +459,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             int iht = ibtag1 * bitB + ibtag2 * bitA + jetPair::ht;
             int jpt = ibtag1 * bitB + ibtag2 * bitA + jetPair::pt;
             int jmh = ibtag1 * bitB + ibtag2 * bitA + jetPair::mh;
+            int jcsv = ibtag1 * bitB + ibtag2 * bitA + jetPair::csv;
+            int jjp = ibtag1 * bitB + ibtag2 * bitA + jetPair::jp;
+            int jptOverM = ibtag1 * bitB + ibtag2 * bitA + jetPair::ptOverM;
             std::vector<int> tmp = map_jj_btagWP_pair[iht];
             // do the ptjj sorted maps
             std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].p4.Pt() > jj[b].p4.Pt();});
@@ -465,6 +470,17 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             tmp = map_jj_btagWP_pair[iht];
             std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return abs(jj[a].p4.M() - mh) < abs(jj[b].p4.M() - mh);});
             map_jj_btagWP_pair[jmh] = tmp;
+            // do the sum(btag) sorted maps
+            tmp = map_jj_btagWP_pair[iht];
+            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumCSV > jj[b].sumCSV;});
+            map_jj_btagWP_pair[jcsv] = tmp;
+            tmp = map_jj_btagWP_pair[iht];
+            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumJP > jj[b].sumJP;});
+            map_jj_btagWP_pair[jjp] = tmp;
+            // do the ptjj / mjj sorted maps
+            tmp = map_jj_btagWP_pair[iht];
+            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return (jj[a].p4.Pt() / jj[a].p4.M()) > (jj[b].p4.Pt() / jj[b].p4.M());});
+            map_jj_btagWP_pair[jptOverM] = tmp;
         }
     }
     for (unsigned int i = 0; i < map_jj_btagWP_pair.size(); i++)
@@ -498,6 +514,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.btag_TL = jj[ijj].btag_TL;
             myllmetjj.btag_TM = jj[ijj].btag_TM;
             myllmetjj.btag_TT = jj[ijj].btag_TT;
+            myllmetjj.sumCSV = jj[ijj].sumCSV;
+            myllmetjj.sumJP = jj[ijj].sumJP;
             myllmetjj.DR_j_j = jj[ijj].DR_j_j;
             myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
             // blind copy of the llmet content

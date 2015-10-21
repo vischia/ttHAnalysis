@@ -14,5 +14,5 @@ namespace btagWP {
 
 namespace jetPair {
 //    enum jetPair { mh, pt, ht, btag, ptOverM, mc, Count }; //FIXME: ultimately
-    enum jetPair { ht, mh, pt, Count };
+    enum jetPair { ht, mh, pt, csv, jp, ptOverM, Count };
 }
