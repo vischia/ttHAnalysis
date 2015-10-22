@@ -344,7 +344,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
     {
         map_llmet_id_iso[i].clear();
-        map_llmet_id_iso[i] = map_ll_id_iso[i];
+        for (unsigned int j = 0; j < map_ll_id_iso[i].size(); j++)
+        {
+            map_llmet_id_iso[i].push_back(map_ll_id_iso[i][j]);
+        }
     }
     for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
         n_map_llmet_id_iso[i] = map_llmet_id_iso[i].size();
@@ -549,6 +552,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.minDPhi_j_met = std::max(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4));
             // content specific to HH::DileptonMetDijet
             myllmetjj.illmet = illmet;
+            myllmetjj.ijj = ijj;
             float DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2;
             DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, leptons[ilep1].p4);
             DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, leptons[ilep2].p4);
@@ -567,6 +571,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
 
+    if (HHANADEBUG) {std::cout << "##### Now debugging the llmetjj maps" << std::endl;}
     // llmetjj maps: cross product of llmet and jj maps
     for (unsigned int i = 0; i < map_llmetjj_id_iso_btagWP_pair.size(); i++)
         map_llmetjj_id_iso_btagWP_pair[i].clear();
@@ -612,12 +617,34 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                                 int ijj = ibtag1 * bitY
                                     + ibtag2 * bitX
                                     + ipair;
+                                if (map_llmet_id_iso[illmet].size() == 0 || map_jj_btagWP_pair[ijj].size() == 0)
+                                {
+                                    continue;
+                                }
+                                if (HHANADEBUG)
+                                {
+                                    std::cout << "Now treating illmetjj= " << illmetjj << " (illmet, ijj)= (" << illmet << ", " << ijj << ")" << std::endl;
+                                    std::cout << "map_llmet_id_iso[" << illmet << "].size()= " << map_llmet_id_iso[illmet].size() << std::endl;
+                                    for (unsigned int j = 0; j < map_llmet_id_iso[illmet].size(); j++)
+                                        std::cout << "\tmap_llmet_id_iso[" << illmet << "][" << j << "]= " << map_llmet_id_iso[illmet][j] << std::endl;
+                                    std::cout << "map_jj_btagWP_pair[" << ijj << "].size()= " << map_jj_btagWP_pair[ijj].size() << std::endl;
+                                    for (unsigned int j = 0; j < map_jj_btagWP_pair[ijj].size(); j++)
+                                        std::cout << "\tmap_jj_btagWP_pair[" << ijj << "][" << j << "]= " << map_jj_btagWP_pair[ijj][j] << std::endl;
+                                }
                                 for (unsigned int i = 0; i < llmetjj.size(); i++)
                                 {
+                                    if (HHANADEBUG) {std::cout << "llmetjj[" << i << "].illmet= " << llmetjj[i].illmet << "\tllmetjj[" << i << "].ijj= " << llmetjj[i].ijj << std::endl;}
                                     if (std::find(map_llmet_id_iso[illmet].begin(), map_llmet_id_iso[illmet].end(), llmetjj[i].illmet) == map_llmet_id_iso[illmet].end())
+                                    {
+                                        if (HHANADEBUG) {std::cout << "llmetjj candidate #" << i << " is NOT in the llmet map, skipping event" << std::endl;}
                                         continue;
+                                    }
                                     if (std::find(map_jj_btagWP_pair[ijj].begin(), map_jj_btagWP_pair[ijj].end(), llmetjj[i].ijj) == map_jj_btagWP_pair[ijj].end())
+                                    {
+                                        if (HHANADEBUG) { std::cout << "llmetjj candidate #" << i << " is NOT in the jj map, skipping event" << std::endl;}
                                         continue;
+                                    }
+                                    if (HHANADEBUG) {std::cout << "llmetjj candidate selected, pushing it back" << std::endl;}
                                     map_llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
                                 }
                             }
