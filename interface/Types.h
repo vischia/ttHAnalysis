@@ -94,7 +94,6 @@ namespace HH {
         LorentzVector p4;
         unsigned int illmet; // index in the HH::DileptonMet collection
         unsigned int ijj; // index in the HH::Dijet collection
-        unsigned int imet; // index in the HH::Met collection
         float DPhi_jj_met;
         float minDPhi_j_met;
         float maxDPhi_j_met;

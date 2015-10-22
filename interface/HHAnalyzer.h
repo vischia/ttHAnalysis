@@ -55,14 +55,14 @@ class HHAnalyzer: public Framework::Analyzer {
         std::vector<std::vector<int>>& map_llmet_id_iso = tree["map_llmet_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
         std::vector<std::vector<int>>& map_j_btagWP = tree["map_j_btagWP"].write_with_init<std::vector<std::vector<int>>>(btagWP::Count, std::vector<int>(0));
         std::vector<std::vector<int>>& map_jj_btagWP_pair = tree["map_jj_btagWP_pair"].write_with_init<std::vector<std::vector<int>>>(btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
-        std::vector<std::vector<int>>& map_llmetjj_id_iso_btagWP_pair = tree["map_llmetjj_id_iso_btagWP_pair"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
+        std::vector<std::vector<int>>& map_llmetjj_id_iso_btagWP_pair = tree["map_llmetjj_id_iso_btagWP_pair"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
         // associated multiplicities
         std::vector<unsigned int>& n_map_l_id_iso = tree["n_map_l_id_iso"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count, 0);
         std::vector<unsigned int>& n_map_ll_id_iso = tree["n_map_ll_id_iso"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, 0);
         std::vector<unsigned int>& n_map_llmet_id_iso = tree["n_map_llmet_id_iso"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, 0);
         std::vector<unsigned int>& n_map_j_btagWP = tree["n_map_j_btagWP"].write_with_init<std::vector<unsigned int>>(btagWP::Count, 0);
         std::vector<unsigned int>& n_map_jj_btagWP_pair = tree["n_map_jj_btagWP_pair"].write_with_init<std::vector<unsigned int>>(btagWP::Count * btagWP::Count * jetPair::Count, 0);
-        std::vector<unsigned int>& n_map_llmetjj_id_iso_btagWP_pair = tree["n_map_llmetjj_id_iso_btagWP_pair"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * btagWP::Count * jetPair::Count, 0);
+        std::vector<unsigned int>& n_map_llmetjj_id_iso_btagWP_pair = tree["n_map_llmetjj_id_iso_btagWP_pair"].write_with_init<std::vector<unsigned int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * btagWP::Count * btagWP::Count * jetPair::Count, 0);
 
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
