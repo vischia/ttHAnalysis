@@ -24,9 +24,9 @@ namespace HH {
     };
     struct Dilepton {
         LorentzVector p4;
-        std::pair<unsigned int, unsigned int> idxs; // indices in the collection of HH::Lepton
-        unsigned int ilep1; // index in the corresponding framework collection
-        unsigned int ilep2; // index in the corresponding framework collection
+        std::pair<unsigned int, unsigned int> idxs; // indices in the corresponding framework collection
+        unsigned int ilep1; // index in the HH::Lepton collection
+        unsigned int ilep2; // index in the HH::Lepton collection
         std::pair<int8_t, int8_t> hlt_idxs = std::make_pair(-1,-1); // Stores indices of matched online objects. (-1,-1) if no match
         bool isOS; // Opposite Sign
         bool isMuMu;
@@ -73,8 +73,8 @@ namespace HH {
     };
     struct Dijet {
         LorentzVector p4;
-        std::pair<unsigned int, unsigned int> idxs; // indices in the collection of HH::Jet
-        unsigned int ijet1; // indices in the framework collection
+        std::pair<unsigned int, unsigned int> idxs; // indices in the framework collection
+        unsigned int ijet1; // indices in the HH::Jet collection
         unsigned int ijet2;
         bool btag_LL;
         bool btag_LM;
@@ -85,6 +85,8 @@ namespace HH {
         bool btag_TL;
         bool btag_TM;
         bool btag_TT;
+        float sumCSV;
+        float sumJP;
         float DR_j_j;
         float DPhi_j_j;
     };

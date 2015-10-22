@@ -152,9 +152,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         {
             HH::Dilepton dilep;
             dilep.p4 = leptons[ilep1].p4 + leptons[ilep2].p4;
-            dilep.idxs = std::make_pair(ilep1, ilep2);
-            dilep.ilep1 = leptons[ilep1].idx;
-            dilep.ilep2 = leptons[ilep2].idx;
+            dilep.idxs = std::make_pair(leptons[ilep1].idx, leptons[ilep2].idx);
+            dilep.ilep1 = ilep1;
+            dilep.ilep2 = ilep2;
             dilep.isOS = leptons[ilep1].charge * leptons[ilep2].charge < 0;
             dilep.isMuMu = leptons[ilep1].isMu && leptons[ilep2].isMu;
             dilep.isElEl = leptons[ilep1].isEl && leptons[ilep2].isEl;
@@ -404,9 +404,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         {
             HH::Dijet myjj;
             myjj.p4 = jets[ijet1].p4 + jets[ijet2].p4;
-            myjj.idxs = std::make_pair(ijet1, ijet2);
-            myjj.ijet1 = jets[ijet1].idx;
-            myjj.ijet2 = jets[ijet2].idx;
+            myjj.idxs = std::make_pair(jets[ijet1].idx, jets[ijet2].idx);
+            myjj.ijet1 = ijet1;
+            myjj.ijet2 = ijet2;
             myjj.btag_LL = jets[ijet1].btagL && jets[ijet2].btagL;
             myjj.btag_LM = jets[ijet1].btagL && jets[ijet2].btagM;
             myjj.btag_LT = jets[ijet1].btagL && jets[ijet2].btagT;
@@ -416,6 +416,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.btag_TL = jets[ijet1].btagT && jets[ijet2].btagL;
             myjj.btag_TM = jets[ijet1].btagT && jets[ijet2].btagM;
             myjj.btag_TT = jets[ijet1].btagT && jets[ijet2].btagT;
+            myjj.sumCSV = jets[ijet1].CSV + jets[ijet2].CSV;
+            myjj.sumJP = jets[ijet1].JP + jets[ijet2].JP;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
             myjj.DPhi_j_j = ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4);
             jj.push_back(myjj);
@@ -457,6 +459,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             int iht = ibtag1 * bitB + ibtag2 * bitA + jetPair::ht;
             int jpt = ibtag1 * bitB + ibtag2 * bitA + jetPair::pt;
             int jmh = ibtag1 * bitB + ibtag2 * bitA + jetPair::mh;
+            int jcsv = ibtag1 * bitB + ibtag2 * bitA + jetPair::csv;
+            int jjp = ibtag1 * bitB + ibtag2 * bitA + jetPair::jp;
+            int jptOverM = ibtag1 * bitB + ibtag2 * bitA + jetPair::ptOverM;
             std::vector<int> tmp = map_jj_btagWP_pair[iht];
             // do the ptjj sorted maps
             std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].p4.Pt() > jj[b].p4.Pt();});
@@ -465,6 +470,17 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             tmp = map_jj_btagWP_pair[iht];
             std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return abs(jj[a].p4.M() - mh) < abs(jj[b].p4.M() - mh);});
             map_jj_btagWP_pair[jmh] = tmp;
+            // do the sum(btag) sorted maps
+            tmp = map_jj_btagWP_pair[iht];
+            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumCSV > jj[b].sumCSV;});
+            map_jj_btagWP_pair[jcsv] = tmp;
+            tmp = map_jj_btagWP_pair[iht];
+            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumJP > jj[b].sumJP;});
+            map_jj_btagWP_pair[jjp] = tmp;
+            // do the ptjj / mjj sorted maps
+            tmp = map_jj_btagWP_pair[iht];
+            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return (jj[a].p4.Pt() / jj[a].p4.M()) > (jj[b].p4.Pt() / jj[b].p4.M());});
+            map_jj_btagWP_pair[jptOverM] = tmp;
         }
     }
     for (unsigned int i = 0; i < map_jj_btagWP_pair.size(); i++)
@@ -498,6 +514,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.btag_TL = jj[ijj].btag_TL;
             myllmetjj.btag_TM = jj[ijj].btag_TM;
             myllmetjj.btag_TT = jj[ijj].btag_TT;
+            myllmetjj.sumCSV = jj[ijj].sumCSV;
+            myllmetjj.sumJP = jj[ijj].sumJP;
             myllmetjj.DR_j_j = jj[ijj].DR_j_j;
             myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
             // blind copy of the llmet content
