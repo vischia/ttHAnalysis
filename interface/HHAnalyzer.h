@@ -12,7 +12,8 @@ class HHAnalyzer: public Framework::Analyzer {
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
             Analyzer(name, tree_, config)
         {
-            m_muonIsoCut = config.getUntrackedParameter<double>("muonIsoCut", 0.12);
+            m_muonLooseIsoCut = config.getUntrackedParameter<double>("muonTightIsoCut", 0.25);
+            m_muonTightIsoCut = config.getUntrackedParameter<double>("muonTightIsoCut", 0.15);
             m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4);
             m_muonPtCut = config.getUntrackedParameter<double>("muonPtCut", 20);
 
@@ -76,7 +77,7 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nLeptons, unsigned int);
 
         float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_electronPtCut;
-        float m_muonIsoCut, m_muonEtaCut, m_muonPtCut;
+        float m_muonLooseIsoCut, m_muonTightIsoCut, m_muonEtaCut, m_muonPtCut;
         float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut_loose, m_jet_bDiscrCut_medium, m_jet_bDiscrCut_tight;
         float m_minDR_l_j_Cut;
         float m_hltDRCut, m_hltDPtCut;
