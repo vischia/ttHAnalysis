@@ -12,7 +12,7 @@ class HHAnalyzer: public Framework::Analyzer {
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
             Analyzer(name, tree_, config)
         {
-            m_muonLooseIsoCut = config.getUntrackedParameter<double>("muonTightIsoCut", 0.25);
+            m_muonLooseIsoCut = config.getUntrackedParameter<double>("muonLooseIsoCut", 0.25);
             m_muonTightIsoCut = config.getUntrackedParameter<double>("muonTightIsoCut", 0.15);
             m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4);
             m_muonPtCut = config.getUntrackedParameter<double>("muonPtCut", 20);
