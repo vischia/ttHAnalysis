@@ -617,9 +617,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                                     + ibtag2 * bitX
                                     + ipair;
                                 if (map_llmet_id_iso[illmet].size() == 0 || map_jj_btagWP_pair[ijj].size() == 0)
-                                {
                                     continue;
-                                }
                                 if (HHANADEBUG)
                                 {
                                     std::cout << "Now treating illmetjj= " << illmetjj << " (illmet, ijj)= (" << illmet << ", " << ijj << ")" << std::endl;
@@ -630,21 +628,18 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                                     for (unsigned int j = 0; j < map_jj_btagWP_pair[ijj].size(); j++)
                                         std::cout << "\tmap_jj_btagWP_pair[" << ijj << "][" << j << "]= " << map_jj_btagWP_pair[ijj][j] << std::endl;
                                 }
-                                for (unsigned int i = 0; i < llmetjj.size(); i++)
+                                for (unsigned int jjj = 0; jjj < map_jj_btagWP_pair[ijj].size(); jjj++)
                                 {
-                                    if (HHANADEBUG) {std::cout << "llmetjj[" << i << "].illmet= " << llmetjj[i].illmet << "\tllmetjj[" << i << "].ijj= " << llmetjj[i].ijj << std::endl;}
-                                    if (std::find(map_llmet_id_iso[illmet].begin(), map_llmet_id_iso[illmet].end(), llmetjj[i].illmet) == map_llmet_id_iso[illmet].end())
+                                    for (unsigned int i = 0; i < llmetjj.size(); i++)
                                     {
-                                        if (HHANADEBUG) {std::cout << "llmetjj candidate #" << i << " is NOT in the llmet map, skipping event" << std::endl;}
-                                        continue;
+                                        if (std::find(map_llmet_id_iso[illmet].begin(), map_llmet_id_iso[illmet].end(), llmetjj[i].illmet) == map_llmet_id_iso[illmet].end())
+                                            continue;
+                                        if (llmetjj[i].ijj == map_jj_btagWP_pair[ijj][jjj])
+                                        {
+                                            map_llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
+                                            break;
+                                        }
                                     }
-                                    if (std::find(map_jj_btagWP_pair[ijj].begin(), map_jj_btagWP_pair[ijj].end(), llmetjj[i].ijj) == map_jj_btagWP_pair[ijj].end())
-                                    {
-                                        if (HHANADEBUG) { std::cout << "llmetjj candidate #" << i << " is NOT in the jj map, skipping event" << std::endl;}
-                                        continue;
-                                    }
-                                    if (HHANADEBUG) {std::cout << "llmetjj candidate selected, pushing it back" << std::endl;}
-                                    map_llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
                                 }
                             }
                         }
