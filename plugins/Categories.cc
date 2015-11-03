@@ -1,6 +1,7 @@
 #include <cp3_llbb/Framework/interface/MuonsProducer.h>
 #include <cp3_llbb/Framework/interface/ElectronsProducer.h>
 #include <cp3_llbb/Framework/interface/JetsProducer.h>
+#include <cp3_llbb/Framework/interface/HLTProducer.h>
 
 #include <cp3_llbb/HHAnalysis/interface/Categories.h>
 
@@ -55,6 +56,8 @@ void MuMuCategory::register_cuts(CutManager& manager) {
     manager.new_cut("ll_mass", "mll > 20");
     manager.new_cut("ll_mass_lowerZcut", "mll > 85");
     manager.new_cut("has_two_bJets", "nBJet >= 2");
+    manager.new_cut("fire_trigger_Mu17_Mu8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
+    manager.new_cut("fire_trigger_Mu17_TkMu8", "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
 };
 
 void MuMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -68,6 +71,12 @@ void MuMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     }
     const unsigned int nBJets = getNBJets(analyzers);
     if (nBJets >=2) manager.pass_cut("has_two_bJets"); 
+    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
+    for (const std::string& path: hlt.paths) 
+    {
+        if (path.find("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") != std::string::npos) manager.pass_cut("fire_trigger_Mu17_Mu8");
+        if (path.find("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") != std::string::npos) manager.pass_cut("fire_trigger_Mu17_MuTk8");
+    }
 }
 
 // ***** ***** *****
@@ -94,6 +103,7 @@ void ElElCategory::register_cuts(CutManager& manager) {
     manager.new_cut("ll_mass", "mll > 20");
     manager.new_cut("ll_mass_lowerZcut", "mll > 85");
     manager.new_cut("has_two_bJets", "nBJet >= 2");
+    manager.new_cut("fire_trigger_Ele17_Ele12", "HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ*");
 };
 
 void ElElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -107,6 +117,11 @@ void ElElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     }
     const unsigned int nBJets = getNBJets(analyzers);
     if (nBJets >=2) manager.pass_cut("has_two_bJets"); 
+    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
+    for (const std::string& path: hlt.paths) 
+    {
+        if (path.find("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") != std::string::npos) manager.pass_cut("fire_trigger_Ele17_Ele12");
+    }
 }
 
 // ***** ***** *****
@@ -134,6 +149,7 @@ void ElMuCategory::register_cuts(CutManager& manager) {
     manager.new_cut("ll_mass", "mll > 20");
     manager.new_cut("ll_mass_lowerZcut", "mll > 85");
     manager.new_cut("has_two_bJets", "nBJet >= 2");
+    manager.new_cut("fire_trigger_Mu8_Ele17", "HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_*");
 };
 
 void ElMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -147,6 +163,11 @@ void ElMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     }
     const unsigned int nBJets = getNBJets(analyzers);
     if (nBJets >=2) manager.pass_cut("has_two_bJets"); 
+    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
+    for (const std::string& path: hlt.paths) 
+    {
+        if (path.find("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v1") != std::string::npos) manager.pass_cut("fire_trigger_Mu8_Ele17");
+    }
 }
 
 // ***** ***** *****
@@ -174,6 +195,7 @@ void MuElCategory::register_cuts(CutManager& manager) {
     manager.new_cut("ll_mass", "mll > 20");
     manager.new_cut("ll_mass_lowerZcut", "mll > 85");
     manager.new_cut("has_two_bJets", "nBJet >= 2");
+    manager.new_cut("fire_trigger_Mu17_Ele12", "HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_*");
 };
 
 void MuElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -187,5 +209,10 @@ void MuElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     }
     const unsigned int nBJets = getNBJets(analyzers);
     if (nBJets >=2) manager.pass_cut("has_two_bJets"); 
+    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
+    for (const std::string& path: hlt.paths) 
+    {
+        if (path.find("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") != std::string::npos) manager.pass_cut("fire_trigger_Mu17_Ele12");
+    }
 }
 

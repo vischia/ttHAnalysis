@@ -31,7 +31,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** ***** *****
 
     const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
-
     //Function that tries to match `lepton` with an online object, using a deltaR and a deltaPt cut   
     //Returns the index inside the HLTProducer collection, or -1 if no match is found.
     //(Taken from https://github.com/blinkseb/TTAnalysis/blob/c2a2d5de3e4281943c19c582afb452b8ef6457f1/plugins/TTAnalyzer.cc#L533)
@@ -40,6 +39,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         if (lepton.hlt_already_tried_matching)
             return lepton.hlt_idx;
         float min_dr = std::numeric_limits<float>::max();
+        float final_dpt_over_pt = std::numeric_limits<float>::max();
 
         int8_t index = -1;
         for (size_t hlt_object = 0; hlt_object < hlt.object_p4.size(); hlt_object++) {
@@ -55,12 +55,14 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
             if (dr < min_dr) {
                 min_dr = dr;
+                final_dpt_over_pt = dpt_over_pt;
                 index = hlt_object;
             }
         }
         lepton.hlt_idx = index;
         lepton.hlt_already_tried_matching = true;
         lepton.hlt_DR_matchedObject = min_dr;
+        lepton.hlt_DPtOverPt_matchedObject = final_dpt_over_pt;
         return index;
     };
 

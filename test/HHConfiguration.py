@@ -44,8 +44,8 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             discr_cut_medium =  cms.untracked.double(0.89),
             discr_cut_tight =  cms.untracked.double(0.97),
             minDR_l_j_Cut = cms.untracked.double(0.3),
-            hltDRCut = cms.untracked.double(9),
-            hltDPtCut = cms.untracked.double(1000)  # cut will be DPt/Pt < hltDPtCut
+            hltDRCut = cms.untracked.double(0.3),
+            hltDPtCut = cms.untracked.double(0.5)  # cut will be DPt/Pt < hltDPtCut
             ),
         )
     ), 

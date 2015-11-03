@@ -15,6 +15,7 @@ namespace HH {
                              // Example : t->Draw("hh_leptons.p4.Pt() - hlt_object_p4[hh_leptons.hlt_idx].Pt()","hh_leptons.hlt_idx != -1","")
         bool hlt_already_tried_matching = false; // do the matching only once, even when the lepton is in several Dilepton
         float hlt_DR_matchedObject = std::numeric_limits<float>::max();
+        float hlt_DPtOverPt_matchedObject = std::numeric_limits<float>::max();
         bool isMu;
         bool isEl;
         bool id_L; // Loose
