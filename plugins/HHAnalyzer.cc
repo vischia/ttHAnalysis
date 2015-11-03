@@ -169,7 +169,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.iso_TL = leptons[ilep1].iso_T && leptons[ilep2].iso_L;
             dilep.iso_TT = leptons[ilep1].iso_T && leptons[ilep2].iso_T;
             dilep.DR_l_l = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
-            dilep.DPhi_l_l = ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4);
+            dilep.DPhi_l_l = std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4));
             if (!hlt.paths.empty()) dilep.hlt_idxs = std::make_pair(matchOfflineLepton(leptons[ilep1]),matchOfflineLepton(leptons[ilep2]));
             ll.push_back(dilep); 
         }
@@ -324,11 +324,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.ill = ill;
             myllmet.imet = imet;
             myllmet.isNoHF = met[imet].isNoHF;
-            float dphi = ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, met[imet].p4);
+            float dphi = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, met[imet].p4));
             myllmet.DPhi_ll_met = dphi;
-            float mindphi = std::min(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.first].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.second].p4, met[imet].p4));
+            float mindphi = std::min(std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.first].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.second].p4, met[imet].p4)));
             myllmet.minDPhi_l_met = mindphi; 
-            float maxdphi = std::max(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.first].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.second].p4, met[imet].p4));
+            float maxdphi = std::max(std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.first].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.second].p4, met[imet].p4)));
             myllmet.maxDPhi_l_met = maxdphi;
             myllmet.MT = (ll[ill].p4 + met[imet].p4).M();
             myllmet.MT_formula = std::sqrt(2 * ll[ill].p4.Pt() * met[imet].p4.Pt() * (1-std::cos(dphi)));
@@ -421,7 +421,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.sumCSV = jets[ijet1].CSV + jets[ijet2].CSV;
             myjj.sumJP = jets[ijet1].JP + jets[ijet2].JP;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
-            myjj.DPhi_j_j = ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4);
+            myjj.DPhi_j_j = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4));
             jj.push_back(myjj);
             // fill dijet map
             map_jj_btagWP_pair[btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
@@ -546,9 +546,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.projectedMet = llmet[illmet].projectedMet;
             // content specific to HH::DijetMet
             // NB: computed for the first time here, no intermediate jjmet collection
-            myllmetjj.DPhi_jj_met = ROOT::Math::VectorUtil::DeltaPhi(jj[ijj].p4, met[imet].p4);
-            myllmetjj.minDPhi_j_met = std::min(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4));
-            myllmetjj.minDPhi_j_met = std::max(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4), ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4));
+            myllmetjj.DPhi_jj_met = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jj[ijj].p4, met[imet].p4));
+            myllmetjj.minDPhi_j_met = std::min(std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
+            myllmetjj.minDPhi_j_met = std::max(std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
             // content specific to HH::DileptonMetDijet
             myllmetjj.illmet = illmet;
             myllmetjj.ijj = ijj;
@@ -560,9 +560,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.maxDR_l_j = std::max({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
             myllmetjj.minDR_l_j = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
             myllmetjj.DR_ll_jj = ROOT::Math::VectorUtil::DeltaR(ll[ill].p4, jj[ijj].p4);
-            myllmetjj.DPhi_ll_jj = ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj[ijj].p4);
+            myllmetjj.DPhi_ll_jj = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj[ijj].p4));
             myllmetjj.DR_llmet_jj = ROOT::Math::VectorUtil::DeltaR(llmet[illmet].p4, jj[ijj].p4);
-            myllmetjj.DPhi_llmet_jj = ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4);
+            myllmetjj.DPhi_llmet_jj = std::abs(ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4));
             myllmetjj.cosThetaStar_CS = getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4);
             if (myllmetjj.minDR_l_j < m_minDR_l_j_Cut)
                 continue;
