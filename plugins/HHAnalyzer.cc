@@ -503,7 +503,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             unsigned int ilep1 = ll[ill].ilep1;
             unsigned int ilep2 = ll[ill].ilep2;
             HH::DileptonMetDijet myllmetjj;
-            myllmetjj.p4 = jj[ijj].p4 + met[imet].p4;
+            myllmetjj.p4 = ll[ill].p4 + jj[ijj].p4 + met[imet].p4;
+            myllmetjj.p4_lljj = leptons[ilep1].p4 + leptons[ilep2].p4 + jets[ijet1].p4 + jets[ijet2].p4;
             // blind copy of the jj content
             myllmetjj.ijet1 = jj[ijj].ijet1;
             myllmetjj.ijet2 = jj[ijj].ijet2;
@@ -548,7 +549,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             // NB: computed for the first time here, no intermediate jjmet collection
             myllmetjj.DPhi_jj_met = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jj[ijj].p4, met[imet].p4));
             myllmetjj.minDPhi_j_met = std::min(std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
-            myllmetjj.minDPhi_j_met = std::max(std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
+            myllmetjj.maxDPhi_j_met = std::max(std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
             // content specific to HH::DileptonMetDijet
             myllmetjj.illmet = illmet;
             myllmetjj.ijj = ijj;
