@@ -93,7 +93,15 @@ namespace HH {
     };
     struct DileptonMetDijet : public DileptonMet, public Dijet {
         LorentzVector p4;
-        LorentzVector p4_lljj;
+        LorentzVector lep1_p4;
+        LorentzVector lep2_p4;
+        LorentzVector jet1_p4;
+        LorentzVector jet2_p4;
+        LorentzVector pfmet_p4;
+        LorentzVector nohfmet_p4;
+        LorentzVector ll_p4;
+        LorentzVector jj_p4;
+        LorentzVector lljj_p4;
         int illmet; // index in the HH::DileptonMet collection
         int ijj; // index in the HH::Dijet collection
         float DPhi_jj_met;

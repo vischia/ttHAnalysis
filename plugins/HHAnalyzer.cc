@@ -290,8 +290,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Adding MET(s)
     // ***** 
-    // FIXME: add back standard MET
-//    const METProducer& stdmet = producers.get<METProducer>("met");
+    // FIXME: add back standard MET 
+    // CAREFULL WHEN FIXING THE ABOVE : for now stdmet is added as llmetjj.pfmet, nohf_met is added as llmetjj.nohf_met 
+    const METProducer& stdmet = producers.get<METProducer>("met");
 //    met.push_back({stdmet.p4, false});
     const METProducer& nohf_met = producers.get<METProducer>("nohf_met");
     met.push_back({nohf_met.p4, true});
@@ -506,7 +507,15 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             unsigned int ilep2 = ll[ill].ilep2;
             HH::DileptonMetDijet myllmetjj;
             myllmetjj.p4 = ll[ill].p4 + jj[ijj].p4 + met[imet].p4;
-            myllmetjj.p4_lljj = leptons[ilep1].p4 + leptons[ilep2].p4 + jets[ijet1].p4 + jets[ijet2].p4;
+            myllmetjj.lep1_p4 = leptons[ilep1].p4;
+            myllmetjj.lep2_p4 = leptons[ilep2].p4;
+            myllmetjj.jet1_p4 = leptons[ijet1].p4;
+            myllmetjj.jet2_p4 = leptons[ijet2].p4;
+            myllmetjj.pfmet_p4 = stdmet.p4;
+            myllmetjj.nohfmet_p4 = nohf_met.p4;
+            myllmetjj.ll_p4 = ll[ill].p4;
+            myllmetjj.jj_p4 = jj[ijj].p4;
+            myllmetjj.lljj_p4 = leptons[ilep1].p4 + leptons[ilep2].p4 + jets[ijet1].p4 + jets[ijet2].p4;
             // blind copy of the jj content
             myllmetjj.ijet1 = jj[ijj].ijet1;
             myllmetjj.ijet2 = jj[ijj].ijet2;
@@ -566,7 +575,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.DPhi_ll_jj = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj[ijj].p4));
             myllmetjj.DR_llmet_jj = ROOT::Math::VectorUtil::DeltaR(llmet[illmet].p4, jj[ijj].p4);
             myllmetjj.DPhi_llmet_jj = std::abs(ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4));
-            myllmetjj.cosThetaStar_CS = getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4);
+            myllmetjj.cosThetaStar_CS = std::abs(getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4));
             if (myllmetjj.minDR_l_j < m_minDR_l_j_Cut)
                 continue;
             llmetjj.push_back(myllmetjj);
