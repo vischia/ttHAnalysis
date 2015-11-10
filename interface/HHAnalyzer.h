@@ -15,14 +15,16 @@ class HHAnalyzer: public Framework::Analyzer {
             m_muonLooseIsoCut = config.getUntrackedParameter<double>("muonLooseIsoCut", 0.25);
             m_muonTightIsoCut = config.getUntrackedParameter<double>("muonTightIsoCut", 0.15);
             m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4);
-            m_muonPtCut = config.getUntrackedParameter<double>("muonPtCut", 20);
+            m_leadingMuonPtCut = config.getUntrackedParameter<double>("leadingMuonPtCut", 20);
+            m_subleadingMuonPtCut = config.getUntrackedParameter<double>("subleadingMuonPtCut", 10);
 
             m_electronIsoCut_EB_Loose = config.getUntrackedParameter<double>("electronIsoCut_EB_Loose", 0.0893);
             m_electronIsoCut_EE_Loose = config.getUntrackedParameter<double>("electronIsoCut_EE_Loose", 0.121);
             m_electronIsoCut_EB_Tight = config.getUntrackedParameter<double>("electronIsoCut_EB_Tight", 0.0354);
             m_electronIsoCut_EE_Tight = config.getUntrackedParameter<double>("electronIsoCut_EE_Tight", 0.0646);
             m_electronEtaCut = config.getUntrackedParameter<double>("electronEtaCut", 2.5);
-            m_electronPtCut = config.getUntrackedParameter<double>("electronPtCut", 20);
+            m_leadingElectronPtCut = config.getUntrackedParameter<double>("leadingElectronPtCut", 20);
+            m_subleadingElectronPtCut = config.getUntrackedParameter<double>("subleadingElectronPtCut", 15);
             m_electron_loose_wp_name = config.getUntrackedParameter<std::string>("electrons_loose_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-loose");
             m_electron_tight_wp_name = config.getUntrackedParameter<std::string>("electrons_tight_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-tight");
 
@@ -76,8 +78,8 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nElectrons, unsigned int);
         BRANCH(nLeptons, unsigned int);
 
-        float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_electronPtCut;
-        float m_muonLooseIsoCut, m_muonTightIsoCut, m_muonEtaCut, m_muonPtCut;
+        float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_leadingElectronPtCut, m_subleadingElectronPtCut;
+        float m_muonLooseIsoCut, m_muonTightIsoCut, m_muonEtaCut, m_leadingMuonPtCut, m_subleadingMuonPtCut;
         float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut_loose, m_jet_bDiscrCut_medium, m_jet_bDiscrCut_tight;
         float m_minDR_l_j_Cut;
         float m_hltDRCut, m_hltDPtCut;

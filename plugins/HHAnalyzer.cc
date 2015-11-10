@@ -79,7 +79,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Fill lepton structures
     for (unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
-        if (allelectrons.p4[ielectron].Pt() > m_electronPtCut
+        if (allelectrons.p4[ielectron].Pt() > m_subleadingElectronPtCut
             && abs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
         {
             electrons.push_back(ielectron);
@@ -91,7 +91,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.isEl = true;
             ele.id_L = allelectrons.ids[ielectron][m_electron_loose_wp_name];
             ele.id_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
-            // FIXME: distinguish EB / EE cases
             ele.iso_L = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Loose) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Loose);
             ele.iso_T = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Tight) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Tight);
             leptons.push_back(ele);
@@ -100,7 +99,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
     for (unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
-        if (allmuons.p4[imuon].Pt() > m_muonPtCut 
+        if (allmuons.p4[imuon].Pt() > m_subleadingMuonPtCut
             && abs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
         {
             muons.push_back(imuon);
@@ -149,8 +148,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
            
     for (unsigned int ilep1 = 0; ilep1 < leptons.size(); ilep1++)
     {
+        if ((leptons[ilep1].isMu && leptons[ilep1].p4.Pt() < m_leadingMuonPtCut) || (leptons[ilep1].isEl && leptons[ilep1].p4.Pt() < m_leadingElectronPtCut)) continue;
+
         for (unsigned int ilep2 = ilep1+1; ilep2 < leptons.size(); ilep2++)
         {
+            if ( (leptons[ilep2].isMu && leptons[ilep2].p4.Pt() < m_subleadingMuonPtCut) || (leptons[ilep2].isEl && leptons[ilep2].p4.Pt() < m_subleadingElectronPtCut)) continue;
             HH::Dilepton dilep;
             dilep.p4 = leptons[ilep1].p4 + leptons[ilep2].p4;
             dilep.idxs = std::make_pair(leptons[ilep1].idx, leptons[ilep2].idx);
