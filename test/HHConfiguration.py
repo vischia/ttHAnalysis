@@ -29,11 +29,13 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             electronIsoCut_EE_Loose = cms.untracked.double(0.121),
             electronIsoCut_EB_Tight = cms.untracked.double(0.0354),
             electronIsoCut_EE_Tight = cms.untracked.double(0.0646),
-            electronPtCut = cms.untracked.double(20),
+            leadingElectronPtCut = cms.untracked.double(20),
+            subleadingElectronPtCut = cms.untracked.double(15),
             electronEtaCut = cms.untracked.double(2.5),
             muonLooseIsoCut = cms.untracked.double(.25), # https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO 
             muonTightIsoCut = cms.untracked.double(.15), # https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO 
-            muonPtCut = cms.untracked.double(20),
+            leadingMuonPtCut = cms.untracked.double(20),
+            subleadingMuonPtCut = cms.untracked.double(10),
             muonEtaCut = cms.untracked.double(2.4),
             electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
             electrons_tight_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
@@ -44,8 +46,8 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             discr_cut_medium =  cms.untracked.double(0.89),
             discr_cut_tight =  cms.untracked.double(0.97),
             minDR_l_j_Cut = cms.untracked.double(0.3),
-            hltDRCut = cms.untracked.double(9),
-            hltDPtCut = cms.untracked.double(1000)  # cut will be DPt/Pt < hltDPtCut
+            hltDRCut = cms.untracked.double(0.3),
+            hltDPtCut = cms.untracked.double(0.5)  # cut will be DPt/Pt < hltDPtCut
             ),
         )
     ), 
