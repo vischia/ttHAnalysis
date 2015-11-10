@@ -97,8 +97,7 @@ namespace HH {
         LorentzVector lep2_p4;
         LorentzVector jet1_p4;
         LorentzVector jet2_p4;
-        LorentzVector pfmet_p4;
-        LorentzVector nohfmet_p4;
+        LorentzVector met_p4;
         LorentzVector ll_p4;
         LorentzVector jj_p4;
         LorentzVector lljj_p4;

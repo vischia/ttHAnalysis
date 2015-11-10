@@ -166,7 +166,7 @@ void ElMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
     const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
     for (const std::string& path: hlt.paths) 
     {
-        if (path.find("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v1") != std::string::npos) manager.pass_cut("fire_trigger_Mu8_Ele17");
+        if (path.find("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") != std::string::npos) manager.pass_cut("fire_trigger_Mu8_Ele17");
     }
 }
 

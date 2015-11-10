@@ -152,7 +152,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
         for (unsigned int ilep2 = ilep1+1; ilep2 < leptons.size(); ilep2++)
         {
-            if ( (leptons[ilep2].isMu && leptons[ilep2].p4.Pt() < m_subleadingMuonPtCut) || (leptons[ilep2].isEl && leptons[ilep2].p4.Pt() < m_subleadingElectronPtCut)) continue;
             HH::Dilepton dilep;
             dilep.p4 = leptons[ilep1].p4 + leptons[ilep2].p4;
             dilep.idxs = std::make_pair(leptons[ilep1].idx, leptons[ilep2].idx);
@@ -292,14 +291,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Adding MET(s)
     // ***** 
-    // FIXME: add back standard MET 
-    // CAREFULL WHEN FIXING THE ABOVE : for now stdmet is added as llmetjj.pfmet, nohf_met is added as llmetjj.nohf_met 
-    const METProducer& stdmet = producers.get<METProducer>("met");
-//    met.push_back({stdmet.p4, false});
-    const METProducer& nohf_met = producers.get<METProducer>("nohf_met");
-    met.push_back({nohf_met.p4, true});
-//    const METProducer& nohf_met = producers.get<METProducer>("puppimet");
-// TODO: adding puppi met will require changing the Met AND DileptonMet struct
+    const METProducer& pf_met = producers.get<METProducer>("met");
+    met.push_back({pf_met.p4, false});
+    const METProducer& nohf_met = producers.get<METProducer>("nohf_met");  // so that nohfmet is available in the tree
+    //met.push_back({nohf_met.p4, true});
+    //const METProducer& puppi_met = producers.get<METProducer>("puppimet");
+    // TODO: adding puppi met will require changing the Met AND DileptonMet struct
 
     for (unsigned int imet = 0; imet < met.size(); imet++)
     {
@@ -343,7 +340,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     }
 
     // Fill dilepton+met maps
-    // FIXME: for now only store nohf_met
+    // FIXME: for now only store pf_met
     // so ll and llmet structures are in sync
     for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
     {
@@ -494,7 +491,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         n_map_jj_btagWP_pair[i] = map_jj_btagWP_pair[i].size();
  
     // ********** 
-    // lljj, llbb, +stdmet
+    // lljj, llbb, +pf_met
     // ********** 
     llmetjj.clear();
     for (unsigned int illmet = 0; illmet < llmet.size(); illmet++)
@@ -513,8 +510,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.lep2_p4 = leptons[ilep2].p4;
             myllmetjj.jet1_p4 = leptons[ijet1].p4;
             myllmetjj.jet2_p4 = leptons[ijet2].p4;
-            myllmetjj.pfmet_p4 = stdmet.p4;
-            myllmetjj.nohfmet_p4 = nohf_met.p4;
+            myllmetjj.met_p4 = pf_met.p4;
             myllmetjj.ll_p4 = ll[ill].p4;
             myllmetjj.jj_p4 = jj[ijj].p4;
             myllmetjj.lljj_p4 = leptons[ilep1].p4 + leptons[ilep2].p4 + jets[ijet1].p4 + jets[ijet2].p4;
