@@ -316,6 +316,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.id_LT = ll[ill].id_LT;
             myllmet.id_TL = ll[ill].id_TL;
             myllmet.id_TT = ll[ill].id_TT;
+            myllmet.iso_LL = ll[ill].iso_LL;
+            myllmet.iso_LT = ll[ill].iso_LT;
+            myllmet.iso_TL = ll[ill].iso_TL;
+            myllmet.iso_TT = ll[ill].iso_TT;
             myllmet.DR_l_l = ll[ill].DR_l_l;
             myllmet.DPhi_l_l = ll[ill].DPhi_l_l;
             // content specific to HH:DileptonMet
@@ -622,6 +626,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.id_LT = ll[ill].id_LT;
             myllmetjj.id_TL = ll[ill].id_TL;
             myllmetjj.id_TT = ll[ill].id_TT;
+            myllmetjj.iso_LL = ll[ill].iso_LL;
+            myllmetjj.iso_LT = ll[ill].iso_LT;
+            myllmetjj.iso_TL = ll[ill].iso_TL;
+            myllmetjj.iso_TT = ll[ill].iso_TT;
             myllmetjj.DR_l_l = ll[ill].DR_l_l;
             myllmetjj.DPhi_l_l = ll[ill].DPhi_l_l;
             myllmetjj.ill = ill;
