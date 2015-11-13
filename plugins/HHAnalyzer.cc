@@ -770,9 +770,20 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         + btagWP::M * bitB
         + btagWP::M * bitA
         + jetPair::ht;
-    llmetjj_allTight_btagM.clear();
+    llmetjj_allTight_btagM_ht.clear();
     for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
-        llmetjj_allTight_btagM.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+        llmetjj_allTight_btagM_ht.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+
+    icustom = icustom - jetPair::ht + jetPair::pt;
+    llmetjj_allTight_btagM_pt.clear();
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
+        llmetjj_allTight_btagM_pt.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+
+    icustom = icustom - jetPair::pt + jetPair::csv;
+    llmetjj_allTight_btagM_csv.clear();
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
+        llmetjj_allTight_btagM_csv.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+
     // llmetjj_allTight_nobtag
     icustom = lepID::T * bitH
         + lepIso::T  * bitG
@@ -783,9 +794,20 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         + btagWP::no * bitB
         + btagWP::no * bitA
         + jetPair::ht;
-     llmetjj_allTight_nobtag.clear();
+    llmetjj_allTight_nobtag_ht.clear();
     for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
-         llmetjj_allTight_nobtag.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+         llmetjj_allTight_nobtag_ht.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+
+    icustom = icustom - jetPair::ht + jetPair::pt;
+    llmetjj_allTight_nobtag_pt.clear();
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
+        llmetjj_allTight_nobtag_pt.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+
+    icustom = icustom - jetPair::pt + jetPair::csv;
+    llmetjj_allTight_nobtag_csv.clear();
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
+        llmetjj_allTight_nobtag_csv.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+
 
     // ***** ***** *****
     // Event variables

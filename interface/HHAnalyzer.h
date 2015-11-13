@@ -51,10 +51,13 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(jj, std::vector<HH::Dijet>);
         BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
         // some few custom candidates, for convenience
-        // sorted by ht
         // allTight= tight lepton ID, tight lepton Iso, Tight jet ID
-        BRANCH(llmetjj_allTight_btagM, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_allTight_nobtag, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_btagM_ht, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_btagM_pt, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_btagM_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_nobtag_ht, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_nobtag_pt, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_nobtag_csv, std::vector<HH::DileptonMetDijet>);
 
         // maps
         std::vector<std::vector<int>>& map_l_id_iso = tree["map_l_id_iso"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count, std::vector<int>(0));
