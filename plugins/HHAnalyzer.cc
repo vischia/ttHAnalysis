@@ -751,6 +751,33 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             }
         }
     }
+    // Adding some few custom candidates, for convenience
+    // llmetjj_allTight_btagM
+    int icustom = lepID::T * bitH
+        + lepIso::T * bitG
+        + lepID::T  * bitF
+        + lepIso::T * bitE
+        + jetID::T  * bitD
+        + jetID::T  * bitC
+        + btagWP::M * bitB
+        + btagWP::M * bitA
+        + jetPair::ht;
+    llmetjj_allTight_btagM.clear();
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
+        llmetjj_allTight_btagM.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+    // llmetjj_allTight_nobtag
+    icustom = lepID::T * bitH
+        + lepIso::T  * bitG
+        + lepID::T   * bitF
+        + lepIso::T  * bitE
+        + jetID::T   * bitD
+        + jetID::T   * bitC
+        + btagWP::no * bitB
+        + btagWP::no * bitA
+        + jetPair::ht;
+     llmetjj_allTight_nobtag.clear();
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
+         llmetjj_allTight_nobtag.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
 
     // ***** ***** *****
     // Event variables
