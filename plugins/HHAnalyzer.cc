@@ -373,20 +373,21 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.idx = ijet;
             myjet.id_L = alljets.passLooseID[ijet];
             myjet.id_T = alljets.passTightID[ijet];
+            myjet.id_TLV = alljets.passTightLeptonVetoID[ijet];
             myjet.CSV = alljets.getBTagDiscriminant(ijet, "pfCombinedInclusiveSecondaryVertexV2BJetTags");
             myjet.JP = alljets.getBTagDiscriminant(ijet, "pfJetProbabilityBJetTags");
             float mybtag = alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName);
-            myjet.btagL = mybtag > m_jet_bDiscrCut_loose;
-            myjet.btagM = mybtag > m_jet_bDiscrCut_medium;
-            myjet.btagT = mybtag > m_jet_bDiscrCut_tight;
+            myjet.btag_L = mybtag > m_jet_bDiscrCut_loose;
+            myjet.btag_M = mybtag > m_jet_bDiscrCut_medium;
+            myjet.btag_T = mybtag > m_jet_bDiscrCut_tight;
             jets.push_back(myjet);
             // filling maps
             map_j_btagWP[btagWP::no].push_back(count);
-            if (myjet.btagL)
+            if (myjet.btag_L)
                 map_j_btagWP[btagWP::L].push_back(count);
-            if (myjet.btagM)
+            if (myjet.btag_M)
                 map_j_btagWP[btagWP::M].push_back(count);
-            if (myjet.btagT)
+            if (myjet.btag_T)
                 map_j_btagWP[btagWP::T].push_back(count);
             count++;
         }
@@ -400,6 +401,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         map_jj_btagWP_pair[ijj].clear();
     bitA = jetPair::Count;
     bitB = bitA * btagWP::Count;
+    bitC = bitB * btagWP::Count;
+    int bitD = bitC * jetID::Count;
     count = 0;
 
     for (unsigned int ijet1 = 0; ijet1 < jets.size(); ijet1++)
@@ -411,44 +414,122 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.idxs = std::make_pair(jets[ijet1].idx, jets[ijet2].idx);
             myjj.ijet1 = ijet1;
             myjj.ijet2 = ijet2;
-            myjj.btag_LL = jets[ijet1].btagL && jets[ijet2].btagL;
-            myjj.btag_LM = jets[ijet1].btagL && jets[ijet2].btagM;
-            myjj.btag_LT = jets[ijet1].btagL && jets[ijet2].btagT;
-            myjj.btag_ML = jets[ijet1].btagM && jets[ijet2].btagL;
-            myjj.btag_MM = jets[ijet1].btagM && jets[ijet2].btagM;
-            myjj.btag_MT = jets[ijet1].btagM && jets[ijet2].btagT;
-            myjj.btag_TL = jets[ijet1].btagT && jets[ijet2].btagL;
-            myjj.btag_TM = jets[ijet1].btagT && jets[ijet2].btagM;
-            myjj.btag_TT = jets[ijet1].btagT && jets[ijet2].btagT;
+            myjj.btag_LL = jets[ijet1].btag_L && jets[ijet2].btag_L;
+            myjj.btag_LM = jets[ijet1].btag_L && jets[ijet2].btag_M;
+            myjj.btag_LT = jets[ijet1].btag_L && jets[ijet2].btag_T;
+            myjj.btag_ML = jets[ijet1].btag_M && jets[ijet2].btag_L;
+            myjj.btag_MM = jets[ijet1].btag_M && jets[ijet2].btag_M;
+            myjj.btag_MT = jets[ijet1].btag_M && jets[ijet2].btag_T;
+            myjj.btag_TL = jets[ijet1].btag_T && jets[ijet2].btag_L;
+            myjj.btag_TM = jets[ijet1].btag_T && jets[ijet2].btag_M;
+            myjj.btag_TT = jets[ijet1].btag_T && jets[ijet2].btag_T;
             myjj.sumCSV = jets[ijet1].CSV + jets[ijet2].CSV;
             myjj.sumJP = jets[ijet1].JP + jets[ijet2].JP;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
             myjj.DPhi_j_j = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4));
             jj.push_back(myjj);
             // fill dijet map
-            map_jj_btagWP_pair[btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
-            if (jets[ijet1].btagL)
-                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
-            if (jets[ijet2].btagL)
-                map_jj_btagWP_pair[btagWP::no * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+            map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
+            if (jets[ijet1].btag_L)
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
+            if (jets[ijet2].btag_L)
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LL)
-                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LM)
-                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LT)
-                map_jj_btagWP_pair[btagWP::L * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_ML)
-                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_MM)
-                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_MT)
-                map_jj_btagWP_pair[btagWP::M * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TL)
-                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TM)
-                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TT)
-                map_jj_btagWP_pair[btagWP::T * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+            if (jets[ijet1].id_L)
+            {
+                for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                    for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                        if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                map_jj_btagWP_pair[jetID::L  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_L)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::L  * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_T)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::L  * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_TLV)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::L  * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+            }
+            if (jets[ijet1].id_T)
+            {
+                for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                    for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                        if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                map_jj_btagWP_pair[jetID::T  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_L)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::T  * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_T)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::T  * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_TLV)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::T  * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+            }
+            if (jets[ijet1].id_TLV)
+            {
+                for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                    for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                        if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                            if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                map_jj_btagWP_pair[jetID::TLV * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_L)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::TLV * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_T)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::TLV * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                if (jets[ijet2].id_TLV)
+                    for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
+                        for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
+                            if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj_btagWP_pair[jetID::TLV * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+            }
             count++;
         }
     }
@@ -456,35 +537,43 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Fill the rest of dijet combinatoric maps
     bitA = jetPair::Count;
     bitB = bitA * btagWP::Count;
-    for (int ibtag1 = 0; ibtag1 < btagWP::Count; ibtag1++)
+    bitC = bitB * btagWP::Count;
+    bitD = bitC * jetID::Count;
+    for (int ijetid1 = 0; ijetid1 < jetID::Count; ijetid1++)
     {
-        for (int ibtag2 = 0; ibtag2 < btagWP::Count; ibtag2++)
+        for (int ijetid2 = 0; ijetid2 < jetID::Count; ijetid2++)
         {
-            int iht = ibtag1 * bitB + ibtag2 * bitA + jetPair::ht;
-            int jpt = ibtag1 * bitB + ibtag2 * bitA + jetPair::pt;
-            int jmh = ibtag1 * bitB + ibtag2 * bitA + jetPair::mh;
-            int jcsv = ibtag1 * bitB + ibtag2 * bitA + jetPair::csv;
-            int jjp = ibtag1 * bitB + ibtag2 * bitA + jetPair::jp;
-            int jptOverM = ibtag1 * bitB + ibtag2 * bitA + jetPair::ptOverM;
-            std::vector<int> tmp = map_jj_btagWP_pair[iht];
-            // do the ptjj sorted maps
-            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].p4.Pt() > jj[b].p4.Pt();});
-            map_jj_btagWP_pair[jpt] = tmp;
-            // do the closest to mh sorted maps
-            tmp = map_jj_btagWP_pair[iht];
-            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return abs(jj[a].p4.M() - mh) < abs(jj[b].p4.M() - mh);});
-            map_jj_btagWP_pair[jmh] = tmp;
-            // do the sum(btag) sorted maps
-            tmp = map_jj_btagWP_pair[iht];
-            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumCSV > jj[b].sumCSV;});
-            map_jj_btagWP_pair[jcsv] = tmp;
-            tmp = map_jj_btagWP_pair[iht];
-            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumJP > jj[b].sumJP;});
-            map_jj_btagWP_pair[jjp] = tmp;
-            // do the ptjj / mjj sorted maps
-            tmp = map_jj_btagWP_pair[iht];
-            std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return (jj[a].p4.Pt() / jj[a].p4.M()) > (jj[b].p4.Pt() / jj[b].p4.M());});
-            map_jj_btagWP_pair[jptOverM] = tmp;
+            for (int ibtag1 = 0; ibtag1 < btagWP::Count; ibtag1++)
+            {
+                for (int ibtag2 = 0; ibtag2 < btagWP::Count; ibtag2++)
+                {
+                    int iht = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::ht;
+                    int jpt = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::pt;
+                    int jmh = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::mh;
+                    int jcsv = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::csv;
+                    int jjp = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::jp;
+                    int jptOverM = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::ptOverM;
+                    std::vector<int> tmp = map_jj_btagWP_pair[iht];
+                    // do the ptjj sorted maps
+                    std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].p4.Pt() > jj[b].p4.Pt();});
+                    map_jj_btagWP_pair[jpt] = tmp;
+                    // do the closest to mh sorted maps
+                    tmp = map_jj_btagWP_pair[iht];
+                    std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return abs(jj[a].p4.M() - mh) < abs(jj[b].p4.M() - mh);});
+                    map_jj_btagWP_pair[jmh] = tmp;
+                    // do the sum(btag) sorted maps
+                    tmp = map_jj_btagWP_pair[iht];
+                    std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumCSV > jj[b].sumCSV;});
+                    map_jj_btagWP_pair[jcsv] = tmp;
+                    tmp = map_jj_btagWP_pair[iht];
+                    std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumJP > jj[b].sumJP;});
+                    map_jj_btagWP_pair[jjp] = tmp;
+                    // do the ptjj / mjj sorted maps
+                    tmp = map_jj_btagWP_pair[iht];
+                    std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return (jj[a].p4.Pt() / jj[a].p4.M()) > (jj[b].p4.Pt() / jj[b].p4.M());});
+                    map_jj_btagWP_pair[jptOverM] = tmp;
+                }
+            }
         }
     }
     for (unsigned int i = 0; i < map_jj_btagWP_pair.size(); i++)
@@ -588,9 +677,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     bitA = jetPair::Count;
     bitB = bitA * btagWP::Count;
     bitC = bitB * btagWP::Count;
-    int bitD = bitC * lepIso::Count;
-    int bitE = bitD * lepID::Count;
+    bitD = bitC * jetID::Count;
+    int bitE = bitD * jetID::Count;
     int bitF = bitE * lepIso::Count;
+    int bitG = bitF * lepID::Count;
+    int bitH = bitG * lepIso::Count;
 
     int bit0 = lepIso::Count;
     int bit1 = bit0 * lepID::Count;
@@ -598,6 +689,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
     int bitX = jetPair::Count;
     int bitY = bitX * btagWP::Count;
+    int bitZ = bitY * btagWP::Count;
+    int bitXX = bitZ * jetID::Count;
     for (int il1id = 0; il1id < lepID::Count; il1id++)
     {
         for (int il1iso = 0; il1iso < lepIso::Count; il1iso++)
@@ -606,48 +699,58 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             {
                 for (int il2iso = 0; il2iso < lepIso::Count; il2iso++)
                 {
-                    for(int ibtag1 = 0; ibtag1 < btagWP::Count; ibtag1++)
+                    for (int ij1id = 0; ij1id < jetID::Count; ij1id++)
                     {
-                        for(int ibtag2 = 0; ibtag2 < btagWP::Count; ibtag2++)
+                        for (int ij2id = 0; ij2id < jetID::Count; ij2id++)
                         {
-                            for(int ipair = 0; ipair < jetPair::Count; ipair++)
+                            for(int ibtag1 = 0; ibtag1 < btagWP::Count; ibtag1++)
                             {
-                                int illmetjj = il1id * bitF
-                                    + il1iso * bitE
-                                    + il2id * bitD
-                                    + il2iso * bitC
-                                    + ibtag1 * bitB
-                                    + ibtag2 * bitA
-                                    + ipair;
-                                int illmet = il1id * bit2
-                                    + il1iso * bit1
-                                    + il2id * bit0
-                                    + il2iso;
-                                int ijj = ibtag1 * bitY
-                                    + ibtag2 * bitX
-                                    + ipair;
-                                if (map_llmet_id_iso[illmet].size() == 0 || map_jj_btagWP_pair[ijj].size() == 0)
-                                    continue;
-                                if (HHANADEBUG)
+                                for(int ibtag2 = 0; ibtag2 < btagWP::Count; ibtag2++)
                                 {
-                                    std::cout << "Now treating illmetjj= " << illmetjj << " (illmet, ijj)= (" << illmet << ", " << ijj << ")" << std::endl;
-                                    std::cout << "map_llmet_id_iso[" << illmet << "].size()= " << map_llmet_id_iso[illmet].size() << std::endl;
-                                    for (unsigned int j = 0; j < map_llmet_id_iso[illmet].size(); j++)
-                                        std::cout << "\tmap_llmet_id_iso[" << illmet << "][" << j << "]= " << map_llmet_id_iso[illmet][j] << std::endl;
-                                    std::cout << "map_jj_btagWP_pair[" << ijj << "].size()= " << map_jj_btagWP_pair[ijj].size() << std::endl;
-                                    for (unsigned int j = 0; j < map_jj_btagWP_pair[ijj].size(); j++)
-                                        std::cout << "\tmap_jj_btagWP_pair[" << ijj << "][" << j << "]= " << map_jj_btagWP_pair[ijj][j] << std::endl;
-                                }
-                                for (unsigned int jjj = 0; jjj < map_jj_btagWP_pair[ijj].size(); jjj++)
-                                {
-                                    for (unsigned int i = 0; i < llmetjj.size(); i++)
+                                    for(int ipair = 0; ipair < jetPair::Count; ipair++)
                                     {
-                                        if (std::find(map_llmet_id_iso[illmet].begin(), map_llmet_id_iso[illmet].end(), llmetjj[i].illmet) == map_llmet_id_iso[illmet].end())
+                                        int illmetjj = il1id * bitH
+                                            + il1iso * bitG
+                                            + il2id * bitF
+                                            + il2iso * bitE
+                                            + ij1id * bitD
+                                            + ij2id * bitC
+                                            + ibtag1 * bitB
+                                            + ibtag2 * bitA
+                                            + ipair;
+                                        int illmet = il1id * bit2
+                                            + il1iso * bit1
+                                            + il2id * bit0
+                                            + il2iso;
+                                        int ijj = ij1id * bitXX
+                                            + ij2id * bitZ
+                                            + ibtag1 * bitY
+                                            + ibtag2 * bitX
+                                            + ipair;
+                                        if (map_llmet_id_iso[illmet].size() == 0 || map_jj_btagWP_pair[ijj].size() == 0)
                                             continue;
-                                        if (llmetjj[i].ijj == map_jj_btagWP_pair[ijj][jjj])
+                                        if (HHANADEBUG)
                                         {
-                                            map_llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
-                                            break;
+                                            std::cout << "Now treating illmetjj= " << illmetjj << " (illmet, ijj)= (" << illmet << ", " << ijj << ")" << std::endl;
+                                            std::cout << "map_llmet_id_iso[" << illmet << "].size()= " << map_llmet_id_iso[illmet].size() << std::endl;
+                                            for (unsigned int j = 0; j < map_llmet_id_iso[illmet].size(); j++)
+                                                std::cout << "\tmap_llmet_id_iso[" << illmet << "][" << j << "]= " << map_llmet_id_iso[illmet][j] << std::endl;
+                                            std::cout << "map_jj_btagWP_pair[" << ijj << "].size()= " << map_jj_btagWP_pair[ijj].size() << std::endl;
+                                            for (unsigned int j = 0; j < map_jj_btagWP_pair[ijj].size(); j++)
+                                                std::cout << "\tmap_jj_btagWP_pair[" << ijj << "][" << j << "]= " << map_jj_btagWP_pair[ijj][j] << std::endl;
+                                        }
+                                        for (unsigned int jjj = 0; jjj < map_jj_btagWP_pair[ijj].size(); jjj++)
+                                        {
+                                            for (unsigned int i = 0; i < llmetjj.size(); i++)
+                                            {
+                                                if (std::find(map_llmet_id_iso[illmet].begin(), map_llmet_id_iso[illmet].end(), llmetjj[i].illmet) == map_llmet_id_iso[illmet].end())
+                                                    continue;
+                                                if (llmetjj[i].ijj == map_jj_btagWP_pair[ijj][jjj])
+                                                {
+                                                    map_llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
+                                                    break;
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -667,7 +770,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     nJets = jets.size();
     nBJets = 0;
     for (unsigned int ijet = 0; ijet < jets.size(); ijet++)
-        if (jets[ijet].btagM)
+        if (jets[ijet].btag_M)
             nBJets++;
     nMuons = muons.size();
     nElectrons = electrons.size();

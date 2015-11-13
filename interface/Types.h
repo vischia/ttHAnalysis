@@ -66,9 +66,10 @@ namespace HH {
         int idx;
         bool id_L;
         bool id_T;
-        bool btagL;
-        bool btagM;
-        bool btagT;
+        bool id_TLV;
+        bool btag_L;
+        bool btag_M;
+        bool btag_T;
         float CSV;
         float JP;
     };

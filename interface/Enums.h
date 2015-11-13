@@ -8,6 +8,10 @@ namespace lepIso {
     enum lepIso {no, L, T, Count };
 }
 
+namespace jetID {
+    enum jetID {L, T, TLV, no, Count };
+}
+
 namespace btagWP {
     enum btagWP { no, L, M, T, Count };
 }
