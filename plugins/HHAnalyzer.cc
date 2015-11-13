@@ -143,8 +143,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                 map_l_id_iso[lepID::T * lepIso::Count + lepIso::T].push_back(ilepton);
         }
     }
-    for (unsigned int i = 0; i < map_l_id_iso.size(); i++)
-        n_map_l_id_iso[i] = map_l_id_iso[i].size();
            
     for (unsigned int ilep1 = 0; ilep1 < leptons.size(); ilep1++)
     {
@@ -285,8 +283,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             }
         }
     }
-    for (unsigned int i = 0; i < map_ll_id_iso.size(); i++)
-        n_map_ll_id_iso[i] = map_ll_id_iso[i].size();
 
     // ***** 
     // Adding MET(s)
@@ -350,8 +346,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             map_llmet_id_iso[i].push_back(map_ll_id_iso[i][j]);
         }
     }
-    for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
-        n_map_llmet_id_iso[i] = map_llmet_id_iso[i].size();
 
     // ***** 
     // Jets and dijets 
@@ -392,8 +386,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             count++;
         }
     }
-    for (unsigned int i = 0; i < map_j_btagWP.size(); i++)
-        n_map_j_btagWP[i] = map_j_btagWP[i].size();
 
     jj.clear();
     // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
@@ -576,8 +568,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             }
         }
     }
-    for (unsigned int i = 0; i < map_jj_btagWP_pair.size(); i++)
-        n_map_jj_btagWP_pair[i] = map_jj_btagWP_pair[i].size();
  
     // ********** 
     // lljj, llbb, +pf_met
@@ -761,8 +751,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             }
         }
     }
-    for (unsigned int i = 0; i < map_llmetjj_id_iso_btagWP_pair.size(); i++)
-        n_map_llmetjj_id_iso_btagWP_pair[i] = map_llmetjj_id_iso_btagWP_pair[i].size();
 
     // ***** ***** *****
     // Event variables
