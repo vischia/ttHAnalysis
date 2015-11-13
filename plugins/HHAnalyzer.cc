@@ -111,8 +111,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             mu.isEl = false;
             mu.id_L = allmuons.isLoose[imuon];
             mu.id_T = allmuons.isTight[imuon];
-            mu.iso_L = allmuons.relativeIsoR04_withEA[imuon] < m_muonLooseIsoCut;
-            mu.iso_T = allmuons.relativeIsoR04_withEA[imuon] < m_muonTightIsoCut;
+            mu.iso_L = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonLooseIsoCut;
+            mu.iso_T = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonTightIsoCut;
             leptons.push_back(mu);
         }
     }//end of loop on muons
