@@ -9,6 +9,7 @@ typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiE4D<float>> LorentzVector;
 namespace HH {
     struct Lepton {
         LorentzVector p4;
+        LorentzVector gen_p4;
         int8_t charge;
         int idx;
         int8_t hlt_idx = -1; // Index to the matched HLT object. -1 if no match. 
@@ -22,9 +23,11 @@ namespace HH {
         bool id_T; // Tight
         bool iso_L; // Loose
         bool iso_T; // Tight
+        bool gen_matched;
     };
     struct Dilepton {
         LorentzVector p4;
+        LorentzVector gen_p4;
         std::pair<int, int> idxs; // indices in the corresponding framework collection
         int ilep1; // index in the HH::Lepton collection
         int ilep2; // index in the HH::Lepton collection
@@ -45,13 +48,17 @@ namespace HH {
         bool iso_TT;
         float DR_l_l;
         float DPhi_l_l;
+        bool gen_matched;
     };
     struct Met {
         LorentzVector p4;
+        LorentzVector gen_p4;
         bool isNoHF;
+        bool gen_matched;
     };
     struct DileptonMet : public Dilepton, public Met {
         LorentzVector p4;
+        LorentzVector gen_p4;
         int ill; // index in the HH::Dilepton collection
         int imet; // index in the HH::Met collection
         float DPhi_ll_met;
@@ -60,9 +67,11 @@ namespace HH {
         float MT;
         float MT_formula;
         float projectedMet;
+        bool gen_matched;
     };
     struct Jet {
         LorentzVector p4;
+        LorentzVector gen_p4;
         int idx;
         bool id_L;
         bool id_T;
@@ -72,9 +81,13 @@ namespace HH {
         bool btag_T;
         float CSV;
         float JP;
+        bool gen_isMatched_bParton;
+        bool gen_isMatched_bHadron;
+        bool gen_matched;
     };
     struct Dijet {
         LorentzVector p4;
+        LorentzVector gen_p4;
         std::pair<int, int> idxs; // indices in the framework collection
         int ijet1; // indices in the HH::Jet collection
         int ijet2;
@@ -91,6 +104,9 @@ namespace HH {
         float sumJP;
         float DR_j_j;
         float DPhi_j_j;
+        bool gen_isMatched_bbPartons;
+        bool gen_isMatched_bbHadrons;
+        bool gen_matched;
     };
     struct DileptonMetDijet : public DileptonMet, public Dijet {
         LorentzVector p4;
@@ -102,6 +118,15 @@ namespace HH {
         LorentzVector ll_p4;
         LorentzVector jj_p4;
         LorentzVector lljj_p4;
+        LorentzVector gen_p4;
+        LorentzVector gen_lep1_p4;
+        LorentzVector gen_lep2_p4;
+        LorentzVector gen_jet1_p4;
+        LorentzVector gen_jet2_p4;
+        LorentzVector gen_met_p4;
+        LorentzVector gen_ll_p4;
+        LorentzVector gen_jj_p4;
+        LorentzVector gen_lljj_p4;
         int illmet; // index in the HH::DileptonMet collection
         int ijj; // index in the HH::Dijet collection
         float DPhi_jj_met;
@@ -114,6 +139,7 @@ namespace HH {
         float DR_llmet_jj;
         float DPhi_llmet_jj;
         float cosThetaStar_CS;
+        bool gen_matched;
     };
 }
 

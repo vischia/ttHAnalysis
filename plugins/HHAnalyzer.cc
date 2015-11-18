@@ -25,6 +25,7 @@ void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::Paramet
 void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const AnalyzersManager&, const CategoryManager&) {
 
     float mh = event.isRealData() ? 125.02 : 125.0;
+    LorentzVector null_p4(0., 0., 0., 0.);
 
     // ***** ***** *****
     // Trigger Matching
@@ -93,6 +94,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.id_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
             ele.iso_L = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Loose) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Loose);
             ele.iso_T = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Tight) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Tight);
+            ele.gen_matched = allelectrons.matched[ielectron];
+            ele.gen_p4 = ele.gen_matched ? allelectrons.gen_p4[ielectron] : null_p4;
             leptons.push_back(ele);
         }
     }//end of loop on electrons
@@ -113,6 +116,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             mu.id_T = allmuons.isTight[imuon];
             mu.iso_L = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonLooseIsoCut;
             mu.iso_T = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonTightIsoCut;
+            mu.gen_matched = allmuons.matched[imuon];
+            mu.gen_p4 = mu.gen_matched ? allmuons.gen_p4[imuon] : null_p4;
             leptons.push_back(mu);
         }
     }//end of loop on muons
@@ -172,6 +177,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.DR_l_l = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
             dilep.DPhi_l_l = std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4));
             if (!hlt.paths.empty()) dilep.hlt_idxs = std::make_pair(matchOfflineLepton(leptons[ilep1]),matchOfflineLepton(leptons[ilep2]));
+            dilep.gen_matched = leptons[ilep1].gen_matched && leptons[ilep2].gen_matched;
+            dilep.gen_p4 = dilep.gen_matched ? leptons[ilep1].gen_p4 + leptons[ilep2].gen_p4 : null_p4;
             ll.push_back(dilep); 
         }
     }
@@ -288,9 +295,26 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Adding MET(s)
     // ***** 
     const METProducer& pf_met = producers.get<METProducer>("met");
-    met.push_back({pf_met.p4, false});
+    HH::Met mymet;
+    mymet.p4 = pf_met.p4;
+    mymet.isNoHF = false;
+    mymet.gen_matched = false;
+    mymet.gen_p4 = null_p4;
+    if (!event.isRealData())
+    { // genMet is not constructed in the framework, so construct it manually out of the neutrinos hanging around the mc particles
+        const GenParticlesProducer& gp = producers.get<GenParticlesProducer>("gen_particles");
+        for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
+            std::bitset<15> flags (gp.pruned_status_flags[ip]);
+            if (!flags.test(13)) continue; // take the last copies
+            if (abs(gp.pruned_pdg_id[ip]) == 12 || abs(gp.pruned_pdg_id[ip]) == 14 || abs(gp.pruned_pdg_id[ip]) == 16)
+            {
+                mymet.gen_matched = true;
+                mymet.gen_p4 += gp.pruned_p4[ip];
+            }
+        } 
+    }
+    met.push_back(mymet);
     const METProducer& nohf_met = producers.get<METProducer>("nohf_met");  // so that nohfmet is available in the tree
-    //met.push_back({nohf_met.p4, true});
     //const METProducer& puppi_met = producers.get<METProducer>("puppimet");
     // TODO: adding puppi met will require changing the Met AND DileptonMet struct
 
@@ -335,6 +359,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.MT = (ll[ill].p4 + met[imet].p4).M();
             myllmet.MT_formula = std::sqrt(2 * ll[ill].p4.Pt() * met[imet].p4.Pt() * (1-std::cos(dphi)));
             myllmet.projectedMet = mindphi >= M_PI ? met[imet].p4.Pt() : met[imet].p4.Pt() * std::sin(mindphi);
+            myllmet.gen_matched = ll[ill].gen_matched && met[imet].gen_matched;
+            myllmet.gen_p4 = myllmet.gen_matched ? ll[ill].gen_p4 + met[imet].gen_p4 : null_p4;
             llmet.push_back(myllmet);
         }
     }
@@ -378,6 +404,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.btag_L = mybtag > m_jet_bDiscrCut_loose;
             myjet.btag_M = mybtag > m_jet_bDiscrCut_medium;
             myjet.btag_T = mybtag > m_jet_bDiscrCut_tight;
+            myjet.gen_isMatched_bParton = fabs(alljets.partonFlavor[ijet]) == 5;
+            myjet.gen_isMatched_bHadron = fabs(alljets.hadronFlavor[ijet]) == 5;
+            myjet.gen_matched = alljets.matched[ijet];
+            myjet.gen_p4 = myjet.gen_matched ? alljets.gen_p4[ijet] : null_p4;
             jets.push_back(myjet);
             // filling maps
             map_j_btagWP[btagWP::no].push_back(count);
@@ -423,6 +453,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.sumJP = jets[ijet1].JP + jets[ijet2].JP;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
             myjj.DPhi_j_j = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4));
+            myjj.gen_isMatched_bbPartons = jets[ijet1].gen_isMatched_bParton && jets[ijet2].gen_isMatched_bParton; 
+            myjj.gen_isMatched_bbHadrons = jets[ijet1].gen_isMatched_bHadron && jets[ijet2].gen_isMatched_bHadron; 
+            myjj.gen_matched = jets[ijet1].gen_matched && jets[ijet2].gen_matched;
+            myjj.gen_p4 = myjj.gen_matched ? jets[ijet1].gen_p4 + jets[ijet2].gen_p4 : null_p4;
             jj.push_back(myjj);
             // fill dijet map
             map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
@@ -593,10 +627,21 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.lep2_p4 = leptons[ilep2].p4;
             myllmetjj.jet1_p4 = leptons[ijet1].p4;
             myllmetjj.jet2_p4 = leptons[ijet2].p4;
-            myllmetjj.met_p4 = pf_met.p4;
+            myllmetjj.met_p4 = met[imet].p4;
             myllmetjj.ll_p4 = ll[ill].p4;
             myllmetjj.jj_p4 = jj[ijj].p4;
-            myllmetjj.lljj_p4 = leptons[ilep1].p4 + leptons[ilep2].p4 + jets[ijet1].p4 + jets[ijet2].p4;
+            myllmetjj.lljj_p4 = ll[ill].p4 + jj[ijj].p4;
+            // gen info
+            myllmetjj.gen_matched = ll[ill].gen_matched && jj[ijj].gen_matched && met[imet].gen_matched;
+            myllmetjj.gen_p4 = ll[ill].gen_p4 + jj[ijj].gen_p4 + met[imet].gen_p4;
+            myllmetjj.gen_lep1_p4 = leptons[ilep1].gen_p4;
+            myllmetjj.gen_lep2_p4 = leptons[ilep2].gen_p4;
+            myllmetjj.gen_jet1_p4 = leptons[ijet1].gen_p4;
+            myllmetjj.gen_jet2_p4 = leptons[ijet2].gen_p4;
+            myllmetjj.gen_met_p4 = met[imet].gen_p4;
+            myllmetjj.gen_ll_p4 = ll[ill].gen_p4;
+            myllmetjj.gen_jj_p4 = jj[ijj].gen_p4;
+            myllmetjj.gen_lljj_p4 = ll[ill].gen_p4 + jj[ijj].gen_p4;
             // blind copy of the jj content
             myllmetjj.ijet1 = jj[ijj].ijet1;
             myllmetjj.ijet2 = jj[ijj].ijet2;
@@ -613,6 +658,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.sumJP = jj[ijj].sumJP;
             myllmetjj.DR_j_j = jj[ijj].DR_j_j;
             myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
+            myllmetjj.gen_isMatched_bbPartons = jj[ijj].gen_isMatched_bbPartons;
+            myllmetjj.gen_isMatched_bbHadrons = jj[ijj].gen_isMatched_bbHadrons;
             // blind copy of the llmet content
             myllmetjj.ilep1 = ll[ill].ilep1;
             myllmetjj.ilep2 = ll[ill].ilep2;
