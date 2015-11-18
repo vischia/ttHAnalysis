@@ -24,6 +24,8 @@ namespace HH {
         bool iso_L; // Loose
         bool iso_T; // Tight
         bool gen_matched;
+        float gen_DR;
+        float gen_DPtOverPt;
     };
     struct Dilepton {
         LorentzVector p4;
@@ -49,12 +51,16 @@ namespace HH {
         float DR_l_l;
         float DPhi_l_l;
         bool gen_matched;
+        float gen_DR;
+        float gen_DPtOverPt;
     };
     struct Met {
         LorentzVector p4;
         LorentzVector gen_p4;
         bool isNoHF;
         bool gen_matched;
+        float gen_DR;
+        float gen_DPtOverPt;
     };
     struct DileptonMet : public Dilepton, public Met {
         LorentzVector p4;
@@ -68,6 +74,8 @@ namespace HH {
         float MT_formula;
         float projectedMet;
         bool gen_matched;
+        float gen_DR;
+        float gen_DPtOverPt;
     };
     struct Jet {
         LorentzVector p4;
@@ -84,6 +92,8 @@ namespace HH {
         bool gen_isMatched_bParton;
         bool gen_isMatched_bHadron;
         bool gen_matched;
+        float gen_DR;
+        float gen_DPtOverPt;
     };
     struct Dijet {
         LorentzVector p4;
@@ -107,6 +117,8 @@ namespace HH {
         bool gen_isMatched_bbPartons;
         bool gen_isMatched_bbHadrons;
         bool gen_matched;
+        float gen_DR;
+        float gen_DPtOverPt;
     };
     struct DileptonMetDijet : public DileptonMet, public Dijet {
         LorentzVector p4;
@@ -140,6 +152,8 @@ namespace HH {
         float DPhi_llmet_jj;
         float cosThetaStar_CS;
         bool gen_matched;
+        float gen_DR;
+        float gen_DPtOverPt;
     };
 }
 
