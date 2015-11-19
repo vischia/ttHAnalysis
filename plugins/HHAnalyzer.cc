@@ -882,11 +882,16 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Event variables
     // ***** ***** *****
     nJets = jets.size();
+    nJetsL = 0;
+    for (unsigned int ijet = 0; ijet < jets.size(); ijet++)
+        if (jets[ijet].id_L)
+            nJetsL++;
     nBJetsL = 0;
     nBJetsM = 0;
     nBJetsT = 0;
     for (unsigned int ijet = 0; ijet < jets.size(); ijet++)
     {
+        if (!jets[ijet].id_L) continue;
         if (jets[ijet].btag_L)
             nBJetsL++;
         if (jets[ijet].btag_M)
@@ -895,8 +900,33 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             nBJetsT++;
     }
     nMuons = muons.size();
+    nMuonsL = 0;
+    nMuonsT = 0;
     nElectrons = electrons.size();
+    nElectronsL = 0;
+    nElectronsT = 0;
     nLeptons = leptons.size();
+    nLeptonsL = 0;
+    nLeptonsT = 0;
+    for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
+    {
+        if (leptons[ilepton].id_L && leptons[ilepton].iso_L)
+        {
+            nLeptonsL++;
+            if (leptons[ilepton].isMu)
+                nMuonsL++;
+            if (leptons[ilepton].isEl)
+                nElectronsL++;
+        }
+        if (leptons[ilepton].id_T && leptons[ilepton].iso_T)
+        {
+            nLeptonsT++;
+            if (leptons[ilepton].isMu)
+                nMuonsT++;
+            if (leptons[ilepton].isEl)
+                nElectronsT++;
+        }
+    }
 
 
 
