@@ -29,7 +29,7 @@ const unsigned int DileptonCategory::getNJets(const AnalyzersManager& analyzers)
 
 const unsigned int DileptonCategory::getNBJets(const AnalyzersManager& analyzers) const {
     const HHAnalyzer& hh_analyzer = analyzers.get<HHAnalyzer>("hh_analyzer");
-    return hh_analyzer.nBJets;
+    return hh_analyzer.nBJetsM;
 }
 
 // ***** ***** *****
@@ -55,7 +55,7 @@ bool MuMuCategory::event_in_category_post_analyzers(const ProducersManager& prod
 void MuMuCategory::register_cuts(CutManager& manager) {
     manager.new_cut("ll_mass", "mll > 20");
     manager.new_cut("ll_mass_lowerZcut", "mll > 85");
-    manager.new_cut("has_two_bJets", "nBJet >= 2");
+    manager.new_cut("has_two_bJets", "nBJetM >= 2");
     manager.new_cut("fire_trigger_Mu17_Mu8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*");
     manager.new_cut("fire_trigger_Mu17_TkMu8", "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*");
 };

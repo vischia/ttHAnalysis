@@ -73,10 +73,19 @@ class HHAnalyzer: public Framework::Analyzer {
 
         // global event stuff (selected objects multiplicity)
         BRANCH(nJets, unsigned int);
-        BRANCH(nBJets, unsigned int);
+        BRANCH(nJetsL, unsigned int);
+        BRANCH(nBJetsL, unsigned int);
+        BRANCH(nBJetsM, unsigned int);
+        BRANCH(nBJetsT, unsigned int);
         BRANCH(nMuons, unsigned int);
+        BRANCH(nMuonsL, unsigned int);
+        BRANCH(nMuonsT, unsigned int);
         BRANCH(nElectrons, unsigned int);
+        BRANCH(nElectronsL, unsigned int);
+        BRANCH(nElectronsT, unsigned int);
         BRANCH(nLeptons, unsigned int);
+        BRANCH(nLeptonsL, unsigned int);
+        BRANCH(nLeptonsT, unsigned int);
 
         float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_leadingElectronPtCut, m_subleadingElectronPtCut;
         float m_muonLooseIsoCut, m_muonTightIsoCut, m_muonEtaCut, m_leadingMuonPtCut, m_subleadingMuonPtCut;
