@@ -25,6 +25,7 @@ void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::Paramet
 void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const AnalyzersManager&, const CategoryManager&) {
 
     float mh = event.isRealData() ? 125.02 : 125.0;
+    LorentzVector null_p4(0., 0., 0., 0.);
 
     // ***** ***** *****
     // Trigger Matching
@@ -45,7 +46,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         for (size_t hlt_object = 0; hlt_object < hlt.object_p4.size(); hlt_object++) {
 
             float dr = ROOT::Math::VectorUtil::DeltaR(lepton.p4, hlt.object_p4[hlt_object]);
-            float dpt_over_pt = std::abs(lepton.p4.Pt() - hlt.object_p4[hlt_object].Pt()) / lepton.p4.Pt();
+            float dpt_over_pt = fabs(lepton.p4.Pt() - hlt.object_p4[hlt_object].Pt()) / lepton.p4.Pt();
 
             if (dr > m_hltDRCut)
                 continue;
@@ -80,7 +81,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     for (unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
         if (allelectrons.p4[ielectron].Pt() > m_subleadingElectronPtCut
-            && abs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
+            && fabs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
         {
             electrons.push_back(ielectron);
             HH::Lepton ele;
@@ -93,6 +94,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.id_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
             ele.iso_L = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Loose) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Loose);
             ele.iso_T = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Tight) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Tight);
+            ele.gen_matched = allelectrons.matched[ielectron];
+            ele.gen_p4 = ele.gen_matched ? allelectrons.gen_p4[ielectron] : null_p4;
+            ele.gen_DR = ele.gen_matched ? ROOT::Math::VectorUtil::DeltaR(ele.p4, ele.gen_p4): -1.;
+            ele.gen_DPtOverPt = ele.gen_matched ? (ele.p4.Pt() - ele.gen_p4.Pt()) / ele.p4.Pt() : -10.;
             leptons.push_back(ele);
         }
     }//end of loop on electrons
@@ -100,7 +105,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     for (unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
         if (allmuons.p4[imuon].Pt() > m_subleadingMuonPtCut
-            && abs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
+            && fabs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
         {
             muons.push_back(imuon);
             HH::Lepton mu;
@@ -113,6 +118,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             mu.id_T = allmuons.isTight[imuon];
             mu.iso_L = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonLooseIsoCut;
             mu.iso_T = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonTightIsoCut;
+            mu.gen_matched = allmuons.matched[imuon];
+            mu.gen_p4 = mu.gen_matched ? allmuons.gen_p4[imuon] : null_p4;
+            mu.gen_DR = mu.gen_matched ? ROOT::Math::VectorUtil::DeltaR(mu.p4, mu.gen_p4) : -1.;
+            mu.gen_DPtOverPt = mu.gen_matched ? (mu.p4.Pt() - mu.gen_p4.Pt()) / mu.p4.Pt() : -10.;
             leptons.push_back(mu);
         }
     }//end of loop on muons
@@ -170,8 +179,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.iso_TL = leptons[ilep1].iso_T && leptons[ilep2].iso_L;
             dilep.iso_TT = leptons[ilep1].iso_T && leptons[ilep2].iso_T;
             dilep.DR_l_l = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
-            dilep.DPhi_l_l = std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4));
+            dilep.DPhi_l_l = fabs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4));
             if (!hlt.paths.empty()) dilep.hlt_idxs = std::make_pair(matchOfflineLepton(leptons[ilep1]),matchOfflineLepton(leptons[ilep2]));
+            dilep.gen_matched = leptons[ilep1].gen_matched && leptons[ilep2].gen_matched;
+            dilep.gen_p4 = dilep.gen_matched ? leptons[ilep1].gen_p4 + leptons[ilep2].gen_p4 : null_p4;
+            dilep.gen_DR = dilep.gen_matched ? ROOT::Math::VectorUtil::DeltaR(dilep.p4, dilep.gen_p4) : -1.;
+            dilep.gen_DPtOverPt = dilep.gen_matched ? (dilep.p4.Pt() - dilep.gen_p4.Pt()) / dilep.p4.Pt() : -10.;
             ll.push_back(dilep); 
         }
     }
@@ -288,9 +301,32 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Adding MET(s)
     // ***** 
     const METProducer& pf_met = producers.get<METProducer>("met");
-    met.push_back({pf_met.p4, false});
+    HH::Met mymet;
+    mymet.p4 = pf_met.p4;
+    mymet.isNoHF = false;
+    mymet.gen_matched = false;
+    mymet.gen_p4 = null_p4;
+    mymet.gen_DR = -1.;
+    mymet.gen_DPhi = -1.;
+    mymet.gen_DPtOverPt = -10.;
+    if (!event.isRealData())
+    { // genMet is not constructed in the framework, so construct it manually out of the neutrinos hanging around the mc particles
+        const GenParticlesProducer& gp = producers.get<GenParticlesProducer>("gen_particles");
+        for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
+            std::bitset<15> flags (gp.pruned_status_flags[ip]);
+            if (!flags.test(13)) continue; // take the last copies
+            if (abs(gp.pruned_pdg_id[ip]) == 12 || abs(gp.pruned_pdg_id[ip]) == 14 || abs(gp.pruned_pdg_id[ip]) == 16)
+            {
+                mymet.gen_matched = true;
+                mymet.gen_p4 += gp.pruned_p4[ip];
+            }
+        }
+        mymet.gen_DR = mymet.gen_matched ? ROOT::Math::VectorUtil::DeltaR(mymet.p4, mymet.gen_p4) : -1.;
+        mymet.gen_DPhi = mymet.gen_matched ? fabs(ROOT::Math::VectorUtil::DeltaPhi(mymet.p4, mymet.gen_p4)) : -1.;
+        mymet.gen_DPtOverPt = mymet.gen_matched ? (mymet.p4.Pt() - mymet.gen_p4.Pt()) / mymet.p4.Pt() : -10.;
+    }
+    met.push_back(mymet);
     const METProducer& nohf_met = producers.get<METProducer>("nohf_met");  // so that nohfmet is available in the tree
-    //met.push_back({nohf_met.p4, true});
     //const METProducer& puppi_met = producers.get<METProducer>("puppimet");
     // TODO: adding puppi met will require changing the Met AND DileptonMet struct
 
@@ -326,15 +362,20 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.ill = ill;
             myllmet.imet = imet;
             myllmet.isNoHF = met[imet].isNoHF;
-            float dphi = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, met[imet].p4));
+            float dphi = fabs(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, met[imet].p4));
             myllmet.DPhi_ll_met = dphi;
-            float mindphi = std::min(std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.first].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.second].p4, met[imet].p4)));
+            float mindphi = std::min(fabs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.first].p4, met[imet].p4)), fabs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.second].p4, met[imet].p4)));
             myllmet.minDPhi_l_met = mindphi; 
-            float maxdphi = std::max(std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.first].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.second].p4, met[imet].p4)));
+            float maxdphi = std::max(fabs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.first].p4, met[imet].p4)), fabs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ll[ill].idxs.second].p4, met[imet].p4)));
             myllmet.maxDPhi_l_met = maxdphi;
             myllmet.MT = (ll[ill].p4 + met[imet].p4).M();
             myllmet.MT_formula = std::sqrt(2 * ll[ill].p4.Pt() * met[imet].p4.Pt() * (1-std::cos(dphi)));
             myllmet.projectedMet = mindphi >= M_PI ? met[imet].p4.Pt() : met[imet].p4.Pt() * std::sin(mindphi);
+            myllmet.gen_matched = ll[ill].gen_matched && met[imet].gen_matched;
+            myllmet.gen_p4 = myllmet.gen_matched ? ll[ill].gen_p4 + met[imet].gen_p4 : null_p4;
+            myllmet.gen_DR = myllmet.gen_matched ? ROOT::Math::VectorUtil::DeltaR(myllmet.p4, myllmet.gen_p4) : -1.;
+            myllmet.gen_DPhi = myllmet.gen_matched ? fabs(ROOT::Math::VectorUtil::DeltaPhi(myllmet.p4, myllmet.gen_p4)) : -1.;
+            myllmet.gen_DPtOverPt = myllmet.gen_matched ? (myllmet.p4.Pt() - myllmet.gen_p4.Pt()) / myllmet.p4.Pt() : -10.;
             llmet.push_back(myllmet);
         }
     }
@@ -364,7 +405,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     for (unsigned int ijet = 0; ijet < alljets.p4.size(); ijet++)
     {
         if ((alljets.p4[ijet].Pt() > m_jetPtCut) 
-            && (abs(alljets.p4[ijet].Eta()) < m_jetEtaCut))
+            && (fabs(alljets.p4[ijet].Eta()) < m_jetEtaCut))
         {
             HH::Jet myjet;
             myjet.p4 = alljets.p4[ijet];
@@ -378,6 +419,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.btag_L = mybtag > m_jet_bDiscrCut_loose;
             myjet.btag_M = mybtag > m_jet_bDiscrCut_medium;
             myjet.btag_T = mybtag > m_jet_bDiscrCut_tight;
+            myjet.gen_matched_bParton = (alljets.partonFlavor[ijet]) == 5;
+            myjet.gen_matched_bHadron = (alljets.hadronFlavor[ijet]) == 5;
+            myjet.gen_matched = alljets.matched[ijet];
+            myjet.gen_p4 = myjet.gen_matched ? alljets.gen_p4[ijet] : null_p4;
+            myjet.gen_DR = myjet.gen_matched ? ROOT::Math::VectorUtil::DeltaR(myjet.p4, myjet.gen_p4) : -1.;
+            myjet.gen_DPtOverPt = myjet.gen_matched ? (myjet.p4.Pt() - myjet.gen_p4.Pt()) / myjet.p4.Pt() : -10.;
             jets.push_back(myjet);
             // filling maps
             map_j_btagWP[btagWP::no].push_back(count);
@@ -422,7 +469,13 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.sumCSV = jets[ijet1].CSV + jets[ijet2].CSV;
             myjj.sumJP = jets[ijet1].JP + jets[ijet2].JP;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
-            myjj.DPhi_j_j = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4));
+            myjj.DPhi_j_j = fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4));
+            myjj.gen_matched_bbPartons = jets[ijet1].gen_matched_bParton && jets[ijet2].gen_matched_bParton; 
+            myjj.gen_matched_bbHadrons = jets[ijet1].gen_matched_bHadron && jets[ijet2].gen_matched_bHadron; 
+            myjj.gen_matched = jets[ijet1].gen_matched && jets[ijet2].gen_matched;
+            myjj.gen_p4 = myjj.gen_matched ? jets[ijet1].gen_p4 + jets[ijet2].gen_p4 : null_p4;
+            myjj.gen_DR = myjj.gen_matched ? ROOT::Math::VectorUtil::DeltaR(myjj.p4, myjj.gen_p4) : -1.;
+            myjj.gen_DPtOverPt = myjj.gen_matched ? (myjj.p4.Pt() - myjj.gen_p4.Pt()) / myjj.p4.Pt() : -10.;
             jj.push_back(myjj);
             // fill dijet map
             map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
@@ -555,7 +608,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                     map_jj_btagWP_pair[jpt] = tmp;
                     // do the closest to mh sorted maps
                     tmp = map_jj_btagWP_pair[iht];
-                    std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return abs(jj[a].p4.M() - mh) < abs(jj[b].p4.M() - mh);});
+                    std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return fabs(jj[a].p4.M() - mh) < fabs(jj[b].p4.M() - mh);});
                     map_jj_btagWP_pair[jmh] = tmp;
                     // do the sum(btag) sorted maps
                     tmp = map_jj_btagWP_pair[iht];
@@ -593,10 +646,24 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.lep2_p4 = leptons[ilep2].p4;
             myllmetjj.jet1_p4 = leptons[ijet1].p4;
             myllmetjj.jet2_p4 = leptons[ijet2].p4;
-            myllmetjj.met_p4 = pf_met.p4;
+            myllmetjj.met_p4 = met[imet].p4;
             myllmetjj.ll_p4 = ll[ill].p4;
             myllmetjj.jj_p4 = jj[ijj].p4;
-            myllmetjj.lljj_p4 = leptons[ilep1].p4 + leptons[ilep2].p4 + jets[ijet1].p4 + jets[ijet2].p4;
+            myllmetjj.lljj_p4 = ll[ill].p4 + jj[ijj].p4;
+            // gen info
+            myllmetjj.gen_matched = ll[ill].gen_matched && jj[ijj].gen_matched && met[imet].gen_matched;
+            myllmetjj.gen_p4 = myllmetjj.gen_matched ? ll[ill].gen_p4 + jj[ijj].gen_p4 + met[imet].gen_p4 : null_p4;
+            myllmetjj.gen_DR = myllmetjj.gen_matched ? ROOT::Math::VectorUtil::DeltaR(myllmetjj.p4, myllmetjj.gen_p4) : -1.;
+            myllmetjj.gen_DPhi = myllmetjj.gen_matched ? fabs(ROOT::Math::VectorUtil::DeltaPhi(myllmetjj.p4, myllmetjj.gen_p4)) : -1.;
+            myllmetjj.gen_DPtOverPt = myllmetjj.gen_matched ? (myllmetjj.p4.Pt() - myllmetjj.gen_p4.Pt()) / myllmetjj.p4.Pt() : -10.;
+            myllmetjj.gen_lep1_p4 = leptons[ilep1].gen_p4;
+            myllmetjj.gen_lep2_p4 = leptons[ilep2].gen_p4;
+            myllmetjj.gen_jet1_p4 = leptons[ijet1].gen_p4;
+            myllmetjj.gen_jet2_p4 = leptons[ijet2].gen_p4;
+            myllmetjj.gen_met_p4 = met[imet].gen_p4;
+            myllmetjj.gen_ll_p4 = ll[ill].gen_p4;
+            myllmetjj.gen_jj_p4 = jj[ijj].gen_p4;
+            myllmetjj.gen_lljj_p4 = ll[ill].gen_p4 + jj[ijj].gen_p4;
             // blind copy of the jj content
             myllmetjj.ijet1 = jj[ijj].ijet1;
             myllmetjj.ijet2 = jj[ijj].ijet2;
@@ -613,6 +680,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.sumJP = jj[ijj].sumJP;
             myllmetjj.DR_j_j = jj[ijj].DR_j_j;
             myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
+            myllmetjj.gen_matched_bbPartons = jj[ijj].gen_matched_bbPartons;
+            myllmetjj.gen_matched_bbHadrons = jj[ijj].gen_matched_bbHadrons;
             // blind copy of the llmet content
             myllmetjj.ilep1 = ll[ill].ilep1;
             myllmetjj.ilep2 = ll[ill].ilep2;
@@ -643,9 +712,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.projectedMet = llmet[illmet].projectedMet;
             // content specific to HH::DijetMet
             // NB: computed for the first time here, no intermediate jjmet collection
-            myllmetjj.DPhi_jj_met = std::abs(ROOT::Math::VectorUtil::DeltaPhi(jj[ijj].p4, met[imet].p4));
-            myllmetjj.minDPhi_j_met = std::min(std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
-            myllmetjj.maxDPhi_j_met = std::max(std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), std::abs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
+            myllmetjj.DPhi_jj_met = fabs(ROOT::Math::VectorUtil::DeltaPhi(jj[ijj].p4, met[imet].p4));
+            myllmetjj.minDPhi_j_met = std::min(fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
+            myllmetjj.maxDPhi_j_met = std::max(fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
             // content specific to HH::DileptonMetDijet
             myllmetjj.illmet = illmet;
             myllmetjj.ijj = ijj;
@@ -657,10 +726,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.maxDR_l_j = std::max({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
             myllmetjj.minDR_l_j = std::min({DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2});
             myllmetjj.DR_ll_jj = ROOT::Math::VectorUtil::DeltaR(ll[ill].p4, jj[ijj].p4);
-            myllmetjj.DPhi_ll_jj = std::abs(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj[ijj].p4));
+            myllmetjj.DPhi_ll_jj = fabs(ROOT::Math::VectorUtil::DeltaPhi(ll[ill].p4, jj[ijj].p4));
             myllmetjj.DR_llmet_jj = ROOT::Math::VectorUtil::DeltaR(llmet[illmet].p4, jj[ijj].p4);
-            myllmetjj.DPhi_llmet_jj = std::abs(ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4));
-            myllmetjj.cosThetaStar_CS = std::abs(getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4));
+            myllmetjj.DPhi_llmet_jj = fabs(ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4));
+            myllmetjj.cosThetaStar_CS = fabs(getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4));
             if (myllmetjj.minDR_l_j < m_minDR_l_j_Cut)
                 continue;
             llmetjj.push_back(myllmetjj);
