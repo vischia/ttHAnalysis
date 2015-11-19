@@ -63,7 +63,7 @@ process.framework.producers.puppimet.prefix = cms.string('puppimet_')
 process.framework.producers.puppimet.parameters.met = cms.untracked.InputTag('slimmedMETsPuppi')
 
 # Custom the cuts
-process.framework.producers.jets.parameters.cut = cms.untracked.string("pt > 30")
+process.framework.producers.jets.parameters.cut = cms.untracked.string("pt > 20")
 #process.framework.producers.muons.parameters.cut = cms.untracked.string("pt > 20")
 #process.framework.producers.electrons.parameters.cut = cms.untracked.string("pt > 20")
 
