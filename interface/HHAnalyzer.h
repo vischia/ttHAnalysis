@@ -73,7 +73,9 @@ class HHAnalyzer: public Framework::Analyzer {
 
         // global event stuff (selected objects multiplicity)
         BRANCH(nJets, unsigned int);
-        BRANCH(nBJets, unsigned int);
+        BRANCH(nBJetsL, unsigned int);
+        BRANCH(nBJetsM, unsigned int);
+        BRANCH(nBJetsT, unsigned int);
         BRANCH(nMuons, unsigned int);
         BRANCH(nElectrons, unsigned int);
         BRANCH(nLeptons, unsigned int);

@@ -882,10 +882,18 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Event variables
     // ***** ***** *****
     nJets = jets.size();
-    nBJets = 0;
+    nBJetsL = 0;
+    nBJetsM = 0;
+    nBJetsT = 0;
     for (unsigned int ijet = 0; ijet < jets.size(); ijet++)
+    {
+        if (jets[ijet].btag_L)
+            nBJetsL++;
         if (jets[ijet].btag_M)
-            nBJets++;
+            nBJetsM++;
+        if (jets[ijet].btag_T)
+            nBJetsT++;
+    }
     nMuons = muons.size();
     nElectrons = electrons.size();
     nLeptons = leptons.size();
