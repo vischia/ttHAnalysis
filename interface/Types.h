@@ -60,6 +60,7 @@ namespace HH {
         bool isNoHF;
         bool gen_matched;
         float gen_DR;
+        float gen_DPhi;
         float gen_DPtOverPt;
     };
     struct DileptonMet : public Dilepton, public Met {
@@ -75,6 +76,7 @@ namespace HH {
         float projectedMet;
         bool gen_matched;
         float gen_DR;
+        float gen_DPhi;
         float gen_DPtOverPt;
     };
     struct Jet {
@@ -89,8 +91,8 @@ namespace HH {
         bool btag_T;
         float CSV;
         float JP;
-        bool gen_isMatched_bParton;
-        bool gen_isMatched_bHadron;
+        bool gen_matched_bParton;
+        bool gen_matched_bHadron;
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
@@ -114,8 +116,8 @@ namespace HH {
         float sumJP;
         float DR_j_j;
         float DPhi_j_j;
-        bool gen_isMatched_bbPartons;
-        bool gen_isMatched_bbHadrons;
+        bool gen_matched_bbPartons;
+        bool gen_matched_bbHadrons;
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
@@ -153,6 +155,7 @@ namespace HH {
         float cosThetaStar_CS;
         bool gen_matched;
         float gen_DR;
+        float gen_DPhi;
         float gen_DPtOverPt;
     };
 }
