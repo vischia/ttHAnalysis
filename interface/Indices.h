@@ -6,81 +6,61 @@
 
 namespace HHAnalysis {
   
-  // Lepton IDs
-  namespace LepID {
-    enum LepID{ L, T, Count };
-    // Ugly way to allow iterating over all items in the enumeration ( for(const LepID::LepID& id: LepID::it) )
-    const std::array<LepID, Count> it = {{ L, T }};
+  // lepton IDs
+  namespace lepID {
+    enum lepID{ L, T, Count };
+    // Ugly way to allow iterating over all items in the enumeration ( for(const lepID::lepID& id: lepID::it) )
+    const std::array<lepID, Count> it = {{ L, T }};
     // Is useful in categories to construct cut strings out of each working point
-    const std::map<LepID, std::string> map = { {L, "L"}, {T, "T"} };
+    const std::map<lepID, std::string> map = { {L, "L"}, {T, "T"} };
   }
   
-  // Lepton Isolation
-  namespace LepIso {
-    enum LepIso{ no, L, T, Count };
-    const std::array<LepIso, Count> it = {{ no, L, T }};
-    const std::map<LepIso, std::string> map = { {no, "no"}, {L, "L"}, {T, "T"} };
+  // lepton Isolation
+  namespace lepIso {
+    enum lepIso{ no, L, T, Count };
+    const std::array<lepIso, Count> it = {{ no, L, T }};
+    const std::map<lepIso, std::string> map = { {no, "no"}, {L, "L"}, {T, "T"} };
   }
 
-  // Combination of Lepton ID + Lepton Isolation for a single lepton
-  uint16_t LepIDIso(const LepID::LepID& id, const LepIso::LepIso& iso);
-  std::string LepIDIsoStr(const LepID::LepID& id, const LepIso::LepIso& iso);
+  // Combination of lepton ID + lepton Isolation for a single lepton
+  uint16_t lepIDIso(const lepID::lepID& id, const lepIso::lepIso& iso);
+  std::string lepIDIsoStr(const lepID::lepID& id, const lepIso::lepIso& iso);
 
-  // Combination of Lepton ID for a DiLepton object
-  uint16_t LepLepID(const LepID::LepID& id1, const LepID::LepID& id2);
-  std::string LepLepIDStr(const LepID::LepID& id1, const LepID::LepID& id2);
+  // Combination of lepton ID + lepton Isolation for a Dilepton object
+  uint16_t leplepIDIso(const lepID::lepID& id1, const lepIso::lepIso& iso1, const lepID::lepID& id2, const lepIso::lepIso& iso2);
+  std::string leplepIDIsoStr(const lepID::lepID& id1, const lepIso::lepIso& iso1, const lepID::lepID& id2, const lepIso::lepIso& iso2);
 
-  // Combination of Lepton Isolation for a DiLepton object
-  uint16_t LepLepIso(const LepIso::LepIso& iso1, const LepIso::LepIso& iso2);
-  std::string LepLepIsoStr(const LepIso::LepIso& iso1, const LepIso::LepIso& iso2);
-
-  // Combination of Lepton ID + Lepton Isolation for a DiLepton object
-  uint16_t LepLepIDIso(const LepID::LepID& id1, const LepIso::LepIso& iso1, const LepID::LepID& id2, const LepIso::LepIso& iso2);
-  std::string LepLepIDIsoStr(const LepID::LepID& id1, const LepIso::LepIso& iso1, const LepID::LepID& id2, const LepIso::LepIso& iso2);
-
-  // Jet ID
-  namespace JetID {
-    enum JetID{ L, T, TLV, no, Count };
-    const std::array<JetID, Count> it = {{ L, T, TLV, no }};
-    const std::map<JetID, std::string> map = { {L, "L"}, {T, "T"}, {TLV, "TLV"}, {no, "no"} };
+  // jet ID
+  namespace jetID {
+    enum jetID{ L, T, TLV, no, Count };
+    const std::array<jetID, Count> it = {{ L, T, TLV, no }};
+    const std::map<jetID, std::string> map = { {L, "L"}, {T, "T"}, {TLV, "TLV"}, {no, "no"} };
   }
 
-  // Combination of Jet IDs for two jets (NOTE: NOT USED FOR NOW)
-  uint16_t JetJetID(const JetID::JetID& id1, const JetID::JetID& id2);
-  std::string JetJetIDStr(const JetID::JetID& id1, const JetID::JetID& id2);
-  
   // B-tagging working points
-  namespace BWP {
-    enum BWP{ no, L, M, T, Count };
-    const std::array<BWP, Count> it = {{ no, L, M, T }};
-    const std::map<BWP, std::string> map = { {no, "no"}, {L, "L"}, {M, "M"}, {T, "T"} };
+  namespace btagWP {
+    enum btagWP{ no, L, M, T, Count };
+    const std::array<btagWP, Count> it = {{ no, L, M, T }};
+    const std::map<btagWP, std::string> map = { {no, "no"}, {L, "L"}, {M, "M"}, {T, "T"} };
   }
 
-  // Jet combinatoric
-  namespace JetPair {
-    enum JetPair { ht, mh, pt, csv, jp, ptOverM, Count };
-    const std::array<JetPair, Count> it = {{ ht, mh, pt, csv, jp, ptOverM }};
-    const std::map<JetPair, std::string> map = { {ht, "ht"}, {mh, "mh"}, {pt, "pt"}, {csv, "csv"}, {jp, "jp"}, {ptOverM, "ptOverM"} }; 
+  // jet combinatoric
+  namespace jetPair {
+    enum jetPair { ht, mh, pt, csv, jp, ptOverM, Count };
+    const std::array<jetPair, Count> it = {{ ht, mh, pt, csv, jp, ptOverM }};
+    const std::map<jetPair, std::string> map = { {ht, "ht"}, {mh, "mh"}, {pt, "pt"}, {csv, "csv"}, {jp, "jp"}, {ptOverM, "ptOverM"} }; 
   }
 
-  // Combination of Jet ID and B-tagging working point
-  uint16_t JetIDBWP(const JetID::JetID& id, const BWP::BWP& wp);
-  std::string JetIDBWPStr(const JetID::JetID& id, const BWP::BWP& wp);
+  // Combination of jet ID and B-tagging working point for one jet (not yet available) 
+  uint16_t jetIDbtagWP(const jetID::jetID& id, const btagWP::btagWP& wp);
+  std::string jetIDbtagWPStr(const jetID::jetID& id, const btagWP::btagWP& wp);
   
-  // Combination of Lepton ID + Lepton Isolation (one lepton) and B-tagging working point for one jet
-  uint16_t LepIDIsoJetBWP(const LepID::LepID& id, const LepIso::LepIso& iso, const BWP::BWP& wp);
-  std::string LepIDIsoJetBWPStr(const LepID::LepID& id, const LepIso::LepIso& iso, const BWP::BWP& wp);
+  // Combination of jet ID and B-tagging working points for two jets 
+  uint16_t jetjetIDbtagWP(const jetID::jetID& id1, const jetID::jetID& id2, const btagWP::btagWP& wp1, const btagWP::btagWP& wp2);
+  std::string jetjetIDbtagWPStr(const jetID::jetID& id1, const jetID::jetID& id2, const btagWP::btagWP& wp1, const btagWP::btagWP& wp2);
 
-  // Combination of B-tagging working points for two jets
-  uint16_t JetJetBWP(const BWP::BWP& wp1, const BWP::BWP& wp2);
-  std::string JetJetBWPStr(const BWP::BWP& wp1, const BWP::BWP& wp2);
-
-  // Combination of Jet ID and B-tagging working points for two jets 
-  uint16_t JetJetIDBWP(const JetID::JetID& id1, const JetID::JetID& id2, const BWP::BWP& wp1, const BWP::BWP& wp2);
-  std::string JetJetIDBWPStr(const JetID::JetID& id1, const JetID::JetID& id2, const BWP::BWP& wp1, const BWP::BWP& wp2);
-
-  // Combination of Lepton ID, Lepton Isolation, Jet ID, B-tagging working points and jetPair ordering for a two-lepton-two-b-jets object
-  uint16_t LepLepIDIsoJetJetIDBWPPair(const LepID::LepID& id1, const LepIso::LepIso& iso1, const LepID::LepID& id2, const LepIso::LepIso& iso2, const JetID::JetID& jetid1, const JetID::JetID& jetid2, const BWP::BWP& wp1, const BWP::BWP& wp2, const JetPair::JetPair& jetpair);
-  std::string LepLepIDIsoJetJetIDBWPPairStr(const LepID::LepID& id1, const LepIso::LepIso& iso1, const LepID::LepID& id2, const LepIso::LepIso& iso2, const JetID::JetID& jetid1, const JetID::JetID& jetid2, const BWP::BWP& wp1, const BWP::BWP& wp2, const JetPair::JetPair& jetpair);
+  // Combination of lepton ID, lepton Isolation, jet ID, B-tagging working points and jetPair ordering for a two-lepton-two-b-jets object
+  uint16_t leplepIDIsojetjetIDbtagWPPair(const lepID::lepID& id1, const lepIso::lepIso& iso1, const lepID::lepID& id2, const lepIso::lepIso& iso2, const jetID::jetID& jetid1, const jetID::jetID& jetid2, const btagWP::btagWP& wp1, const btagWP::btagWP& wp2, const jetPair::jetPair& jetpair);
+  std::string leplepIDIsojetjetIDbtagWPPairStr(const lepID::lepID& id1, const lepIso::lepIso& iso1, const lepID::lepID& id2, const lepIso::lepIso& iso2, const jetID::jetID& jetid1, const jetID::jetID& jetid2, const btagWP::btagWP& wp1, const btagWP::btagWP& wp2, const jetPair::jetPair& jetpair);
 
 }
