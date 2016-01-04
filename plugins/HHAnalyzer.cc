@@ -829,29 +829,29 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
     // Adding some few custom candidates, for convenience
-    // llmetjj_allTight_btagM
+    // llmetjj_allTight_btagL
     int icustom = lepID::T * bitH
         + lepIso::T * bitG
         + lepID::T  * bitF
         + lepIso::T * bitE
         + jetID::T  * bitD
         + jetID::T  * bitC
-        + btagWP::M * bitB
-        + btagWP::M * bitA
+        + btagWP::L * bitB
+        + btagWP::L * bitA
         + jetPair::ht;
-    llmetjj_allTight_btagM_ht.clear();
+    llmetjj_allTight_btagL_ht.clear();
     for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagM_ht.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
+        llmetjj_allTight_btagL_ht.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
     icustom = icustom - jetPair::ht + jetPair::pt;
-    llmetjj_allTight_btagM_pt.clear();
+    llmetjj_allTight_btagL_pt.clear();
     for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagM_pt.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
+        llmetjj_allTight_btagL_pt.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
     icustom = icustom - jetPair::pt + jetPair::csv;
-    llmetjj_allTight_btagM_csv.clear();
+    llmetjj_allTight_btagL_csv.clear();
     for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagM_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
+        llmetjj_allTight_btagL_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
     // llmetjj_allTight_nobtag
     icustom = lepID::T * bitH

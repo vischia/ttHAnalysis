@@ -54,9 +54,9 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
         // some few custom candidates, for convenience
         // allTight= tight lepton ID, tight lepton Iso, Tight jet ID
-        BRANCH(llmetjj_allTight_btagM_ht, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_allTight_btagM_pt, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_allTight_btagM_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_btagL_ht, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_btagL_pt, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_allTight_btagL_csv, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_allTight_nobtag_ht, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_allTight_nobtag_pt, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_allTight_nobtag_csv, std::vector<HH::DileptonMetDijet>);
