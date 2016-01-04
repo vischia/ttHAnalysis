@@ -130,26 +130,26 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     std::sort(leptons.begin(), leptons.end(), [](const HH::Lepton& lep1, const HH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });     
 
     // Fill lepton maps
-    for (unsigned int i_id_iso = 0; i_id_iso < map_l_id_iso.size(); i_id_iso++)
-        map_l_id_iso[i_id_iso].clear();
+    for (unsigned int i_id_iso = 0; i_id_iso < map_l.size(); i_id_iso++)
+        map_l[i_id_iso].clear();
 
     for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
     {
         if (leptons[ilepton].id_L)
         {
-            map_l_id_iso[lepID::L * lepIso::Count + lepIso::no].push_back(ilepton);
+            map_l[lepID::L * lepIso::Count + lepIso::no].push_back(ilepton);
             if (leptons[ilepton].iso_L)
-                map_l_id_iso[lepID::L * lepIso::Count + lepIso::L].push_back(ilepton);
+                map_l[lepID::L * lepIso::Count + lepIso::L].push_back(ilepton);
             if (leptons[ilepton].iso_T)
-                map_l_id_iso[lepID::L * lepIso::Count + lepIso::T].push_back(ilepton);
+                map_l[lepID::L * lepIso::Count + lepIso::T].push_back(ilepton);
         }
         if (leptons[ilepton].id_T)
         {
-            map_l_id_iso[lepID::T * lepIso::Count + lepIso::no].push_back(ilepton);
+            map_l[lepID::T * lepIso::Count + lepIso::no].push_back(ilepton);
             if (leptons[ilepton].iso_L)
-                map_l_id_iso[lepID::T * lepIso::Count + lepIso::L].push_back(ilepton);
+                map_l[lepID::T * lepIso::Count + lepIso::L].push_back(ilepton);
             if (leptons[ilepton].iso_T)
-                map_l_id_iso[lepID::T * lepIso::Count + lepIso::T].push_back(ilepton);
+                map_l[lepID::T * lepIso::Count + lepIso::T].push_back(ilepton);
         }
     }
            
@@ -190,8 +190,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     }
 
     // Fill dilepton maps
-    for (unsigned int i = 0; i < map_ll_id_iso.size(); i++)
-        map_ll_id_iso[i].clear();
+    for (unsigned int i = 0; i < map_ll.size(); i++)
+        map_ll[i].clear();
 
     // map is stored as lep1_ID, lep1_Iso, lep2_ID, lep2_Iso
     int bitA = lepIso::Count;
@@ -201,98 +201,98 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     {
         if (ll[ill].id_LL)
         {
-            map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+            map_ll[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                map_ll[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                map_ll[lepID::L * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             if (leptons[ll[ill].ilep1].iso_L)
             {
-                map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                map_ll[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                    map_ll[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                    map_ll[lepID::L * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             }
             if (leptons[ll[ill].ilep1].iso_T)
             {
-                map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                map_ll[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                    map_ll[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                    map_ll[lepID::L * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             }
         }
         if (ll[ill].id_LT)
         {
-            map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+            map_ll[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                map_ll[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                map_ll_id_iso[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                map_ll[lepID::L * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             if (leptons[ll[ill].ilep1].iso_L)
             {
-                map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                map_ll[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                    map_ll[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                    map_ll[lepID::L * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             }
             if (leptons[ll[ill].ilep1].iso_T)
             {
-                map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                map_ll[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                    map_ll[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                    map_ll[lepID::L * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             }
         }
         if (ll[ill].id_TL)
         {
-            map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+            map_ll[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                map_ll[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                map_ll[lepID::T * bitC + lepIso::no * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             if (leptons[ll[ill].ilep1].iso_L)
             {
-                map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                map_ll[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                    map_ll[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                    map_ll[lepID::T * bitC + lepIso::L * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             }
             if (leptons[ll[ill].ilep1].iso_T)
             {
-                map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
+                map_ll[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
+                    map_ll[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
+                    map_ll[lepID::T * bitC + lepIso::T * bitB + lepID::L * bitA + lepIso::T].push_back(ill);
             }
         }
         if (ll[ill].id_TT)
         {
-            map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+            map_ll[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                map_ll[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
             if (leptons[ll[ill].ilep2].iso_L)
-                map_ll_id_iso[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                map_ll[lepID::T * bitC + lepIso::no * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             if (leptons[ll[ill].ilep1].iso_L)
             {
-                map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                map_ll[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                    map_ll[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                    map_ll[lepID::T * bitC + lepIso::L * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             }
             if (leptons[ll[ill].ilep1].iso_T)
             {
-                map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
+                map_ll[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::no].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
+                    map_ll[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::L].push_back(ill);
                 if (leptons[ll[ill].ilep2].iso_L)
-                    map_ll_id_iso[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
+                    map_ll[lepID::T * bitC + lepIso::T * bitB + lepID::T * bitA + lepIso::T].push_back(ill);
             }
         }
     }
@@ -383,12 +383,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Fill dilepton+met maps
     // FIXME: for now only store pf_met
     // so ll and llmet structures are in sync
-    for (unsigned int i = 0; i < map_llmet_id_iso.size(); i++)
+    for (unsigned int i = 0; i < map_llmet.size(); i++)
     {
-        map_llmet_id_iso[i].clear();
-        for (unsigned int j = 0; j < map_ll_id_iso[i].size(); j++)
+        map_llmet[i].clear();
+        for (unsigned int j = 0; j < map_ll[i].size(); j++)
         {
-            map_llmet_id_iso[i].push_back(map_ll_id_iso[i][j]);
+            map_llmet[i].push_back(map_ll[i][j]);
         }
     }
 
@@ -397,8 +397,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
     jets.clear();
-    for (unsigned int ibtag = 0; ibtag < map_j_btagWP.size(); ibtag++)
-        map_j_btagWP[ibtag].clear();
+    for (unsigned int ibtag = 0; ibtag < map_j.size(); ibtag++)
+        map_j[ibtag].clear();
 
     // (The following include filling up the jets map
     int count = 0;
@@ -427,21 +427,21 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.gen_DPtOverPt = myjet.gen_matched ? (myjet.p4.Pt() - myjet.gen_p4.Pt()) / myjet.p4.Pt() : -10.;
             jets.push_back(myjet);
             // filling maps
-            map_j_btagWP[btagWP::no].push_back(count);
+            map_j[btagWP::no].push_back(count);
             if (myjet.btag_L)
-                map_j_btagWP[btagWP::L].push_back(count);
+                map_j[btagWP::L].push_back(count);
             if (myjet.btag_M)
-                map_j_btagWP[btagWP::M].push_back(count);
+                map_j[btagWP::M].push_back(count);
             if (myjet.btag_T)
-                map_j_btagWP[btagWP::T].push_back(count);
+                map_j[btagWP::T].push_back(count);
             count++;
         }
     }
 
     jj.clear();
     // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
-    for (unsigned int ijj = 0; ijj < map_jj_btagWP_pair.size(); ijj++)
-        map_jj_btagWP_pair[ijj].clear();
+    for (unsigned int ijj = 0; ijj < map_jj.size(); ijj++)
+        map_jj[ijj].clear();
     bitA = jetPair::Count;
     bitB = bitA * btagWP::Count;
     bitC = bitB * btagWP::Count;
@@ -478,106 +478,106 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.gen_DPtOverPt = myjj.gen_matched ? (myjj.p4.Pt() - myjj.gen_p4.Pt()) / myjj.p4.Pt() : -10.;
             jj.push_back(myjj);
             // fill dijet map
-            map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
+            map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
             if (jets[ijet1].btag_L)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
             if (jets[ijet2].btag_L)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LL)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LM)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_LT)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::L * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_ML)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_MM)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_MT)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::M * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TL)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::L * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TM)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::M * bitA + jetPair::ht].push_back(count);
             if (myjj.btag_TT)
-                map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
+                map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::T * bitB + btagWP::T * bitA + jetPair::ht].push_back(count);
             if (jets[ijet1].id_L)
             {
                 for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                     for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                        if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                map_jj_btagWP_pair[jetID::L  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                        if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                            if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                map_jj[jetID::L  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_L)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::L  * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::L  * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_T)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::L  * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::L  * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_TLV)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::L  * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::L  * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
             }
             if (jets[ijet1].id_T)
             {
                 for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                     for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                        if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                map_jj_btagWP_pair[jetID::T  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                        if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                            if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                map_jj[jetID::T  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_L)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::T  * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::T  * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_T)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::T  * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::T  * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_TLV)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::T  * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::T  * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
             }
             if (jets[ijet1].id_TLV)
             {
                 for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                     for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                        if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                            if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                map_jj_btagWP_pair[jetID::TLV * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                        if (map_jj[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                            if (map_jj[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                map_jj[jetID::TLV * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_L)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::TLV * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::TLV * bitD + jetID::L  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_T)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::TLV * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no  * bitD + jetID::no * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::TLV * bitD + jetID::T  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
                 if (jets[ijet2].id_TLV)
                     for (int ibtag = 0; ibtag < btagWP::Count; ibtag++)
                         for (int jbtag = 0; jbtag < btagWP::Count; jbtag++)
-                            if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
-                                if (map_jj_btagWP_pair[jetID::no  * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
-                                    map_jj_btagWP_pair[jetID::TLV * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
+                            if (map_jj[jetID::no  * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].size() > 0)
+                                if (map_jj[jetID::no  * bitD + jetID::no  * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].back() == count)
+                                    map_jj[jetID::TLV * bitD + jetID::TLV * bitC + ibtag * bitB + jbtag * bitA + jetPair::ht].push_back(count);
             }
             count++;
         }
@@ -602,25 +602,25 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                     int jcsv = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::csv;
                     int jjp = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::jp;
                     int jptOverM = ijetid1 * bitD + ijetid2 * bitC + ibtag1 * bitB + ibtag2 * bitA + jetPair::ptOverM;
-                    std::vector<int> tmp = map_jj_btagWP_pair[iht];
+                    std::vector<int> tmp = map_jj[iht];
                     // do the ptjj sorted maps
                     std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].p4.Pt() > jj[b].p4.Pt();});
-                    map_jj_btagWP_pair[jpt] = tmp;
+                    map_jj[jpt] = tmp;
                     // do the closest to mh sorted maps
-                    tmp = map_jj_btagWP_pair[iht];
+                    tmp = map_jj[iht];
                     std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return fabs(jj[a].p4.M() - mh) < fabs(jj[b].p4.M() - mh);});
-                    map_jj_btagWP_pair[jmh] = tmp;
+                    map_jj[jmh] = tmp;
                     // do the sum(btag) sorted maps
-                    tmp = map_jj_btagWP_pair[iht];
+                    tmp = map_jj[iht];
                     std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumCSV > jj[b].sumCSV;});
-                    map_jj_btagWP_pair[jcsv] = tmp;
-                    tmp = map_jj_btagWP_pair[iht];
+                    map_jj[jcsv] = tmp;
+                    tmp = map_jj[iht];
                     std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return jj[a].sumJP > jj[b].sumJP;});
-                    map_jj_btagWP_pair[jjp] = tmp;
+                    map_jj[jjp] = tmp;
                     // do the ptjj / mjj sorted maps
-                    tmp = map_jj_btagWP_pair[iht];
+                    tmp = map_jj[iht];
                     std::sort(tmp.begin(), tmp.end(), [&](const int& a, const int& b){return (jj[a].p4.Pt() / jj[a].p4.M()) > (jj[b].p4.Pt() / jj[b].p4.M());});
-                    map_jj_btagWP_pair[jptOverM] = tmp;
+                    map_jj[jptOverM] = tmp;
                 }
             }
         }
@@ -738,8 +738,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
     if (HHANADEBUG) {std::cout << "##### Now debugging the llmetjj maps" << std::endl;}
     // llmetjj maps: cross product of llmet and jj maps
-    for (unsigned int i = 0; i < map_llmetjj_id_iso_btagWP_pair.size(); i++)
-        map_llmetjj_id_iso_btagWP_pair[i].clear();
+    for (unsigned int i = 0; i < map_llmetjj.size(); i++)
+        map_llmetjj[i].clear();
 
     bitA = jetPair::Count;
     bitB = bitA * btagWP::Count;
@@ -794,27 +794,27 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                                             + ibtag1 * bitY
                                             + ibtag2 * bitX
                                             + ipair;
-                                        if (map_llmet_id_iso[illmet].size() == 0 || map_jj_btagWP_pair[ijj].size() == 0)
+                                        if (map_llmet[illmet].size() == 0 || map_jj[ijj].size() == 0)
                                             continue;
                                         if (HHANADEBUG)
                                         {
                                             std::cout << "Now treating illmetjj= " << illmetjj << " (illmet, ijj)= (" << illmet << ", " << ijj << ")" << std::endl;
-                                            std::cout << "map_llmet_id_iso[" << illmet << "].size()= " << map_llmet_id_iso[illmet].size() << std::endl;
-                                            for (unsigned int j = 0; j < map_llmet_id_iso[illmet].size(); j++)
-                                                std::cout << "\tmap_llmet_id_iso[" << illmet << "][" << j << "]= " << map_llmet_id_iso[illmet][j] << std::endl;
-                                            std::cout << "map_jj_btagWP_pair[" << ijj << "].size()= " << map_jj_btagWP_pair[ijj].size() << std::endl;
-                                            for (unsigned int j = 0; j < map_jj_btagWP_pair[ijj].size(); j++)
-                                                std::cout << "\tmap_jj_btagWP_pair[" << ijj << "][" << j << "]= " << map_jj_btagWP_pair[ijj][j] << std::endl;
+                                            std::cout << "map_llmet[" << illmet << "].size()= " << map_llmet[illmet].size() << std::endl;
+                                            for (unsigned int j = 0; j < map_llmet[illmet].size(); j++)
+                                                std::cout << "\tmap_llmet[" << illmet << "][" << j << "]= " << map_llmet[illmet][j] << std::endl;
+                                            std::cout << "map_jj[" << ijj << "].size()= " << map_jj[ijj].size() << std::endl;
+                                            for (unsigned int j = 0; j < map_jj[ijj].size(); j++)
+                                                std::cout << "\tmap_jj[" << ijj << "][" << j << "]= " << map_jj[ijj][j] << std::endl;
                                         }
-                                        for (unsigned int jjj = 0; jjj < map_jj_btagWP_pair[ijj].size(); jjj++)
+                                        for (unsigned int jjj = 0; jjj < map_jj[ijj].size(); jjj++)
                                         {
                                             for (unsigned int i = 0; i < llmetjj.size(); i++)
                                             {
-                                                if (std::find(map_llmet_id_iso[illmet].begin(), map_llmet_id_iso[illmet].end(), llmetjj[i].illmet) == map_llmet_id_iso[illmet].end())
+                                                if (std::find(map_llmet[illmet].begin(), map_llmet[illmet].end(), llmetjj[i].illmet) == map_llmet[illmet].end())
                                                     continue;
-                                                if (llmetjj[i].ijj == map_jj_btagWP_pair[ijj][jjj])
+                                                if (llmetjj[i].ijj == map_jj[ijj][jjj])
                                                 {
-                                                    map_llmetjj_id_iso_btagWP_pair[illmetjj].push_back(i);
+                                                    map_llmetjj[illmetjj].push_back(i);
                                                     break;
                                                 }
                                             }
@@ -840,18 +840,18 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         + btagWP::M * bitA
         + jetPair::ht;
     llmetjj_allTight_btagM_ht.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
-        llmetjj_allTight_btagM_ht.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
+        llmetjj_allTight_btagM_ht.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
     icustom = icustom - jetPair::ht + jetPair::pt;
     llmetjj_allTight_btagM_pt.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
-        llmetjj_allTight_btagM_pt.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
+        llmetjj_allTight_btagM_pt.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
     icustom = icustom - jetPair::pt + jetPair::csv;
     llmetjj_allTight_btagM_csv.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
-        llmetjj_allTight_btagM_csv.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
+        llmetjj_allTight_btagM_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
     // llmetjj_allTight_nobtag
     icustom = lepID::T * bitH
@@ -864,18 +864,18 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         + btagWP::no * bitA
         + jetPair::ht;
     llmetjj_allTight_nobtag_ht.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
-         llmetjj_allTight_nobtag_ht.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
+         llmetjj_allTight_nobtag_ht.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
     icustom = icustom - jetPair::ht + jetPair::pt;
     llmetjj_allTight_nobtag_pt.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
-        llmetjj_allTight_nobtag_pt.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
+        llmetjj_allTight_nobtag_pt.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
     icustom = icustom - jetPair::pt + jetPair::csv;
     llmetjj_allTight_nobtag_csv.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj_id_iso_btagWP_pair[icustom].size(); icandidate++)
-        llmetjj_allTight_nobtag_csv.push_back(llmetjj[map_llmetjj_id_iso_btagWP_pair[icustom][icandidate]]);
+    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
+        llmetjj_allTight_nobtag_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
 
 
     // ***** ***** *****
