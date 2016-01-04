@@ -153,6 +153,7 @@ namespace HH {
         float DR_llmet_jj;
         float DPhi_llmet_jj;
         float cosThetaStar_CS;
+        float MT_fullsystem;
         bool gen_matched;
         float gen_DR;
         float gen_DPhi;
