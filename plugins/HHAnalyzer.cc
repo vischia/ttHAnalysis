@@ -425,6 +425,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.gen_p4 = myjet.gen_matched ? alljets.gen_p4[ijet] : null_p4;
             myjet.gen_DR = myjet.gen_matched ? ROOT::Math::VectorUtil::DeltaR(myjet.p4, myjet.gen_p4) : -1.;
             myjet.gen_DPtOverPt = myjet.gen_matched ? (myjet.p4.Pt() - myjet.gen_p4.Pt()) / myjet.p4.Pt() : -10.;
+            myjet.gen_b = (alljets.hadronFlavor[ijet]) == 5; // redundant with gen_matched_bHadron defined above
+            myjet.gen_c = (alljets.hadronFlavor[ijet]) == 4;
+            myjet.gen_l = (alljets.hadronFlavor[ijet]) < 4;
             jets.push_back(myjet);
             // filling maps
             map_j[btagWP::no].push_back(count);
@@ -476,6 +479,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.gen_p4 = myjj.gen_matched ? jets[ijet1].gen_p4 + jets[ijet2].gen_p4 : null_p4;
             myjj.gen_DR = myjj.gen_matched ? ROOT::Math::VectorUtil::DeltaR(myjj.p4, myjj.gen_p4) : -1.;
             myjj.gen_DPtOverPt = myjj.gen_matched ? (myjj.p4.Pt() - myjj.gen_p4.Pt()) / myjj.p4.Pt() : -10.;
+            myjj.gen_bb = (jets[ijet1].gen_b && jets[ijet2].gen_b);
+            myjj.gen_bc = (jets[ijet1].gen_b && jets[ijet2].gen_c) || (jets[ijet1].gen_c && jets[ijet2].gen_b);
+            myjj.gen_bl = (jets[ijet1].gen_b && jets[ijet2].gen_l) || (jets[ijet1].gen_l && jets[ijet2].gen_b);
+            myjj.gen_cc = (jets[ijet1].gen_c && jets[ijet2].gen_c);
+            myjj.gen_cl = (jets[ijet1].gen_c && jets[ijet2].gen_l) || (jets[ijet1].gen_l && jets[ijet2].gen_c);
+            myjj.gen_ll = (jets[ijet1].gen_l && jets[ijet2].gen_l);
             jj.push_back(myjj);
             // fill dijet map
             map_jj[jetID::no * bitD + jetID::no * bitC + btagWP::no * bitB + btagWP::no * bitA + jetPair::ht].push_back(count);
@@ -682,6 +691,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
             myllmetjj.gen_matched_bbPartons = jj[ijj].gen_matched_bbPartons;
             myllmetjj.gen_matched_bbHadrons = jj[ijj].gen_matched_bbHadrons;
+            myllmetjj.gen_bb = jj[ijj].gen_bb;
+            myllmetjj.gen_bc = jj[ijj].gen_bc;
+            myllmetjj.gen_bl = jj[ijj].gen_bl;
+            myllmetjj.gen_cc = jj[ijj].gen_cc;
+            myllmetjj.gen_cl = jj[ijj].gen_cl;
+            myllmetjj.gen_ll = jj[ijj].gen_ll;
             // blind copy of the llmet content
             myllmetjj.ilep1 = ll[ill].ilep1;
             myllmetjj.ilep2 = ll[ill].ilep2;
