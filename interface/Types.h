@@ -96,6 +96,9 @@ namespace HH {
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
+        bool gen_b;
+        bool gen_c;
+        bool gen_l;
     };
     struct Dijet {
         LorentzVector p4;
@@ -121,6 +124,12 @@ namespace HH {
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
+        bool gen_bb;
+        bool gen_bc;
+        bool gen_bl;
+        bool gen_cc;
+        bool gen_cl;
+        bool gen_ll;
     };
     struct DileptonMetDijet : public DileptonMet, public Dijet {
         LorentzVector p4;
@@ -153,6 +162,7 @@ namespace HH {
         float DR_llmet_jj;
         float DPhi_llmet_jj;
         float cosThetaStar_CS;
+        float MT_fullsystem;
         bool gen_matched;
         float gen_DR;
         float gen_DPhi;
