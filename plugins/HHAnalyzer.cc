@@ -397,9 +397,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
     jets.clear();
-    for (unsigned int ibtag = 0; ibtag < map_j.size(); ibtag++)
-        map_j[ibtag].clear();
+    for (unsigned int imap_j = 0; imap_j < map_j.size(); imap_j++)
+        map_j[imap_j].clear();
 
+    bitA = btagWP::Count;
     // (The following include filling up the jets map
     int count = 0;
     for (unsigned int ijet = 0; ijet < alljets.p4.size(); ijet++)
@@ -430,13 +431,47 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.gen_l = (alljets.hadronFlavor[ijet]) < 4;
             jets.push_back(myjet);
             // filling maps
-            map_j[btagWP::no].push_back(count);
+            // no jet ID
+            map_j[jetID::no * bitA + btagWP::no].push_back(count);
             if (myjet.btag_L)
-                map_j[btagWP::L].push_back(count);
+                map_j[jetID::no * bitA + btagWP::L].push_back(count);
             if (myjet.btag_M)
-                map_j[btagWP::M].push_back(count);
+                map_j[jetID::no * bitA + btagWP::M].push_back(count);
             if (myjet.btag_T)
-                map_j[btagWP::T].push_back(count);
+                map_j[jetID::no * bitA + btagWP::T].push_back(count);
+            // loose jet ID
+            if (myjet.id_L)
+            {
+                map_j[jetID::L * bitA + btagWP::no].push_back(count);
+                if (myjet.btag_L)
+                    map_j[jetID::L * bitA + btagWP::L].push_back(count);
+                if (myjet.btag_M)
+                    map_j[jetID::L * bitA + btagWP::M].push_back(count);
+                if (myjet.btag_T)
+                    map_j[jetID::L * bitA + btagWP::T].push_back(count);
+            }
+            // tight jet ID
+            if (myjet.id_T)
+            {
+                map_j[jetID::T * bitA + btagWP::no].push_back(count);
+                if (myjet.btag_L)
+                    map_j[jetID::T * bitA + btagWP::L].push_back(count);
+                if (myjet.btag_M)
+                    map_j[jetID::T * bitA + btagWP::M].push_back(count);
+                if (myjet.btag_T)
+                    map_j[jetID::T * bitA + btagWP::T].push_back(count);
+            }
+            // tight jet ID lepton veto
+            if (myjet.id_TLV)
+            {
+                map_j[jetID::TLV * bitA + btagWP::no].push_back(count);
+                if (myjet.btag_L)
+                    map_j[jetID::TLV * bitA + btagWP::L].push_back(count);
+                if (myjet.btag_M)
+                    map_j[jetID::TLV * bitA + btagWP::M].push_back(count);
+                if (myjet.btag_T)
+                    map_j[jetID::TLV * bitA + btagWP::T].push_back(count);
+            }
             count++;
         }
     }
