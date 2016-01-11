@@ -1046,7 +1046,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         // Construct the signal gen-level info
         for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
             std::bitset<15> flags (gp.pruned_status_flags[ip]);
-            if (!flags.test(13)) continue; // take the last copies
+            if (!flags.test(14)) continue; // take the last copies before FSR
             if (flags.test(8)) // first look at the hard process
             {
                 if (HHANADEBUG)
@@ -1116,7 +1116,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
                 if (gp.pruned_pdg_id[ip] != 22) continue;
                 std::bitset<15> flags (gp.pruned_status_flags[ip]);
-                if (!flags.test(13)) continue; // take the last copies
+                if (!flags.test(14)) continue; // take the last copies
                 for (unsigned int imother = 0; imother < gp.pruned_mothers_index[ip].size(); imother++)
                 {
                     if (isThereFSRforL1)
@@ -1144,7 +1144,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
                 if (gp.pruned_pdg_id[ip] != 21) continue;
                 std::bitset<15> flags (gp.pruned_status_flags[ip]);
-                if (!flags.test(13)) continue; // take the last copies
+                if (!flags.test(14)) continue; // take the last copies
                 for (unsigned int imother = 0; imother < gp.pruned_mothers_index[ip].size(); imother++)
                 {
                     if (isThereFSRforB1)
