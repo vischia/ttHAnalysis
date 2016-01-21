@@ -14,6 +14,13 @@ class HHAnalyzer: public Framework::Analyzer {
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
             Analyzer(name, tree_, config)
         {
+            // Not untracked as these parameters are mandatory
+            m_electrons_producer = config.getParameter<std::string>("electronsProducer");
+            m_muons_producer = config.getParameter<std::string>("muonsProducer");
+            m_jets_producer = config.getParameter<std::string>("jetsProducer");
+            m_met_producer = config.getParameter<std::string>("metProducer");
+            m_nohf_met_producer = config.getParameter<std::string>("nohfMETProducer");
+            // other parameters
             m_muonLooseIsoCut = config.getUntrackedParameter<double>("muonLooseIsoCut", 0.25);
             m_muonTightIsoCut = config.getUntrackedParameter<double>("muonTightIsoCut", 0.15);
             m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4);
@@ -89,15 +96,6 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nLeptonsL, unsigned int);
         BRANCH(nLeptonsT, unsigned int);
 
-        float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_leadingElectronPtCut, m_subleadingElectronPtCut;
-        float m_muonLooseIsoCut, m_muonTightIsoCut, m_muonEtaCut, m_leadingMuonPtCut, m_subleadingMuonPtCut;
-        float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut_loose, m_jet_bDiscrCut_medium, m_jet_bDiscrCut_tight;
-        float m_minDR_l_j_Cut;
-        float m_hltDRCut, m_hltDPtCut;
-        std::string m_jet_bDiscrName;
-        std::string m_electron_loose_wp_name;
-        std::string m_electron_tight_wp_name;
-
         float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500)
         {// cos theta star angle in the Collins Soper frame
             LorentzVector p1, p2;
@@ -113,6 +111,23 @@ class HHAnalyzer: public Framework::Analyzer {
 
             return cos(ROOT::Math::VectorUtil::Angle(CSaxis.Unit(), newh1.Vect().Unit()));
         }
+
+    private:
+        // Producers name
+        std::string m_electrons_producer;
+        std::string m_muons_producer;
+        std::string m_jets_producer;
+        std::string m_met_producer;
+        std::string m_nohf_met_producer;
+        float m_electronIsoCut_EB_Loose, m_electronIsoCut_EE_Loose, m_electronIsoCut_EB_Tight, m_electronIsoCut_EE_Tight, m_electronEtaCut, m_leadingElectronPtCut, m_subleadingElectronPtCut;
+        float m_muonLooseIsoCut, m_muonTightIsoCut, m_muonEtaCut, m_leadingMuonPtCut, m_subleadingMuonPtCut;
+        float m_jetEtaCut, m_jetPtCut, m_jet_bDiscrCut_loose, m_jet_bDiscrCut_medium, m_jet_bDiscrCut_tight;
+        float m_minDR_l_j_Cut;
+        float m_hltDRCut, m_hltDPtCut;
+        std::string m_jet_bDiscrName;
+        std::string m_electron_loose_wp_name;
+        std::string m_electron_tight_wp_name;
+
 };
 
 #endif

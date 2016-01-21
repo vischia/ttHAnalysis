@@ -7,16 +7,14 @@ from cp3_llbb.Framework import METProducer
 
 runOnData = False
 
+globalTag_ = '74X_mcRun2_asymptotic_v2'
+processName_ = 'PAT'
 if runOnData :
-    globalTag = '74X_dataRun2_v2'
-    processName = 'RECO'
-else : 
-    globalTag = '74X_mcRun2_asymptotic_v2'
-    processName = None
+    globalTag_ = '74X_dataRun2_v2'
+    processName_ = 'RECO'
 
-process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
-
-    hh_analyzer = cms.PSet(
+framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
+framework.addAnalyzer('hh_analyzer', cms.PSet(
         type = cms.string('hh_analyzer'),
         prefix = cms.string('hh_'),
         enable = cms.bool(True),
@@ -24,6 +22,12 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             mll_cut = cms.untracked.double(10)
             ),
         parameters = cms.PSet(
+            # Producers
+            electronsProducer = cms.string('electrons'),
+            muonsProducer = cms.string('muons'),
+            jetsProducer = cms.string('jets'),
+            metProducer = cms.string('met'),
+            nohfMETProducer = cms.string('nohf_met'),
             # Here are the default value (just to show what is configurable)
             electronIsoCut_EB_Loose = cms.untracked.double(0.0893), # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
             electronIsoCut_EE_Loose = cms.untracked.double(0.121),
@@ -50,12 +54,10 @@ process = Framework.create(runOnData, eras.Run2_25ns, globalTag, cms.PSet(
             hltDPtCut = cms.untracked.double(0.5)  # cut will be DPt/Pt < hltDPtCut
             ),
         )
-    ), 
-    
-    redoJEC=False,
-    process_name=processName
-
     )
+#framework.redoJEC()
+framework.doSystematics(['jec', 'jer'])
+process = framework.create()
 
 # Add PUPPI MET
 process.framework.producers.puppimet = cms.PSet(METProducer.default_configuration.clone())
@@ -67,15 +69,14 @@ process.framework.producers.jets.parameters.cut = cms.untracked.string("pt > 20"
 #process.framework.producers.muons.parameters.cut = cms.untracked.string("pt > 20")
 #process.framework.producers.electrons.parameters.cut = cms.untracked.string("pt > 20")
 
-Framework.schedule(process, ['hh_analyzer'])
-
 if runOnData : 
     process.source.fileNames = cms.untracked.vstring(
         '/store/data/Run2015D/MuonEG/MINIAOD/PromptReco-v4/000/258/159/00000/64914E6C-F26B-E511-B0C8-02163E0142D1.root'
         )
 else : 
     process.source.fileNames = cms.untracked.vstring(
-        'file:////storage/data/cms/store/user/brfranco/testFiles/TTTo2L2Nu_13TeV-powheg_RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2-v1.root'
+#        'file:////storage/data/cms/store/user/brfranco/testFiles/TTTo2L2Nu_13TeV-powheg_RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2-v1.root'
+        'file:////storage/data/cms/store/user/obondu/testFiles/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1.root'
         )
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
