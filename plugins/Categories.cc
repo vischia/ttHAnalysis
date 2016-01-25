@@ -38,7 +38,7 @@ const unsigned int DileptonCategory::getNBJets(const AnalyzersManager& analyzers
 bool MuMuCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
-    return (muons.p4.size() >= 2 && alljets.p4.size() >= 2);
+    return (muons.p4.size() >= 2);
 };
 
 bool MuMuCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -48,8 +48,7 @@ bool MuMuCategory::event_in_category_post_analyzers(const ProducersManager& prod
     {
         if (ll[idilep].isMuMu) isMuMu = true;
     }
-    const unsigned int nJets = getNJets(analyzers);
-    return (isMuMu && nJets >= 2);
+    return (isMuMu);
 };
 
 void MuMuCategory::register_cuts(CutManager& manager) {
@@ -87,7 +86,7 @@ void MuMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
 bool ElElCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
-    return (electrons.p4.size() >= 2  && alljets.p4.size() >= 2);
+    return (electrons.p4.size() >= 2);
 };
 
 bool ElElCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -97,8 +96,7 @@ bool ElElCategory::event_in_category_post_analyzers(const ProducersManager& prod
     {
         if (ll[idilep].isElEl) isElEl = true;
     }
-    const unsigned int nJets = getNJets(analyzers);
-    return (isElEl && nJets >= 2);
+    return (isElEl);
 };
 
 void ElElCategory::register_cuts(CutManager& manager) {
@@ -135,7 +133,7 @@ bool ElMuCategory::event_in_category_pre_analyzers(const ProducersManager& produ
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
-    return ((electrons.p4.size() + muons.p4.size() >= 2)  && alljets.p4.size() >= 2);
+    return ((electrons.p4.size() + muons.p4.size()) >= 2);
 };
 
 bool ElMuCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -145,8 +143,7 @@ bool ElMuCategory::event_in_category_post_analyzers(const ProducersManager& prod
     {
         if (ll[idilep].isElMu) isElMu = true;
     }
-    const unsigned int nJets = getNJets(analyzers);
-    return (isElMu && nJets >= 2);
+    return (isElMu);
 };
 
 void ElMuCategory::register_cuts(CutManager& manager) {
@@ -181,7 +178,7 @@ bool MuElCategory::event_in_category_pre_analyzers(const ProducersManager& produ
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
     const JetsProducer& alljets = producers.get<JetsProducer>("jets");
-    return ((electrons.p4.size() + muons.p4.size() >= 2)  && alljets.p4.size() >= 2);
+    return ((electrons.p4.size() + muons.p4.size()) >= 2);
 };
 
 bool MuElCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
@@ -191,8 +188,7 @@ bool MuElCategory::event_in_category_post_analyzers(const ProducersManager& prod
     {
         if (ll[idilep].isMuEl) isMuEl = true;
     }
-    const unsigned int nJets = getNJets(analyzers);
-    return (isMuEl && nJets >= 2);
+    return (isMuEl);
 };
 
 void MuElCategory::register_cuts(CutManager& manager) {
