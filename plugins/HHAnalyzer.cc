@@ -71,8 +71,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ********** 
     // Leptons and dileptons
     // ********** 
-    const ElectronsProducer& allelectrons = producers.get<ElectronsProducer>("electrons");
-    const MuonsProducer& allmuons = producers.get<MuonsProducer>("muons");
+    const ElectronsProducer& allelectrons = producers.get<ElectronsProducer>(m_electrons_producer);
+    const MuonsProducer& allmuons = producers.get<MuonsProducer>(m_muons_producer);
 
     leptons.clear();
     ll.clear();
@@ -300,7 +300,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Adding MET(s)
     // ***** 
-    const METProducer& pf_met = producers.get<METProducer>("met");
+    const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
     HH::Met mymet;
     mymet.p4 = pf_met.p4;
     mymet.isNoHF = false;
@@ -326,7 +326,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         mymet.gen_DPtOverPt = mymet.gen_matched ? (mymet.p4.Pt() - mymet.gen_p4.Pt()) / mymet.p4.Pt() : -10.;
     }
     met.push_back(mymet);
-    const METProducer& nohf_met = producers.get<METProducer>("nohf_met");  // so that nohfmet is available in the tree
+    //const METProducer& nohf_met = producers.get<METProducer>(m_nohf_met_producer);  // so that nohfmet is available in the tree
     //const METProducer& puppi_met = producers.get<METProducer>("puppimet");
     // TODO: adding puppi met will require changing the Met AND DileptonMet struct
 
@@ -395,7 +395,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Jets and dijets 
     // ***** 
-    const JetsProducer& alljets = producers.get<JetsProducer>("jets");
+    const JetsProducer& alljets = producers.get<JetsProducer>(m_jets_producer);
     jets.clear();
     for (unsigned int imap_j = 0; imap_j < map_j.size(); imap_j++)
         map_j[imap_j].clear();
