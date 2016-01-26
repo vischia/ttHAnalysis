@@ -18,9 +18,6 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
         type = cms.string('hh_analyzer'),
         prefix = cms.string('hh_'),
         enable = cms.bool(True),
-        categories_parameters = cms.PSet(
-            mll_cut = cms.untracked.double(10)
-            ),
         parameters = cms.PSet(
             # Producers
             electronsProducer = cms.string('electrons'),
@@ -52,22 +49,24 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             minDR_l_j_Cut = cms.untracked.double(0.3),
             hltDRCut = cms.untracked.double(0.3),
             hltDPtCut = cms.untracked.double(0.5)  # cut will be DPt/Pt < hltDPtCut
-            ),
+            )
         )
     )
+
+# Add PUPPI MET
+puppiCfg = cms.PSet(METProducer.default_configuration.clone())
+puppiCfg.prefix = cms.string('puppimet_')
+puppiCfg.parameters.met = cms.untracked.InputTag('slimmedMETsPuppi')
+framework.addProducer('puppimet', puppiCfg)
+
 #framework.redoJEC()
+framework.smearJets()
 framework.doSystematics(['jec', 'jer'])
 process = framework.create()
 
-# Add PUPPI MET
-process.framework.producers.puppimet = cms.PSet(METProducer.default_configuration.clone())
-process.framework.producers.puppimet.prefix = cms.string('puppimet_')
-process.framework.producers.puppimet.parameters.met = cms.untracked.InputTag('slimmedMETsPuppi')
-
-# Custom the cuts
+# If we want to modify fwk parameters, it has to be done after create()
+# NB : so far, systematics would be with the jet pt by default in the framework
 process.framework.producers.jets.parameters.cut = cms.untracked.string("pt > 20")
-#process.framework.producers.muons.parameters.cut = cms.untracked.string("pt > 20")
-#process.framework.producers.electrons.parameters.cut = cms.untracked.string("pt > 20")
 
 if runOnData : 
     process.source.fileNames = cms.untracked.vstring(
