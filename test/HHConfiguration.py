@@ -48,7 +48,8 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             discr_cut_tight =  cms.untracked.double(0.97),
             minDR_l_j_Cut = cms.untracked.double(0.3),
             hltDRCut = cms.untracked.double(0.3),
-            hltDPtCut = cms.untracked.double(0.5)  # cut will be DPt/Pt < hltDPtCut
+            hltDPtCut = cms.untracked.double(0.5),  # cut will be DPt/Pt < hltDPtCut
+            applyBJetRegression = cms.untracked.bool(True) # BE SURE TO ACTIVATE computeRegression FLAG BELOW
             )
         )
     )
@@ -59,14 +60,13 @@ puppiCfg.prefix = cms.string('puppimet_')
 puppiCfg.parameters.met = cms.untracked.InputTag('slimmedMETsPuppi')
 framework.addProducer('puppimet', puppiCfg)
 
+framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
+framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
+
 #framework.redoJEC()
 framework.smearJets()
 framework.doSystematics(['jec', 'jer'])
 process = framework.create()
-
-# If we want to modify fwk parameters, it has to be done after create()
-# NB : so far, systematics would be with the jet pt by default in the framework
-process.framework.producers.jets.parameters.cut = cms.untracked.string("pt > 20")
 
 if runOnData : 
     process.source.fileNames = cms.untracked.vstring(
