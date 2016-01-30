@@ -245,7 +245,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
             if (!dilep.isOS)
                 continue;
-            if (!(leptons[ilep1].hlt_DR_matchedObject < 0.3 && leptons[ilep1].hlt_DR_matchedObject < 0.3))
+            if (event.isRealData() && !(leptons[ilep1].hlt_DR_matchedObject < 0.3 && leptons[ilep1].hlt_DR_matchedObject < 0.3))
                 continue;
             ll.push_back(dilep); 
         }
