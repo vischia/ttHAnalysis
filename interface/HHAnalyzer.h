@@ -37,6 +37,7 @@ class HHAnalyzer: public Framework::Analyzer {
             m_leadingElectronPtCut = config.getUntrackedParameter<double>("leadingElectronPtCut", 20);
             m_subleadingElectronPtCut = config.getUntrackedParameter<double>("subleadingElectronPtCut", 15);
             m_electron_loose_wp_name = config.getUntrackedParameter<std::string>("electrons_loose_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-loose");
+            m_electron_medium_wp_name = config.getUntrackedParameter<std::string>("electrons_medium_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-medium");
             m_electron_tight_wp_name = config.getUntrackedParameter<std::string>("electrons_tight_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-tight");
 
             m_jetEtaCut = config.getUntrackedParameter<double>("jetEtaCut", 2.4);
@@ -79,6 +80,11 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(llmetjj_allTight_nobtag_ht, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_allTight_nobtag_pt, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_allTight_nobtag_csv, std::vector<HH::DileptonMetDijet>);
+        // Januray 2016: preapproval freezing custom candidates
+        BRANCH(llmetjj_HWWleptons_nobtag_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_HWWleptons_btagL_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_HWWleptons_btagM_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_HWWleptons_btagT_csv, std::vector<HH::DileptonMetDijet>);
 
         // maps
         std::vector<std::vector<int>>& map_l = tree["map_l"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count, std::vector<int>(0));
@@ -126,6 +132,7 @@ class HHAnalyzer: public Framework::Analyzer {
         float m_hltDRCut, m_hltDPtCut;
         std::string m_jet_bDiscrName;
         std::string m_electron_loose_wp_name;
+        std::string m_electron_medium_wp_name;
         std::string m_electron_tight_wp_name;
         bool m_applyBJetRegression;
         std::map<std::string, ScaleFactor> m_hlt_efficiencies;

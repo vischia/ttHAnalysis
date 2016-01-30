@@ -20,9 +20,12 @@ namespace HH {
         bool isMu;
         bool isEl;
         bool id_L; // Loose
+        bool id_M; // Medium
         bool id_T; // Tight
+        bool id_HWW; // HWW-like id
         bool iso_L; // Loose
         bool iso_T; // Tight
+        bool iso_HWW;
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
@@ -41,13 +44,30 @@ namespace HH {
         bool isMuEl;
         bool isSF; // Same Flavour
         bool id_LL;
+        bool id_LM;
         bool id_LT;
+        bool id_LHWW;
+        bool id_ML;
+        bool id_MM;
+        bool id_MT;
+        bool id_MHWW;
         bool id_TL;
+        bool id_TM;
         bool id_TT;
+        bool id_THWW;
+        bool id_HWWL;
+        bool id_HWWM;
+        bool id_HWWT;
+        bool id_HWWHWW;
         bool iso_LL;
         bool iso_LT;
+        bool iso_LHWW;
         bool iso_TL;
         bool iso_TT;
+        bool iso_THWW;
+        bool iso_HWWL;
+        bool iso_HWWT;
+        bool iso_HWWHWW;
         float DR_l_l;
         float DPhi_l_l;
         bool gen_matched;

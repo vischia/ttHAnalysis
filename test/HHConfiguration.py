@@ -39,6 +39,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             subleadingMuonPtCut = cms.untracked.double(10),
             muonEtaCut = cms.untracked.double(2.4),
             electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
+            electrons_medium_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"),
             electrons_tight_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
             jetEtaCut = cms.untracked.double(2.4),
             jetPtCut = cms.untracked.double(20),
@@ -47,9 +48,9 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             discr_cut_medium =  cms.untracked.double(0.89),
             discr_cut_tight =  cms.untracked.double(0.97),
             minDR_l_j_Cut = cms.untracked.double(0.3),
-            hltDRCut = cms.untracked.double(0.3),
+            hltDRCut = cms.untracked.double(0.1),
             hltDPtCut = cms.untracked.double(0.5),  # cut will be DPt/Pt < hltDPtCut
-            applyBJetRegression = cms.untracked.bool(True) # BE SURE TO ACTIVATE computeRegression FLAG BELOW
+            applyBJetRegression = cms.untracked.bool(True), # BE SURE TO ACTIVATE computeRegression FLAG BELOW
             hlt_efficiencies = cms.untracked.PSet(
                 Ele17_12Leg1 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg1_TightID.json'),
                 Ele17_12Leg2 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg2_TightID.json'),
