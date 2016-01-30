@@ -37,6 +37,7 @@ class HHAnalyzer: public Framework::Analyzer {
             m_leadingElectronPtCut = config.getUntrackedParameter<double>("leadingElectronPtCut", 20);
             m_subleadingElectronPtCut = config.getUntrackedParameter<double>("subleadingElectronPtCut", 15);
             m_electron_loose_wp_name = config.getUntrackedParameter<std::string>("electrons_loose_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-loose");
+            m_electron_medium_wp_name = config.getUntrackedParameter<std::string>("electrons_medium_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-medium");
             m_electron_tight_wp_name = config.getUntrackedParameter<std::string>("electrons_tight_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-tight");
 
             m_jetEtaCut = config.getUntrackedParameter<double>("jetEtaCut", 2.4);
@@ -131,6 +132,7 @@ class HHAnalyzer: public Framework::Analyzer {
         float m_hltDRCut, m_hltDPtCut;
         std::string m_jet_bDiscrName;
         std::string m_electron_loose_wp_name;
+        std::string m_electron_medium_wp_name;
         std::string m_electron_tight_wp_name;
         bool m_applyBJetRegression;
         std::map<std::string, ScaleFactor> m_hlt_efficiencies;

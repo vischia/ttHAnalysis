@@ -91,7 +91,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.isMu = false;
             ele.isEl = true;
             ele.id_L = allelectrons.ids[ielectron][m_electron_loose_wp_name];
-            ele.id_M = ele.id_L; // FIXME: for now (January 2016) there is no Medium WP for electrons
+            ele.id_M = allelectrons.ids[ielectron][m_electron_medium_wp_name];
             ele.id_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
             ele.id_HWW = ele.id_T;
             ele.iso_L = allelectrons.isEB[ielectron] ? (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EB_Loose) : (allelectrons.relativeIsoR03_withEA[ielectron] < m_electronIsoCut_EE_Loose);

@@ -39,6 +39,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             subleadingMuonPtCut = cms.untracked.double(10),
             muonEtaCut = cms.untracked.double(2.4),
             electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
+            electrons_medium_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"),
             electrons_tight_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
             jetEtaCut = cms.untracked.double(2.4),
             jetPtCut = cms.untracked.double(20),
