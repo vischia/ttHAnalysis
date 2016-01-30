@@ -48,7 +48,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             discr_cut_medium =  cms.untracked.double(0.89),
             discr_cut_tight =  cms.untracked.double(0.97),
             minDR_l_j_Cut = cms.untracked.double(0.3),
-            hltDRCut = cms.untracked.double(0.3),
+            hltDRCut = cms.untracked.double(0.1),
             hltDPtCut = cms.untracked.double(0.5),  # cut will be DPt/Pt < hltDPtCut
             applyBJetRegression = cms.untracked.bool(True), # BE SURE TO ACTIVATE computeRegression FLAG BELOW
             hlt_efficiencies = cms.untracked.PSet(
