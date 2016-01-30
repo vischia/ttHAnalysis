@@ -242,6 +242,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             else {
                fillTriggerEfficiencies(leptons[ilep1], leptons[ilep2], dilep);
             }
+
+            if (!dilep.isOS)
+                continue;
+            if (!(leptons[ilep1].hlt_DR_matchedObject < 0.3 && leptons[ilep1].hlt_DR_matchedObject < 0.3))
+                continue;
             ll.push_back(dilep); 
         }
     }
