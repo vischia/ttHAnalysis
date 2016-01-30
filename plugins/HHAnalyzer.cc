@@ -405,11 +405,20 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     int count = 0;
     for (unsigned int ijet = 0; ijet < alljets.p4.size(); ijet++)
     {
-        if ((alljets.p4[ijet].Pt() > m_jetPtCut) 
+        float correctionFactor = m_applyBJetRegression ? alljets.regPt[ijet] / alljets.p4[ijet].Pt() : 1.;
+/*
+        std::cout << "m_jets_producer= " << m_jets_producer
+            << "\tm_applyBJetRegression= " << m_applyBJetRegression
+            << "\talljets.p4[" << ijet << "].Pt()= " << alljets.p4[ijet].Pt()
+            << "\talljets.regPt[" << ijet << "]= " << alljets.regPt[ijet]
+            << "\tcorrectionFactor= " << correctionFactor
+            << std::endl;
+*/
+        if ((alljets.p4[ijet].Pt() * correctionFactor > m_jetPtCut) 
             && (fabs(alljets.p4[ijet].Eta()) < m_jetEtaCut))
         {
             HH::Jet myjet;
-            myjet.p4 = alljets.p4[ijet];
+            myjet.p4 = alljets.p4[ijet] * correctionFactor;
             myjet.idx = ijet;
             myjet.id_L = alljets.passLooseID[ijet];
             myjet.id_T = alljets.passTightID[ijet];
