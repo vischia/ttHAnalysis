@@ -55,7 +55,9 @@ namespace HH {
         float gen_DPtOverPt;
         float trigger_efficiency;
         float trigger_efficiency_downVariated;
+        float trigger_efficiency_downVariated_Arun;
         float trigger_efficiency_upVariated;
+        float trigger_efficiency_upVariated_Arun;
     };
     struct Met {
         LorentzVector p4;

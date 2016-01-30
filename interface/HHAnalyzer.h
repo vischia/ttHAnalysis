@@ -55,7 +55,6 @@ class HHAnalyzer: public Framework::Analyzer {
                 const edm::ParameterSet& hlt_efficiencies = config.getUntrackedParameter<edm::ParameterSet>("hlt_efficiencies");
                 std::vector<std::string> hlt_efficiencies_name = hlt_efficiencies.getParameterNames();
                 for (const std::string& hlt_efficiency: hlt_efficiencies_name) {
-                    std::cout << "Adding hlt efficiencies : " << hlt_efficiency << std::endl;
                     ScaleFactorParser parser(hlt_efficiencies.getUntrackedParameter<edm::FileInPath>(hlt_efficiency).fullPath());
                     m_hlt_efficiencies.emplace(hlt_efficiency, std::move(parser.get_scale_factor()));
                 }
@@ -93,6 +92,10 @@ class HHAnalyzer: public Framework::Analyzer {
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
 
+        float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500);
+
+        void fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep);
+
         // global event stuff (selected objects multiplicity)
         BRANCH(nJets, unsigned int);
         BRANCH(nJetsL, unsigned int);
@@ -108,57 +111,6 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nLeptons, unsigned int);
         BRANCH(nLeptonsL, unsigned int);
         BRANCH(nLeptonsT, unsigned int);
-
-        float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500)
-        {// cos theta star angle in the Collins Soper frame
-            LorentzVector p1, p2;
-            p1.SetPxPyPzE(0, 0,  ebeam, ebeam);
-            p2.SetPxPyPzE(0, 0, -ebeam, ebeam);
-
-            LorentzVector hh = h1 + h2;
-            ROOT::Math::Boost boost(-hh.X() / hh.T(), -hh.Y() / hh.T(), -hh.Z() / hh.T());
-            p1 = boost(p1);
-            p2 = boost(p2);
-            LorentzVector newh1 = boost(h1);
-            ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double>> CSaxis(p1.Vect().Unit() - p2.Vect().Unit());
-
-            return cos(ROOT::Math::VectorUtil::Angle(CSaxis.Unit(), newh1.Vect().Unit()));
-        }
-
-        float getTriggerEfficiency(const Lepton & lep1, const Lepton & lep2)
-        {
-            float lep1_leg1 = 1., lep1_leg2 = 1., lep2_leg1 = 1., lep2_leg2 = 1.;
-            if (lep1.isMu && lep2.isMu) {
-                lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                lep1_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                //lep1_tkLeg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-                lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-                //lep2_tkLeg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-            }
-            else if (lep1.isMu && lep2.isEl) {
-                lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                lep1_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                lep2_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-                lep2_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-            }
-            else if (lep1.isEl && lep2.isMu) {
-                lep1_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                lep1_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-                lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-            }
-            else if (lep1.isEl && lep2.isEl){
-                lep1_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                lep1_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-                lep2_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-                lep2_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-            }
-            float total_efficiency = lep1_leg1 * lep2_leg2 + lep1_leg2 * lep2_leg1 - lep1_leg1 * lep2_leg1;
-            return total_efficiency;
-        }
-
-        
 
     private:
         // Producers name
