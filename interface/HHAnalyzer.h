@@ -3,10 +3,12 @@
 
 #include <cp3_llbb/Framework/interface/Analyzer.h>
 #include <cp3_llbb/Framework/interface/Category.h>
+#include <cp3_llbb/Framework/interface/ScaleFactorParser.h>
 #include <cp3_llbb/HHAnalysis/interface/Types.h>
 
 #include <Math/VectorUtil.h>
 
+using namespace HH;
 using namespace HHAnalysis;
 
 class HHAnalyzer: public Framework::Analyzer {
@@ -48,6 +50,15 @@ class HHAnalyzer: public Framework::Analyzer {
 
             m_hltDRCut = config.getUntrackedParameter<double>("hltDRCut", std::numeric_limits<float>::max());
             m_hltDPtCut = config.getUntrackedParameter<double>("hltDPtCut", std::numeric_limits<float>::max());
+
+            if (config.exists("hlt_efficiencies")){
+                const edm::ParameterSet& hlt_efficiencies = config.getUntrackedParameter<edm::ParameterSet>("hlt_efficiencies");
+                std::vector<std::string> hlt_efficiencies_name = hlt_efficiencies.getParameterNames();
+                for (const std::string& hlt_efficiency: hlt_efficiencies_name) {
+                    ScaleFactorParser parser(hlt_efficiencies.getUntrackedParameter<edm::FileInPath>(hlt_efficiency).fullPath());
+                    m_hlt_efficiencies.emplace(hlt_efficiency, std::move(parser.get_scale_factor()));
+                }
+            }
         }
 
         // leptons and dileptons stuff
@@ -81,6 +92,10 @@ class HHAnalyzer: public Framework::Analyzer {
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
 
+        float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500);
+
+        void fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep);
+
         // global event stuff (selected objects multiplicity)
         BRANCH(nJets, unsigned int);
         BRANCH(nJetsL, unsigned int);
@@ -96,22 +111,6 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nLeptons, unsigned int);
         BRANCH(nLeptonsL, unsigned int);
         BRANCH(nLeptonsT, unsigned int);
-
-        float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500)
-        {// cos theta star angle in the Collins Soper frame
-            LorentzVector p1, p2;
-            p1.SetPxPyPzE(0, 0,  ebeam, ebeam);
-            p2.SetPxPyPzE(0, 0, -ebeam, ebeam);
-
-            LorentzVector hh = h1 + h2;
-            ROOT::Math::Boost boost(-hh.X() / hh.T(), -hh.Y() / hh.T(), -hh.Z() / hh.T());
-            p1 = boost(p1);
-            p2 = boost(p2);
-            LorentzVector newh1 = boost(h1);
-            ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double>> CSaxis(p1.Vect().Unit() - p2.Vect().Unit());
-
-            return cos(ROOT::Math::VectorUtil::Angle(CSaxis.Unit(), newh1.Vect().Unit()));
-        }
 
     private:
         // Producers name
@@ -129,6 +128,7 @@ class HHAnalyzer: public Framework::Analyzer {
         std::string m_electron_loose_wp_name;
         std::string m_electron_tight_wp_name;
         bool m_applyBJetRegression;
+        std::map<std::string, ScaleFactor> m_hlt_efficiencies;
 
 };
 
