@@ -3,7 +3,7 @@
 
 #include <cp3_llbb/Framework/interface/Analyzer.h>
 #include <cp3_llbb/Framework/interface/Category.h>
-#include <cp3_llbb/Framework/interface/ScaleFactorParser.h>
+#include <cp3_llbb/Framework/interface/BinnedValuesJSONParser.h>
 #include <cp3_llbb/HHAnalysis/interface/Types.h>
 
 #include <Math/VectorUtil.h>
@@ -56,8 +56,8 @@ class HHAnalyzer: public Framework::Analyzer {
                 const edm::ParameterSet& hlt_efficiencies = config.getUntrackedParameter<edm::ParameterSet>("hlt_efficiencies");
                 std::vector<std::string> hlt_efficiencies_name = hlt_efficiencies.getParameterNames();
                 for (const std::string& hlt_efficiency: hlt_efficiencies_name) {
-                    ScaleFactorParser parser(hlt_efficiencies.getUntrackedParameter<edm::FileInPath>(hlt_efficiency).fullPath());
-                    m_hlt_efficiencies.emplace(hlt_efficiency, std::move(parser.get_scale_factor()));
+                    BinnedValuesJSONParser parser(hlt_efficiencies.getUntrackedParameter<edm::FileInPath>(hlt_efficiency).fullPath());
+                    m_hlt_efficiencies.emplace(hlt_efficiency, std::move(parser.get_values()));
                 }
             }
         }
@@ -135,7 +135,7 @@ class HHAnalyzer: public Framework::Analyzer {
         std::string m_electron_medium_wp_name;
         std::string m_electron_tight_wp_name;
         bool m_applyBJetRegression;
-        std::map<std::string, ScaleFactor> m_hlt_efficiencies;
+        std::map<std::string, BinnedValues> m_hlt_efficiencies;
 
 };
 
