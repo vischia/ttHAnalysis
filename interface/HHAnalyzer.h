@@ -79,6 +79,11 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(llmetjj_allTight_nobtag_ht, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_allTight_nobtag_pt, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_allTight_nobtag_csv, std::vector<HH::DileptonMetDijet>);
+        // Januray 2016: preapproval freezing custom candidates
+        BRANCH(llmetjj_HWWleptons_nobtag_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_HWWleptons_btagL_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_HWWleptons_btagM_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_HWWleptons_btagT_csv, std::vector<HH::DileptonMetDijet>);
 
         // maps
         std::vector<std::vector<int>>& map_l = tree["map_l"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count, std::vector<int>(0));
