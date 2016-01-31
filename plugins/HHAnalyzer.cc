@@ -120,7 +120,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             mu.id_L = allmuons.isLoose[imuon];
             mu.id_M = allmuons.isMedium[imuon];
             mu.id_T = allmuons.isTight[imuon];
-            mu.id_HWW = mu.id_M && (allmuons.dz[imuon] < 0.1) && (allmuons.dxy[imuon] < 0.02);
+            mu.id_HWW = mu.id_M && (mu.p4.Pt() < 20. ? fabs(allmuons.dxy[imuon]) < 0.01 : fabs(allmuons.dxy[imuon]) < 0.02) && (fabs(allmuons.dz[imuon]) < 0.1);
             mu.iso_L = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonLooseIsoCut;
             mu.iso_T = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonTightIsoCut;
             mu.iso_HWW = mu.iso_T; // For the isolation use relative PF isolation (cone size = 0.4) with deltaBeta PU corrections (a.l.a. Run I) and WP < 0.15
