@@ -67,6 +67,9 @@ puppiCfg.prefix = cms.string('puppimet_')
 puppiCfg.parameters.met = cms.untracked.InputTag('slimmedMETsPuppi')
 framework.addProducer('puppimet', puppiCfg)
 
+# Remove fat jets
+framework.removeProducer('fat_jets')
+
 framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
 framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
 
