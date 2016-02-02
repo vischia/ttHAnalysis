@@ -823,40 +823,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
     // Adding some few custom candidates, for convenience
-    // llmetjj_allTight_btagL
-    int icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::L, jetID::T, btagWP::L, jetPair::ht);
-    llmetjj_allTight_btagL_ht.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagL_ht.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::L, jetID::T, btagWP::L, jetPair::pt);
-    llmetjj_allTight_btagL_pt.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagL_pt.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::L, jetID::T, btagWP::L, jetPair::csv);
-    llmetjj_allTight_btagL_csv.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagL_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    // llmetjj_allTight_nobtag
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::no, jetID::T, btagWP::no, jetPair::ht);
-    llmetjj_allTight_nobtag_ht.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-         llmetjj_allTight_nobtag_ht.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::no, jetID::T, btagWP::no, jetPair::pt);
-    llmetjj_allTight_nobtag_pt.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_nobtag_pt.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::no, jetID::T, btagWP::no, jetPair::csv);
-    llmetjj_allTight_nobtag_csv.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_nobtag_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::HWW, lepIso::HWW, lepID::HWW, lepIso::HWW, jetID::L, btagWP::no, jetID::L, btagWP::no, jetPair::csv);
+    int icustom = leplepIDIsojetjetIDbtagWPPair(lepID::HWW, lepIso::HWW, lepID::HWW, lepIso::HWW, jetID::L, btagWP::no, jetID::L, btagWP::no, jetPair::csv);
     llmetjj_HWWleptons_nobtag_csv.clear();
     for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
         llmetjj_HWWleptons_nobtag_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
