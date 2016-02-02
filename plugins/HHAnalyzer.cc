@@ -15,10 +15,12 @@
 #define HHANADEBUG 0
 
 void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
-    manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", config);
-    manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons", config);
-    manager.new_category<ElMuCategory>("elmu", "Category with leading leptons as electron, subleading as muon", config);
-    manager.new_category<MuElCategory>("muel", "Category with leading leptons as muon, subleading as electron", config);
+    edm::ParameterSet newconfig = edm::ParameterSet(config);
+    newconfig.addUntrackedParameter("m_analyzer_name", this->m_name);
+    manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", newconfig);
+    manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons", newconfig);
+    manager.new_category<ElMuCategory>("elmu", "Category with leading leptons as electron, subleading as muon", newconfig);
+    manager.new_category<MuElCategory>("muel", "Category with leading leptons as muon, subleading as electron", newconfig);
 }
 
 
@@ -247,6 +249,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                 continue;
             if (event.isRealData() && !(leptons[ilep1].hlt_DR_matchedObject < m_hltDRCut && leptons[ilep1].hlt_DR_matchedObject < m_hltDRCut))
                 continue;
+            if (!(dilep.id_HWWHWW && dilep.iso_HWWHWW))
+                continue;
             ll.push_back(dilep); 
         }
     }
@@ -460,6 +464,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.gen_b = (alljets.hadronFlavor[ijet]) == 5; // redundant with gen_matched_bHadron defined above
             myjet.gen_c = (alljets.hadronFlavor[ijet]) == 4;
             myjet.gen_l = (alljets.hadronFlavor[ijet]) < 4;
+            if (!myjet.id_L)
+                continue;
             jets.push_back(myjet);
             // filling maps
             // no jet ID

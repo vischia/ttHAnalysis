@@ -9,13 +9,18 @@
 // ***** ***** *****
 
 const std::vector<HH::Lepton>& DileptonCategory::getLeptons(const AnalyzersManager& analyzers) const {
-    const HHAnalyzer& hh_analyzer = analyzers.get<HHAnalyzer>("hh_analyzer");
+    const HHAnalyzer& hh_analyzer = analyzers.get<HHAnalyzer>(m_analyzer_name);
     return hh_analyzer.leptons;
 }
 
 const std::vector<HH::Dilepton>& DileptonCategory::getDileptons(const AnalyzersManager& analyzers) const {
-    const HHAnalyzer& hh_analyzer = analyzers.get<HHAnalyzer>("hh_analyzer");
+    const HHAnalyzer& hh_analyzer = analyzers.get<HHAnalyzer>(m_analyzer_name);
     return hh_analyzer.ll;
+}
+
+const std::vector<HH::DileptonMetDijet>& DileptonCategory::getDileptonMetDijets(const AnalyzersManager& analyzers) const {
+    const HHAnalyzer& hh_analyzer = analyzers.get<HHAnalyzer>(m_analyzer_name);
+    return hh_analyzer.llmetjj;
 }
 
 // ***** ***** *****
@@ -28,12 +33,13 @@ bool MuMuCategory::event_in_category_pre_analyzers(const ProducersManager& produ
 
 bool MuMuCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
     const std::vector<HH::Dilepton>& ll = getDileptons(analyzers);
+    const std::vector<HH::DileptonMetDijet>& llmetjj = getDileptonMetDijets(analyzers);
     bool isMuMu = false;
     for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
     {
         if (ll[idilep].isMuMu) isMuMu = true;
     }
-    return (isMuMu);
+    return (isMuMu && llmetjj.size() > 0);
 };
 
 void MuMuCategory::register_cuts(CutManager& manager) {
@@ -62,12 +68,13 @@ bool ElElCategory::event_in_category_pre_analyzers(const ProducersManager& produ
 
 bool ElElCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
     const std::vector<HH::Dilepton>& ll = getDileptons(analyzers);
+    const std::vector<HH::DileptonMetDijet>& llmetjj = getDileptonMetDijets(analyzers);
     bool isElEl = false;
     for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
     {
         if (ll[idilep].isElEl) isElEl = true;
     }
-    return (isElEl);
+    return (isElEl && llmetjj.size() > 0);
 };
 
 void ElElCategory::register_cuts(CutManager& manager) {
@@ -95,12 +102,13 @@ bool ElMuCategory::event_in_category_pre_analyzers(const ProducersManager& produ
 
 bool ElMuCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
     const std::vector<HH::Dilepton>& ll = getDileptons(analyzers);
+    const std::vector<HH::DileptonMetDijet>& llmetjj = getDileptonMetDijets(analyzers);
     bool isElMu = false;
     for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
     {
         if (ll[idilep].isElMu) isElMu = true;
     }
-    return (isElMu);
+    return (isElMu && llmetjj.size() > 0);
 };
 
 void ElMuCategory::register_cuts(CutManager& manager) {
@@ -126,12 +134,13 @@ bool MuElCategory::event_in_category_pre_analyzers(const ProducersManager& produ
 
 bool MuElCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
     const std::vector<HH::Dilepton>& ll = getDileptons(analyzers);
+    const std::vector<HH::DileptonMetDijet>& llmetjj = getDileptonMetDijets(analyzers);
     bool isMuEl = false;
     for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
     {
         if (ll[idilep].isMuEl) isMuEl = true;
     }
-    return (isMuEl);
+    return (isMuEl && llmetjj.size() > 0);
 };
 
 void MuElCategory::register_cuts(CutManager& manager) {
