@@ -61,6 +61,7 @@ class HHAnalyzer: public Framework::Analyzer {
                 }
             }
         }
+        virtual void endJob(MetadataManager&) override;
 
         // leptons and dileptons stuff
         BRANCH(electrons, std::vector<unsigned int>);
@@ -110,6 +111,22 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nLeptons, unsigned int);
         BRANCH(nLeptonsL, unsigned int);
         BRANCH(nLeptonsT, unsigned int);
+
+        float count_has2leptons = 0.;
+        float count_has2leptons_elel = 0.;
+        float count_has2leptons_elmu = 0.;
+        float count_has2leptons_muel = 0.;
+        float count_has2leptons_mumu = 0.;
+        float count_has2leptons_1llmetjj = 0.;
+        float count_has2leptons_elel_1llmetjj = 0.;
+        float count_has2leptons_elmu_1llmetjj = 0.;
+        float count_has2leptons_muel_1llmetjj = 0.;
+        float count_has2leptons_mumu_1llmetjj = 0.;
+        float count_has2leptons_1llmetjj_2btagM = 0.;
+        float count_has2leptons_elel_1llmetjj_2btagM = 0.;
+        float count_has2leptons_elmu_1llmetjj_2btagM = 0.;
+        float count_has2leptons_muel_1llmetjj_2btagM = 0.;
+        float count_has2leptons_mumu_1llmetjj_2btagM = 0.;
 
     private:
         // Producers name
