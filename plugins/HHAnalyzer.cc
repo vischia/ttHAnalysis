@@ -304,6 +304,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Adding MET(s)
     // ***** 
+    met.clear();
+    llmet.clear();
     const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
     HH::Met mymet;
     mymet.p4 = pf_met.p4;
