@@ -763,6 +763,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.iso_HWWHWW = ll[ill].iso_HWWHWW;
             myllmetjj.DR_l_l = ll[ill].DR_l_l;
             myllmetjj.DPhi_l_l = ll[ill].DPhi_l_l;
+            myllmetjj.trigger_efficiency = ll[ill].trigger_efficiency;
+            myllmetjj.trigger_efficiency_downVariated = ll[ill].trigger_efficiency_downVariated;
+            myllmetjj.trigger_efficiency_downVariated_Arun = ll[ill].trigger_efficiency_downVariated_Arun;
+            myllmetjj.trigger_efficiency_upVariated = ll[ill].trigger_efficiency_upVariated;
+            myllmetjj.trigger_efficiency_upVariated_Arun = ll[ill].trigger_efficiency_upVariated_Arun;
             myllmetjj.ill = ill;
             myllmetjj.imet = imet;
             myllmetjj.isNoHF = met[imet].isNoHF;
