@@ -2,6 +2,7 @@
 #include <cp3_llbb/Framework/interface/BTagsAnalyzer.h>
 #include <cp3_llbb/HHAnalysis/interface/Categories.h>
 
+#include <cp3_llbb/Framework/interface/EventProducer.h>
 #include <cp3_llbb/Framework/interface/GenParticlesProducer.h>
 #include <cp3_llbb/Framework/interface/JetsProducer.h>
 #include <cp3_llbb/Framework/interface/LeptonsProducer.h>
@@ -15,10 +16,12 @@
 #define HHANADEBUG 0
 
 void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
-    manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", config);
-    manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons", config);
-    manager.new_category<ElMuCategory>("elmu", "Category with leading leptons as electron, subleading as muon", config);
-    manager.new_category<MuElCategory>("muel", "Category with leading leptons as muon, subleading as electron", config);
+    edm::ParameterSet newconfig = edm::ParameterSet(config);
+    newconfig.addUntrackedParameter("m_analyzer_name", this->m_name);
+    manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", newconfig);
+    manager.new_category<ElElCategory>("elel", "Category with leading leptons as two electrons", newconfig);
+    manager.new_category<ElMuCategory>("elmu", "Category with leading leptons as electron, subleading as muon", newconfig);
+    manager.new_category<MuElCategory>("muel", "Category with leading leptons as muon, subleading as electron", newconfig);
 }
 
 
@@ -26,6 +29,23 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
     float mh = event.isRealData() ? 125.02 : 125.0;
     LorentzVector null_p4(0., 0., 0., 0.);
+    const EventProducer& fwevent = producers.get<EventProducer>("event");
+    float event_weight = fwevent.weight;
+    float tmp_count_has2leptons = 0.;
+    float tmp_count_has2leptons_elel = 0.;
+    float tmp_count_has2leptons_elmu = 0.;
+    float tmp_count_has2leptons_muel = 0.;
+    float tmp_count_has2leptons_mumu = 0.;
+    float tmp_count_has2leptons_1llmetjj = 0.;
+    float tmp_count_has2leptons_elel_1llmetjj = 0.;
+    float tmp_count_has2leptons_elmu_1llmetjj = 0.;
+    float tmp_count_has2leptons_muel_1llmetjj = 0.;
+    float tmp_count_has2leptons_mumu_1llmetjj = 0.;
+    float tmp_count_has2leptons_1llmetjj_2btagM = 0.;
+    float tmp_count_has2leptons_elel_1llmetjj_2btagM = 0.;
+    float tmp_count_has2leptons_elmu_1llmetjj_2btagM = 0.;
+    float tmp_count_has2leptons_muel_1llmetjj_2btagM = 0.;
+    float tmp_count_has2leptons_mumu_1llmetjj_2btagM = 0.;
 
     // ***** ***** *****
     // Trigger Matching
@@ -242,11 +262,24 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             else {
                fillTriggerEfficiencies(leptons[ilep1], leptons[ilep2], dilep);
             }
-
+            // Some selection
             if (!dilep.isOS)
                 continue;
             if (event.isRealData() && !(leptons[ilep1].hlt_DR_matchedObject < m_hltDRCut && leptons[ilep1].hlt_DR_matchedObject < m_hltDRCut))
                 continue;
+            if (!(dilep.id_HWWHWW && dilep.iso_HWWHWW))
+                continue;
+            // Counters
+            tmp_count_has2leptons = event_weight;
+            if (dilep.isElEl)
+                tmp_count_has2leptons_elel = event_weight;
+            if (dilep.isElMu)
+                tmp_count_has2leptons_elmu = event_weight;
+            if (dilep.isElEl)
+                tmp_count_has2leptons_muel = event_weight;
+            if (dilep.isElEl)
+                tmp_count_has2leptons_mumu = event_weight;
+            // Fill
             ll.push_back(dilep); 
         }
     }
@@ -304,6 +337,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Adding MET(s)
     // ***** 
+    met.clear();
+    llmet.clear();
     const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
     HH::Met mymet;
     mymet.p4 = pf_met.p4;
@@ -458,6 +493,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.gen_b = (alljets.hadronFlavor[ijet]) == 5; // redundant with gen_matched_bHadron defined above
             myjet.gen_c = (alljets.hadronFlavor[ijet]) == 4;
             myjet.gen_l = (alljets.hadronFlavor[ijet]) < 4;
+            if (!myjet.id_L)
+                continue;
             jets.push_back(myjet);
             // filling maps
             // no jet ID
@@ -726,6 +763,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.iso_HWWHWW = ll[ill].iso_HWWHWW;
             myllmetjj.DR_l_l = ll[ill].DR_l_l;
             myllmetjj.DPhi_l_l = ll[ill].DPhi_l_l;
+            myllmetjj.trigger_efficiency = ll[ill].trigger_efficiency;
+            myllmetjj.trigger_efficiency_downVariated = ll[ill].trigger_efficiency_downVariated;
+            myllmetjj.trigger_efficiency_downVariated_Arun = ll[ill].trigger_efficiency_downVariated_Arun;
+            myllmetjj.trigger_efficiency_upVariated = ll[ill].trigger_efficiency_upVariated;
+            myllmetjj.trigger_efficiency_upVariated_Arun = ll[ill].trigger_efficiency_upVariated_Arun;
             myllmetjj.ill = ill;
             myllmetjj.imet = imet;
             myllmetjj.isNoHF = met[imet].isNoHF;
@@ -756,8 +798,32 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.DPhi_llmet_jj = fabs(ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4));
             myllmetjj.cosThetaStar_CS = fabs(getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4));
             myllmetjj.MT_fullsystem = myllmetjj.p4.Mt();
+            // Some selection
             if (myllmetjj.minDR_l_j < m_minDR_l_j_Cut)
                 continue;
+            // Counters
+            tmp_count_has2leptons_1llmetjj = event_weight;
+            if (myllmetjj.isElEl)
+                tmp_count_has2leptons_elel_1llmetjj = event_weight;
+            if (myllmetjj.isElMu)
+                tmp_count_has2leptons_elmu_1llmetjj = event_weight;
+            if (myllmetjj.isElEl)
+                tmp_count_has2leptons_muel_1llmetjj = event_weight;
+            if (myllmetjj.isElEl)
+                tmp_count_has2leptons_mumu_1llmetjj = event_weight;
+            if (myllmetjj.btag_MM)
+            {
+                tmp_count_has2leptons_1llmetjj_2btagM = event_weight;
+                if (myllmetjj.isElEl)
+                    tmp_count_has2leptons_elel_1llmetjj_2btagM = event_weight;
+                if (myllmetjj.isElMu)
+                    tmp_count_has2leptons_elmu_1llmetjj_2btagM = event_weight;
+                if (myllmetjj.isElEl)
+                    tmp_count_has2leptons_muel_1llmetjj_2btagM = event_weight;
+                if (myllmetjj.isElEl)
+                    tmp_count_has2leptons_mumu_1llmetjj_2btagM = event_weight;
+            }
+            // Fill
             llmetjj.push_back(myllmetjj);
         }
     }
@@ -823,40 +889,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
     // Adding some few custom candidates, for convenience
-    // llmetjj_allTight_btagL
-    int icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::L, jetID::T, btagWP::L, jetPair::ht);
-    llmetjj_allTight_btagL_ht.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagL_ht.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::L, jetID::T, btagWP::L, jetPair::pt);
-    llmetjj_allTight_btagL_pt.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagL_pt.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::L, jetID::T, btagWP::L, jetPair::csv);
-    llmetjj_allTight_btagL_csv.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_btagL_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    // llmetjj_allTight_nobtag
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::no, jetID::T, btagWP::no, jetPair::ht);
-    llmetjj_allTight_nobtag_ht.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-         llmetjj_allTight_nobtag_ht.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::no, jetID::T, btagWP::no, jetPair::pt);
-    llmetjj_allTight_nobtag_pt.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_nobtag_pt.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::T, lepIso::T, lepID::T, lepIso::T, jetID::T, btagWP::no, jetID::T, btagWP::no, jetPair::csv);
-    llmetjj_allTight_nobtag_csv.clear();
-    for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
-        llmetjj_allTight_nobtag_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
-
-
-    icustom = leplepIDIsojetjetIDbtagWPPair(lepID::HWW, lepIso::HWW, lepID::HWW, lepIso::HWW, jetID::L, btagWP::no, jetID::L, btagWP::no, jetPair::csv);
+    int icustom = leplepIDIsojetjetIDbtagWPPair(lepID::HWW, lepIso::HWW, lepID::HWW, lepIso::HWW, jetID::L, btagWP::no, jetID::L, btagWP::no, jetPair::csv);
     llmetjj_HWWleptons_nobtag_csv.clear();
     for (unsigned int icandidate = 0; icandidate < map_llmetjj[icustom].size(); icandidate++)
         llmetjj_HWWleptons_nobtag_csv.push_back(llmetjj[map_llmetjj[icustom][icandidate]]);
@@ -927,6 +960,21 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
 
+    count_has2leptons += tmp_count_has2leptons;
+    count_has2leptons_elel += tmp_count_has2leptons_elel;
+    count_has2leptons_elmu += tmp_count_has2leptons_elmu;
+    count_has2leptons_muel += tmp_count_has2leptons_muel;
+    count_has2leptons_mumu += tmp_count_has2leptons_mumu;
+    count_has2leptons_1llmetjj += tmp_count_has2leptons_1llmetjj;
+    count_has2leptons_elel_1llmetjj += tmp_count_has2leptons_elel_1llmetjj;
+    count_has2leptons_elmu_1llmetjj += tmp_count_has2leptons_elmu_1llmetjj;
+    count_has2leptons_muel_1llmetjj += tmp_count_has2leptons_muel_1llmetjj;
+    count_has2leptons_mumu_1llmetjj += tmp_count_has2leptons_mumu_1llmetjj;
+    count_has2leptons_1llmetjj_2btagM += tmp_count_has2leptons_1llmetjj_2btagM;
+    count_has2leptons_elel_1llmetjj_2btagM += tmp_count_has2leptons_elel_1llmetjj_2btagM;
+    count_has2leptons_elmu_1llmetjj_2btagM += tmp_count_has2leptons_elmu_1llmetjj_2btagM;
+    count_has2leptons_muel_1llmetjj_2btagM += tmp_count_has2leptons_muel_1llmetjj_2btagM;
+    count_has2leptons_mumu_1llmetjj_2btagM += tmp_count_has2leptons_mumu_1llmetjj_2btagM;
 
 
     if (!event.isRealData())
@@ -1449,4 +1497,23 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     float error_squared_down_Arun = X*X + Y*Y + Z*Z ;
     dilep.trigger_efficiency_downVariated_Arun = ((nominal - std::sqrt(error_squared_down_Arun)) < 0.)? 0. : nominal - std::sqrt(error_squared_down_Arun);
 
+}
+
+void HHAnalyzer::endJob(MetadataManager& metadata)
+{
+    metadata.add(this->m_name + "count_has2leptons", count_has2leptons);
+    metadata.add(this->m_name + "count_has2leptons_elel", count_has2leptons_elel);
+    metadata.add(this->m_name + "count_has2leptons_elmu", count_has2leptons_elmu);
+    metadata.add(this->m_name + "count_has2leptons_muel", count_has2leptons_muel);
+    metadata.add(this->m_name + "count_has2leptons_mumu", count_has2leptons_mumu);
+    metadata.add(this->m_name + "count_has2leptons_1llmetjj", count_has2leptons_1llmetjj);
+    metadata.add(this->m_name + "count_has2leptons_elel_1llmetjj", count_has2leptons_elel_1llmetjj);
+    metadata.add(this->m_name + "count_has2leptons_elmu_1llmetjj", count_has2leptons_elmu_1llmetjj);
+    metadata.add(this->m_name + "count_has2leptons_muel_1llmetjj", count_has2leptons_muel_1llmetjj);
+    metadata.add(this->m_name + "count_has2leptons_mumu_1llmetjj", count_has2leptons_mumu_1llmetjj);
+    metadata.add(this->m_name + "count_has2leptons_1llmetjj_2btagM", count_has2leptons_1llmetjj_2btagM);
+    metadata.add(this->m_name + "count_has2leptons_elel_1llmetjj_2btagM", count_has2leptons_elel_1llmetjj_2btagM);
+    metadata.add(this->m_name + "count_has2leptons_elmu_1llmetjj_2btagM", count_has2leptons_elmu_1llmetjj_2btagM);
+    metadata.add(this->m_name + "count_has2leptons_muel_1llmetjj_2btagM", count_has2leptons_muel_1llmetjj_2btagM);
+    metadata.add(this->m_name + "count_has2leptons_mumu_1llmetjj_2btagM", count_has2leptons_mumu_1llmetjj_2btagM);
 }

@@ -8,6 +8,12 @@ class DileptonCategory: public Category {
     public:
         const std::vector<HH::Lepton>& getLeptons(const AnalyzersManager& analyzers) const ;
         const std::vector<HH::Dilepton>& getDileptons(const AnalyzersManager& analyzers) const ;
+        const std::vector<HH::DileptonMetDijet>& getDileptonMetDijets(const AnalyzersManager& analyzers) const ;
+        virtual void configure(const edm::ParameterSet& conf) override {
+            m_analyzer_name = conf.getUntrackedParameter<std::string>("m_analyzer_name", "hh_analyzer");
+        }
+    private:
+        std::string m_analyzer_name;
 };
 
 class MuMuCategory: public DileptonCategory {

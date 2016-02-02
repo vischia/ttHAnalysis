@@ -61,25 +61,19 @@ class HHAnalyzer: public Framework::Analyzer {
                 }
             }
         }
+        virtual void endJob(MetadataManager&) override;
 
         // leptons and dileptons stuff
         BRANCH(electrons, std::vector<unsigned int>);
         BRANCH(muons, std::vector<unsigned int>);
         BRANCH(leptons, std::vector<HH::Lepton>);
-        BRANCH(ll, std::vector<HH::Dilepton>);
         BRANCH(met, std::vector<HH::Met>);
-        BRANCH(llmet, std::vector<HH::DileptonMet>);
         BRANCH(jets, std::vector<HH::Jet>);
-        BRANCH(jj, std::vector<HH::Dijet>);
-        BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
+        std::vector<HH::Dilepton> ll;
+        std::vector<HH::DileptonMet> llmet;
+        std::vector<HH::Dijet> jj;
+        std::vector<HH::DileptonMetDijet> llmetjj;
         // some few custom candidates, for convenience
-        // allTight= tight lepton ID, tight lepton Iso, Tight jet ID
-        BRANCH(llmetjj_allTight_btagL_ht, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_allTight_btagL_pt, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_allTight_btagL_csv, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_allTight_nobtag_ht, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_allTight_nobtag_pt, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_allTight_nobtag_csv, std::vector<HH::DileptonMetDijet>);
         // Januray 2016: preapproval freezing custom candidates
         BRANCH(llmetjj_HWWleptons_nobtag_csv, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_HWWleptons_btagL_csv, std::vector<HH::DileptonMetDijet>);
@@ -87,13 +81,13 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(llmetjj_HWWleptons_btagT_csv, std::vector<HH::DileptonMetDijet>);
 
         // maps
-        std::vector<std::vector<int>>& map_l = tree["map_l"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count, std::vector<int>(0));
-        std::vector<std::vector<int>>& map_ll = tree["map_ll"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
+        std::vector<std::vector<int>> map_l = std::vector<std::vector<int>>(lepID::Count * lepIso::Count, std::vector<int>(0));
+        std::vector<std::vector<int>> map_ll = std::vector<std::vector<int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
         // FIXME: add enum over met?
-        std::vector<std::vector<int>>& map_llmet = tree["map_llmet"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
-        std::vector<std::vector<int>>& map_j = tree["map_j"].write_with_init<std::vector<std::vector<int>>>(jetID::Count * btagWP::Count, std::vector<int>(0));
-        std::vector<std::vector<int>>& map_jj = tree["map_jj"].write_with_init<std::vector<std::vector<int>>>(jetID::Count * jetID::Count * btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
-        std::vector<std::vector<int>>& map_llmetjj = tree["map_llmetjj"].write_with_init<std::vector<std::vector<int>>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * jetID::Count * jetID::Count * btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
+        std::vector<std::vector<int>> map_llmet = std::vector<std::vector<int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
+        std::vector<std::vector<int>> map_j = std::vector<std::vector<int>>(jetID::Count * btagWP::Count, std::vector<int>(0));
+        std::vector<std::vector<int>> map_jj = std::vector<std::vector<int>>(jetID::Count * jetID::Count * btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
+        std::vector<std::vector<int>> map_llmetjj = std::vector<std::vector<int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * jetID::Count * jetID::Count * btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
@@ -117,6 +111,22 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(nLeptons, unsigned int);
         BRANCH(nLeptonsL, unsigned int);
         BRANCH(nLeptonsT, unsigned int);
+
+        float count_has2leptons = 0.;
+        float count_has2leptons_elel = 0.;
+        float count_has2leptons_elmu = 0.;
+        float count_has2leptons_muel = 0.;
+        float count_has2leptons_mumu = 0.;
+        float count_has2leptons_1llmetjj = 0.;
+        float count_has2leptons_elel_1llmetjj = 0.;
+        float count_has2leptons_elmu_1llmetjj = 0.;
+        float count_has2leptons_muel_1llmetjj = 0.;
+        float count_has2leptons_mumu_1llmetjj = 0.;
+        float count_has2leptons_1llmetjj_2btagM = 0.;
+        float count_has2leptons_elel_1llmetjj_2btagM = 0.;
+        float count_has2leptons_elmu_1llmetjj_2btagM = 0.;
+        float count_has2leptons_muel_1llmetjj_2btagM = 0.;
+        float count_has2leptons_mumu_1llmetjj_2btagM = 0.;
 
     private:
         // Producers name
