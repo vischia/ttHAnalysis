@@ -50,7 +50,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             minDR_l_j_Cut = cms.untracked.double(0.3),
             hltDRCut = cms.untracked.double(0.1),
             hltDPtCut = cms.untracked.double(0.5),  # cut will be DPt/Pt < hltDPtCut
-            applyBJetRegression = cms.untracked.bool(True), # BE SURE TO ACTIVATE computeRegression FLAG BELOW
+            applyBJetRegression = cms.untracked.bool(False), # BE SURE TO ACTIVATE computeRegression FLAG BELOW
             hlt_efficiencies = cms.untracked.PSet(
                 Ele17_12Leg1 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg1_TightID.json'),
                 Ele17_12Leg2 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg2_TightID.json'),
@@ -70,8 +70,8 @@ framework.addProducer('puppimet', puppiCfg)
 # Remove fat jets
 framework.removeProducer('fat_jets')
 
-framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
-framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
+#framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
+#framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
 
 #framework.redoJEC()
 framework.smearJets()
