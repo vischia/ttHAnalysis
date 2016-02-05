@@ -683,8 +683,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.p4 = ll[ill].p4 + jj[ijj].p4 + met[imet].p4;
             myllmetjj.lep1_p4 = leptons[ilep1].p4;
             myllmetjj.lep2_p4 = leptons[ilep2].p4;
-            myllmetjj.jet1_p4 = leptons[ijet1].p4;
-            myllmetjj.jet2_p4 = leptons[ijet2].p4;
+            myllmetjj.jet1_p4 = jets[ijet1].p4;
+            myllmetjj.jet2_p4 = jets[ijet2].p4;
             myllmetjj.met_p4 = met[imet].p4;
             myllmetjj.ll_p4 = ll[ill].p4;
             myllmetjj.jj_p4 = jj[ijj].p4;
