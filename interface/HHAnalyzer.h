@@ -128,6 +128,40 @@ class HHAnalyzer: public Framework::Analyzer {
         float count_has2leptons_muel_1llmetjj_2btagM = 0.;
         float count_has2leptons_mumu_1llmetjj_2btagM = 0.;
 
+        // ttbar system mc truth
+        // Gen matching. All indexes are from the `pruned` collection
+        uint16_t gen_t; // Index of the top quark
+        uint16_t gen_t_beforeFSR; // Index of the top quark, before any FSR
+        uint16_t gen_tbar; // Index of the anti-top quark
+        uint16_t gen_tbar_beforeFSR; // Index of the anti-top quark, before any FSR
+
+        uint16_t gen_b; // Index of the b quark coming from the top decay
+        uint16_t gen_b_beforeFSR; // Index of the b quark coming from the top decay, before any FSR
+        uint16_t gen_bbar; // Index of the anti-b quark coming from the anti-top decay
+        uint16_t gen_bbar_beforeFSR; // Index of the anti-b quark coming from the anti-top decay, before any FSR
+
+        uint16_t gen_jet1_t; // Index of the first jet from the top decay chain
+        uint16_t gen_jet1_t_beforeFSR; // Index of the first jet from the top decay chain, before any FSR
+        uint16_t gen_jet2_t; // Index of the second jet from the top decay chain
+        uint16_t gen_jet2_t_beforeFSR; // Index of the second jet from the top decay chain, before any FSR
+
+        uint16_t gen_jet1_tbar; // Index of the first jet from the anti-top decay chain
+        uint16_t gen_jet1_tbar_beforeFSR; // Index of the first jet from the anti-top decay chain, before any FSR
+        uint16_t gen_jet2_tbar; // Index of the second jet from the anti-top decay chain
+        uint16_t gen_jet2_tbar_beforeFSR; // Index of the second jet from the anti-top decay chain, before any FSR
+
+        uint16_t gen_lepton_t; // Index of the lepton from the top decay chain
+        uint16_t gen_lepton_t_beforeFSR; // Index of the lepton from the top decay chain, before any FSR
+        uint16_t gen_neutrino_t; // Index of the neutrino from the top decay chain
+        uint16_t gen_neutrino_t_beforeFSR; // Index of the neutrino from the top decay chain, before any FSR
+
+        uint16_t gen_lepton_tbar; // Index of the lepton from the anti-top decay chain
+        uint16_t gen_lepton_tbar_beforeFSR; // Index of the lepton from the anti-top decay chain, before any FSR
+        uint16_t gen_neutrino_tbar; // Index of the neutrino from the anti-top decay chain
+        uint16_t gen_neutrino_tbar_beforeFSR; // Index of the neutrino from the anti-top decay chain, before any FSR
+
+        BRANCH(gen_ttbar_decay_type, char); // Type of ttbar decay. Can take any values from TTDecayType enum
+
     private:
         // Producers name
         std::string m_electrons_producer;
