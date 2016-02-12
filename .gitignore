@@ -35,3 +35,7 @@
 
 # vim
 *.sw*
+
+# plotIt
+plugins/Indices_cc.d
+plugins/Indices_cc_ACLiC_dict_rdict.pcm

@@ -63,4 +63,21 @@ namespace HHAnalysis {
   uint16_t leplepIDIsojetjetIDbtagWPPair(const lepID::lepID& id1, const lepIso::lepIso& iso1, const lepID::lepID& id2, const lepIso::lepIso& iso2, const jetID::jetID& jetid1, const btagWP::btagWP& wp1, const jetID::jetID& jetid2, const btagWP::btagWP& wp2, const jetPair::jetPair& jetpair);
   std::string leplepIDIsojetjetIDbtagWPPairStr(const lepID::lepID& id1, const lepIso::lepIso& iso1, const lepID::lepID& id2, const lepIso::lepIso& iso2, const jetID::jetID& jetid1, const btagWP::btagWP& wp1, const jetID::jetID& jetid2, const btagWP::btagWP& wp2, const jetPair::jetPair& jetpair);
 
+  enum TTDecayType {
+    UnknownTT = -1,
+    NotTT = 0,
+    Hadronic,
+    Semileptonic_e,
+    Semileptonic_mu,
+    Dileptonic_mumu,
+    Dileptonic_ee,
+    Dileptonic_mue,
+
+    // With tau
+    Semileptonic_tau,
+    Dileptonic_tautau,
+    Dileptonic_mutau,
+    Dileptonic_etau
+  };
+
 }
