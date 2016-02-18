@@ -7,10 +7,10 @@ from cp3_llbb.Framework import METProducer
 
 runOnData = False
 
-globalTag_ = '74X_mcRun2_asymptotic_v2'
+globalTag_ = '74X_mcRun2_asymptotic_v5'
 processName_ = 'PAT'
 if runOnData :
-    globalTag_ = '74X_dataRun2_v2'
+    globalTag_ = '74X_dataRun2_reMiniAOD_v2'
     processName_ = 'RECO'
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
@@ -73,7 +73,7 @@ framework.removeProducer('fat_jets')
 #framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
 #framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
 
-#framework.redoJEC()
+framework.redoJEC()
 framework.smearJets()
 framework.doSystematics(['jec', 'jer'])
 process = framework.create()
