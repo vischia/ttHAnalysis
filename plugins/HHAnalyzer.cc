@@ -1693,7 +1693,7 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
         //eff_lep1_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
         eff_lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
         eff_lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-        eff_lep2_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
+        //eff_lep2_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
     }
     else if (lep1.isMu && lep2.isEl) {
         eff_lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
@@ -1726,10 +1726,10 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     if (lep1.isMu && lep2.isMu) {
         error_eff_lep1_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
         error_eff_lep1_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep1_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
+        //error_eff_lep1_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
         error_eff_lep2_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
         error_eff_lep2_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
-        error_eff_lep2_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
+        //error_eff_lep2_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
     }
     else if (lep1.isMu && lep2.isEl) {
         error_eff_lep1_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
@@ -1760,10 +1760,10 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     if (lep1.isMu && lep2.isMu) {
         error_eff_lep1_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
         error_eff_lep1_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep1_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
+        //error_eff_lep1_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
         error_eff_lep2_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
         error_eff_lep2_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
-        error_eff_lep2_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
+        //error_eff_lep2_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
     }
     else if (lep1.isMu && lep2.isEl) {
         error_eff_lep1_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
