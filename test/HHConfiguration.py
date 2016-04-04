@@ -7,13 +7,14 @@ from cp3_llbb.Framework import METProducer
 
 runOnData = False
 
-globalTag_ = '74X_mcRun2_asymptotic_v5'
+globalTag_ = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
 processName_ = 'PAT'
 if runOnData :
-    globalTag_ = '74X_dataRun2_reMiniAOD_v2'
+    globalTag_ = '76X_dataRun2_16Dec2015_v0'
     processName_ = 'RECO'
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
+
 framework.addAnalyzer('hh_analyzer', cms.PSet(
         type = cms.string('hh_analyzer'),
         prefix = cms.string('hh_'),
@@ -26,6 +27,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             metProducer = cms.string('met'),
             nohfMETProducer = cms.string('nohf_met'),
             # Here are the default value (just to show what is configurable)
+            # NB : Isolation and IDs did not change from 74 to 76
             electronIsoCut_EB_Loose = cms.untracked.double(0.0893), # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
             electronIsoCut_EE_Loose = cms.untracked.double(0.121),
             electronIsoCut_EB_Tight = cms.untracked.double(0.0354),
@@ -43,20 +45,22 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             electrons_tight_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
             jetEtaCut = cms.untracked.double(2.4),
             jetPtCut = cms.untracked.double(20),
+            # BTAG INFO
             discr_name =  cms.untracked.string("pfCombinedInclusiveSecondaryVertexV2BJetTags"),
-            discr_cut_loose =  cms.untracked.double(0.605),
-            discr_cut_medium =  cms.untracked.double(0.89),
-            discr_cut_tight =  cms.untracked.double(0.97),
+            discr_cut_loose =  cms.untracked.double(0.460),
+            discr_cut_medium =  cms.untracked.double(0.800),
+            discr_cut_tight =  cms.untracked.double(0.935),
             minDR_l_j_Cut = cms.untracked.double(0.3),
             hltDRCut = cms.untracked.double(0.1),
             hltDPtCut = cms.untracked.double(0.5),  # cut will be DPt/Pt < hltDPtCut
             applyBJetRegression = cms.untracked.bool(False), # BE SURE TO ACTIVATE computeRegression FLAG BELOW
             hlt_efficiencies = cms.untracked.PSet(
-                Ele17_12Leg1 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg1_TightID.json'),
-                Ele17_12Leg2 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg2_TightID.json'),
-                DoubleIsoMu17Mu8_IsoMu17leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_IsoMu17leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json'),
-                DoubleIsoMu17Mu8_IsoMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_IsoMu8leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json'),
-                DoubleIsoMu17Mu8_TkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_TkMu8leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json')
+                Ele17_12Leg1 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg1_76X_Tight_HWW.json'),
+                Ele17_12Leg2 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg1_76X_Tight_HWW.json'),
+                DoubleIsoMu17Mu8_IsoMu17leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu17leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
+                DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8orIsoTkMu8leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
+                #DoubleIsoMu17Mu8_IsoMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_IsoMu8leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json'),
+                #DoubleIsoMu17Mu8_TkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_TkMu8leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json')
             )
         )
     )
@@ -80,12 +84,11 @@ process = framework.create()
 
 if runOnData : 
     process.source.fileNames = cms.untracked.vstring(
-        '/store/data/Run2015D/MuonEG/MINIAOD/PromptReco-v4/000/258/159/00000/64914E6C-F26B-E511-B0C8-02163E0142D1.root'
+        '/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
         )
 else : 
     process.source.fileNames = cms.untracked.vstring(
-#        'file:////storage/data/cms/store/user/brfranco/testFiles/TTTo2L2Nu_13TeV-powheg_RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2-v1.root'
-        'file:////storage/data/cms/store/user/obondu/testFiles/GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow_13TeV-madgraph_RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1.root'
+        '/store/mc/RunIIFall15MiniAODv2/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/50FF8034-BEB9-E511-A09C-001EC9ADDD58.root'
         )
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
