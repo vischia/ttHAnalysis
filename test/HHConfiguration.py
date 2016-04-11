@@ -59,7 +59,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
                 Ele17_12Leg2 = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_Ele17_12Leg1_76X_Tight_HWW.json'),
                 DoubleIsoMu17Mu8_IsoMu17leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu17leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
                 DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8orIsoTkMu8leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
-                #DoubleIsoMu17Mu8_IsoMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_IsoMu8leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json'),
+                DoubleIsoMu17Mu8_IsoMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
                 #DoubleIsoMu17Mu8_TkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_TkMu8leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json')
             )
         )
