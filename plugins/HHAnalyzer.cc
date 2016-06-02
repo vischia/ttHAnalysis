@@ -15,6 +15,7 @@
 #include <cmath>
 
 #define HHANADEBUG 0
+#define HH_GEN_DEBUG (false)
 #define TT_GEN_DEBUG (false)
 
 void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
@@ -1004,6 +1005,44 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 //    };
 
         const GenParticlesProducer& gp = producers.get<GenParticlesProducer>("gen_particles");
+
+        gen_iH1 = gen_iH2 = -1;
+
+        for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
+            std::bitset<15> flags (gp.pruned_status_flags[ip]);
+
+            // Keep only particles in hard process
+            if (! flags.test(7))
+                continue;
+
+            uint64_t pdg_id = std::abs(gp.pruned_pdg_id[ip]);
+
+            auto p4 = gp.pruned_p4[ip];
+
+#if HH_GEN_DEBUG
+            std::cout << "[" << ip << "] pdg id: " << pdg_id << "  flags: " << flags << "  p = " << gp.pruned_p4[ip] << std::endl;
+#endif
+
+            if (pdg_id == 25) {
+                if (gen_iH1 == -1) {
+                    gen_iH1 = ip;
+                    gen_H1 = p4;
+                } else if (gen_iH2 == -1) {
+                    gen_iH2 = ip;
+                    gen_H2 = p4;
+                }
+#if HH_GEN_DEBUG
+                else {
+                    std::cout << "Warning: more than one Higgs in the hard process" << std::endl;
+                }
+#endif
+            }
+        }
+
+        if ((gen_iH1 != -1) && (gen_iH2 != -1)) {
+            gen_mHH = (gen_H1 + gen_H2).M();
+            gen_costhetastar = getCosThetaStar_CS(gen_H1, gen_H2);
+        }
     
         BRANCH(gen_B1, LorentzVector);
         BRANCH(gen_B2, LorentzVector);
@@ -1047,8 +1086,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         gen_LLFSRNuNuBB.SetPxPyPzE(0.,0.,0.,0.);
     
         BRANCH(gen_iX, int);
-        BRANCH(gen_iH1, int);
-        BRANCH(gen_iH2, int);
         BRANCH(gen_iV1, int);
         BRANCH(gen_iV2, int);
         BRANCH(gen_iB1, int);
@@ -1062,7 +1099,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         BRANCH(gen_iGlu1, std::vector<int>);
         BRANCH(gen_iGlu2, std::vector<int>);
         gen_iX = -1;
-        gen_iH1 = gen_iH2 = -1;
         gen_iV1 = gen_iV2 = -1;
         gen_iB1 = gen_iB2 = -1;
         gen_iL1 = gen_iL2 = -1;
@@ -1084,14 +1120,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             {
                 if (HHANADEBUG)
                     std::cout << "\tip= " << ip << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[ip] << "\tflags= " << flags << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[ip].Pt() << ", " << gp.pruned_p4[ip].Eta() << ", " << gp.pruned_p4[ip].Phi() << ", " << gp.pruned_p4[ip].E() << ", " << gp.pruned_p4[ip].M() << ")" << std::endl;
-                if (abs(gp.pruned_pdg_id[ip]) == 25)
-                {
-                    if (gen_iH1 == -1)
-                        gen_iH1 = ip;
-                    else if (gen_iH2 == -1)
-                        gen_iH2 = ip;
-                }
-                else if (abs(gp.pruned_pdg_id[ip]) == 5)
+                if (abs(gp.pruned_pdg_id[ip]) == 5)
                 {
                     if (gen_iB1 == -1)
                     {
@@ -1204,8 +1233,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         {
             if (gen_iX != -1)
                 std::cout << "\tiX= " << gen_iX << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iX] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iX]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iX].Pt() << ", " << gp.pruned_p4[gen_iX].Eta() << ", " << gp.pruned_p4[gen_iX].Phi() << ", " << gp.pruned_p4[gen_iX].E() << ", " << gp.pruned_p4[gen_iX].M() << ")" << std::endl;
-            std::cout << "\tiH1= " << gen_iH1 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iH1] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iH1]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iH1].Pt() << ", " << gp.pruned_p4[gen_iH1].Eta() << ", " << gp.pruned_p4[gen_iH1].Phi() << ", " << gp.pruned_p4[gen_iH1].E() << ", " << gp.pruned_p4[gen_iH1].M() << ")" << std::endl;
-            std::cout << "\tiH2= " << gen_iH2 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iH2] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iH2]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iH2].Pt() << ", " << gp.pruned_p4[gen_iH2].Eta() << ", " << gp.pruned_p4[gen_iH2].Phi() << ", " << gp.pruned_p4[gen_iH2].E() << ", " << gp.pruned_p4[gen_iH2].M() << ")" << std::endl;
             std::cout << "\tiB1= " << gen_iB1 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iB1] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iB1]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iB1].Pt() << ", " << gp.pruned_p4[gen_iB1].Eta() << ", " << gp.pruned_p4[gen_iB1].Phi() << ", " << gp.pruned_p4[gen_iB1].E() << ", " << gp.pruned_p4[gen_iB1].M() << ")" << std::endl;
             std::cout << "\tiB2= " << gen_iB2 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iB2] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iB2]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iB2].Pt() << ", " << gp.pruned_p4[gen_iB2].Eta() << ", " << gp.pruned_p4[gen_iB2].Phi() << ", " << gp.pruned_p4[gen_iB2].E() << ", " << gp.pruned_p4[gen_iB2].M() << ")" << std::endl;
             if (gen_iV1 != -1)

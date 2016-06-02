@@ -162,6 +162,14 @@ class HHAnalyzer: public Framework::Analyzer {
 
         BRANCH(gen_ttbar_decay_type, char); // Type of ttbar decay. Can take any values from TTDecayType enum
 
+        // Di-higgs gen system
+        BRANCH(gen_iH1, char);
+        BRANCH(gen_iH2, char);
+        BRANCH(gen_H1, LorentzVector);
+        BRANCH(gen_H2, LorentzVector);
+        BRANCH(gen_mHH, double);
+        BRANCH(gen_costhetastar, double);
+
     private:
         // Producers name
         std::string m_electrons_producer;
