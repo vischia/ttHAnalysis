@@ -163,12 +163,51 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(gen_ttbar_decay_type, char); // Type of ttbar decay. Can take any values from TTDecayType enum
 
         // Di-higgs gen system
+        BRANCH(gen_iX, char);
+        BRANCH(gen_X, LorentzVector);
+
         BRANCH(gen_iH1, char);
         BRANCH(gen_iH2, char);
         BRANCH(gen_H1, LorentzVector);
         BRANCH(gen_H2, LorentzVector);
         BRANCH(gen_mHH, double);
         BRANCH(gen_costhetastar, double);
+        BRANCH(gen_iH1_afterFSR, char);
+        BRANCH(gen_iH2_afterFSR, char);
+        BRANCH(gen_H1_afterFSR, LorentzVector);
+        BRANCH(gen_H2_afterFSR, LorentzVector);
+
+        BRANCH(gen_iB, char);
+        BRANCH(gen_iBbar, char);
+        BRANCH(gen_iB_afterFSR, char);
+        BRANCH(gen_iBbar_afterFSR, char);
+        BRANCH(gen_B, LorentzVector);
+        BRANCH(gen_Bbar, LorentzVector);
+        BRANCH(gen_B_afterFSR, LorentzVector);
+        BRANCH(gen_Bbar_afterFSR, LorentzVector);
+
+        BRANCH(gen_iV2, char);
+        BRANCH(gen_iV1, char);
+        BRANCH(gen_iV2_afterFSR, char);
+        BRANCH(gen_iV1_afterFSR, char);
+        BRANCH(gen_V2, LorentzVector);
+        BRANCH(gen_V1, LorentzVector);
+        BRANCH(gen_V2_afterFSR, LorentzVector);
+        BRANCH(gen_V1_afterFSR, LorentzVector);
+
+        BRANCH(gen_iLminus, char);
+        BRANCH(gen_iLplus, char);
+        BRANCH(gen_iLminus_afterFSR, char);
+        BRANCH(gen_iLplus_afterFSR, char);
+        BRANCH(gen_Lminus, LorentzVector);
+        BRANCH(gen_Lplus, LorentzVector);
+        BRANCH(gen_Lminus_afterFSR, LorentzVector);
+        BRANCH(gen_Lplus_afterFSR, LorentzVector);
+
+        BRANCH(gen_iNu1, char);
+        BRANCH(gen_iNu2, char);
+        BRANCH(gen_Nu1, LorentzVector);
+        BRANCH(gen_Nu2, LorentzVector);
 
     private:
         // Producers name
@@ -190,5 +229,100 @@ class HHAnalyzer: public Framework::Analyzer {
         std::map<std::string, BinnedValues> m_hlt_efficiencies;
 
 };
+
+// Some macros for gen information
+#define ASSIGN_HH_GEN_INFO_2(X, Y, ERROR) \
+        /* Before FSR. Use isHardProcess (7) flag */ \
+        if (flags.test(7)) { \
+            if (gen_i##X == -1) { \
+                gen_i##X = ip; \
+                gen_##X = p4; \
+            } else if (gen_i##Y == -1) { \
+                gen_i##Y = ip; \
+                gen_##Y = p4; \
+            } else { \
+                std::cout << "Warning: more than two " #ERROR " in the hard process" << std::endl; \
+            } \
+        /* After FSR. Use isLastCopy (13) flag */ \
+        } else if (flags.test(13)) { \
+            if (gen_i##X##_afterFSR == -1) { \
+                gen_i##X##_afterFSR = ip; \
+                gen_##X##_afterFSR = p4; \
+            } else if (gen_i##Y##_afterFSR == -1) { \
+                gen_i##Y##_afterFSR = ip; \
+                gen_##Y##_afterFSR = p4; \
+            } else { \
+                std::cout << "Warning: more than two " #ERROR " after FSR" << std::endl; \
+            } \
+        }
+
+#define ASSIGN_HH_GEN_INFO_2_NO_FSR(X, Y, ERROR) \
+        /* Before FSR. Use isHardProcess (7) flag */ \
+        if (flags.test(7)) { \
+            if (gen_i##X == -1) { \
+                gen_i##X = ip; \
+                gen_##X = p4; \
+            } else if (gen_i##Y == -1) { \
+                gen_i##Y = ip; \
+                gen_##Y = p4; \
+            } else { \
+                std::cout << "Warning: more than two " #ERROR " in the hard process" << std::endl; \
+            } \
+        }
+
+#define ASSIGN_HH_GEN_INFO(X, ERROR) \
+        /* Before FSR. Use isHardProcess (7) flag */ \
+        if (flags.test(7)) { \
+            if (gen_i##X == -1) { \
+                gen_i##X = ip; \
+                gen_##X = p4; \
+            } else { \
+                std::cout << "Warning: more than one " #ERROR " in the hard process" << std::endl; \
+            } \
+        /* After FSR. Use isLastCopy (13) flag */ \
+        } else if (flags.test(13)) { \
+            if (gen_i##X##_afterFSR == -1) { \
+                gen_i##X##_afterFSR = ip; \
+                gen_##X##_afterFSR = p4; \
+            } else { \
+                std::cout << "Warning: more than one " #ERROR " after FSR" << std::endl; \
+            } \
+        }
+
+#define ASSIGN_HH_GEN_INFO_NO_FSR(X, ERROR) \
+        /* Before FSR. Use isHardProcess (7) flag */ \
+        if (flags.test(7)) { \
+            if (gen_i##X == -1) { \
+                gen_i##X = ip; \
+                gen_##X = p4; \
+            } else { \
+                std::cout << "Warning: more than one " #ERROR " in the hard process" << std::endl; \
+            } \
+        }
+
+#define PRINT_PARTICULE(X) \
+        if (gen_i##X != -1) { \
+            std::cout << "    gen_" #X ".M() = " << gen_##X.M() << std::endl; \
+        }
+
+#define PRINT_RESONANCE(X, Y) \
+        if ((gen_i##X != -1) && (gen_i##Y != -1)) { \
+            std::cout << "    gen_" #X ".M() = " << gen_##X.M() << std::endl; \
+            std::cout << "    gen_" #Y ".M() = " << gen_##Y.M() << std::endl; \
+            std::cout << "    gen_(" #X " + " #Y ").M() = " << (gen_##X + gen_##Y).M() << std::endl; \
+        } \
+        if ((gen_i##X##_afterFSR != -1) && (gen_i##Y##_afterFSR != -1)) { \
+            std::cout << "    gen_" #X "_afterFSR.M() = " << gen_##X##_afterFSR.M() << std::endl; \
+            std::cout << "    gen_" #Y "_afterFSR.M() = " << gen_##Y##_afterFSR.M() << std::endl; \
+            std::cout << "    gen_(" #X " + " #Y ")_afterFSR.M() = " << (gen_##X##_afterFSR + gen_##Y##_afterFSR).M() << std::endl; \
+        }
+
+#define PRINT_RESONANCE_NO_FSR(X, Y) \
+        if ((gen_i##X != -1) && (gen_i##Y != -1)) { \
+            std::cout << "    gen_" #X ".M() = " << gen_##X.M() << std::endl; \
+            std::cout << "    gen_" #Y ".M() = " << gen_##Y.M() << std::endl; \
+            std::cout << "    gen_(" #X " + " #Y ").M() = " << (gen_##X + gen_##Y).M() << std::endl; \
+        }
+
 
 #endif

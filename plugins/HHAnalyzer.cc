@@ -1006,36 +1006,126 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
         const GenParticlesProducer& gp = producers.get<GenParticlesProducer>("gen_particles");
 
+#if HH_GEN_DEBUG
+    std::function<void(size_t)> print_mother_chain = [&gp, &print_mother_chain](size_t p) {
+
+        if (gp.pruned_mothers_index[p].empty()) {
+            std::cout << std::endl;
+            return;
+        }
+
+        size_t index = gp.pruned_mothers_index[p][0];
+            std::cout << " <- #" << index << "(" << gp.pruned_pdg_id[index] << ")";
+            print_mother_chain(index);
+    };
+#endif
+
+        std::function<bool(size_t, size_t)> pruned_decays_from = [&pruned_decays_from, &gp](size_t particle_index, size_t mother_index) -> bool {
+            // Iterator over all pruned particles to find if the particle `particle_index` has `mother_index` in its decay history
+            if (gp.pruned_mothers_index[particle_index].empty())
+                return false;
+
+            size_t index = gp.pruned_mothers_index[particle_index][0];
+
+            if (index == mother_index) {
+                return true;
+            }
+
+            if (pruned_decays_from(index, mother_index))
+                return true;
+
+            return false;
+        };
+
+        std::function<bool(size_t, size_t)> pruned_decays_from_pdg_id = [&pruned_decays_from_pdg_id, &gp](size_t particle_index, uint64_t pdg_id) -> bool {
+            // Iterator over all pruned particles to find if the particle `particle_index` decays from a particle with pdg id == pdg_id
+            if (gp.pruned_mothers_index[particle_index].empty())
+                return false;
+
+            size_t index = gp.pruned_mothers_index[particle_index][0];
+
+            if (std::abs(gp.pruned_pdg_id[index]) == pdg_id) {
+                return true;
+            }
+
+            if (pruned_decays_from_pdg_id(index, pdg_id))
+                return true;
+
+            return false;
+        };
+
+        // Construct signal gen info
+
+        gen_iX = -1;
         gen_iH1 = gen_iH2 = -1;
+        gen_iH1_afterFSR = gen_iH2_afterFSR = -1;
+        gen_iB = gen_iBbar = -1;
+        gen_iB_afterFSR = gen_iBbar_afterFSR = -1;
+        gen_iV2 = gen_iV1 = -1;
+        gen_iV2_afterFSR = gen_iV1_afterFSR = -1;
+        gen_iLminus = gen_iLplus = -1;
+        gen_iLminus_afterFSR = gen_iLplus_afterFSR = -1;
+        gen_iNu1 = gen_iNu2 = -1;
 
         for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
             std::bitset<15> flags (gp.pruned_status_flags[ip]);
 
-            // Keep only particles in hard process
-            if (! flags.test(7))
+            if (!flags.test(8))
                 continue;
 
-            uint64_t pdg_id = std::abs(gp.pruned_pdg_id[ip]);
-
-            auto p4 = gp.pruned_p4[ip];
+            int64_t pdg_id = gp.pruned_pdg_id[ip];
 
 #if HH_GEN_DEBUG
             std::cout << "[" << ip << "] pdg id: " << pdg_id << "  flags: " << flags << "  p = " << gp.pruned_p4[ip] << std::endl;
+            print_mother_chain(ip);
 #endif
 
-            if (pdg_id == 25) {
-                if (gen_iH1 == -1) {
-                    gen_iH1 = ip;
-                    gen_H1 = p4;
-                } else if (gen_iH2 == -1) {
-                    gen_iH2 = ip;
-                    gen_H2 = p4;
-                }
-#if HH_GEN_DEBUG
-                else {
-                    std::cout << "Warning: more than one Higgs in the hard process" << std::endl;
-                }
-#endif
+            auto p4 = gp.pruned_p4[ip];
+
+            if (std::abs(pdg_id) == 35 || std::abs(pdg_id) == 39) {
+                ASSIGN_HH_GEN_INFO_NO_FSR(X, "X");
+            } else if (pdg_id == 25) {
+                ASSIGN_HH_GEN_INFO_2(H1, H2, "Higgs");
+            }
+
+            // Only look for Higgs decays if we have found the two Higgs
+            if ((gen_iH1 == -1) || (gen_iH2 == -1))
+                continue;
+
+            // And if the particle actually come directly from a Higgs
+            bool from_h1_decay = pruned_decays_from(ip, gen_iH1);
+            bool from_h2_decay = pruned_decays_from(ip, gen_iH2);
+
+            // Only keep particles coming from the tops decay
+            if (! from_h1_decay && ! from_h2_decay)
+                continue;
+
+            if (pdg_id == 5) {
+                ASSIGN_HH_GEN_INFO(B, "B");
+            } else if (pdg_id == -5) {
+                ASSIGN_HH_GEN_INFO(Bbar, "Bbar");
+            }
+
+            // Ignore B decays
+            if (pruned_decays_from_pdg_id(ip, 5))
+                continue;
+
+            if ((pdg_id == 11) || (pdg_id == 13) || (pdg_id == 15)) {
+                ASSIGN_HH_GEN_INFO(Lminus, "L-");
+            } else if ((pdg_id == -11) || (pdg_id == -13) || (pdg_id == -15)) {
+                ASSIGN_HH_GEN_INFO(Lplus, "L+");
+            } else if ((pdg_id == 23) || (std::abs(pdg_id) == 24)) {
+                ASSIGN_HH_GEN_INFO_2(V1, V2, "W/Z bosons");
+            } else if ((std::abs(pdg_id) == 12) || (std::abs(pdg_id) == 14) || (std::abs(pdg_id) == 16)) {
+                ASSIGN_HH_GEN_INFO_2_NO_FSR(Nu1, Nu2, "neutrinos");
+            }
+        }
+
+        // Swap neutrinos if needed
+        if ((gen_iNu1 != -1) && (gen_iNu2 != -1)) {
+            if (gp.pruned_pdg_id[gen_iNu1] > 0) {
+                std::swap(gen_iNu1, gen_iNu2);
+                std::swap(gen_Nu1, gen_Nu2);
             }
         }
 
@@ -1043,336 +1133,81 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             gen_mHH = (gen_H1 + gen_H2).M();
             gen_costhetastar = getCosThetaStar_CS(gen_H1, gen_H2);
         }
-    
-        BRANCH(gen_B1, LorentzVector);
-        BRANCH(gen_B2, LorentzVector);
-        BRANCH(gen_B1FSR, LorentzVector);
-        BRANCH(gen_B2FSR, LorentzVector);
-        BRANCH(gen_Nu1, LorentzVector);
-        BRANCH(gen_Nu2, LorentzVector);
-        BRANCH(gen_L1, LorentzVector);
-        BRANCH(gen_L2, LorentzVector);
-        BRANCH(gen_LL, LorentzVector);
-        BRANCH(gen_BB, LorentzVector);
-        BRANCH(gen_BBFSR, LorentzVector);
-        BRANCH(gen_L1FSRNu, LorentzVector);
-        BRANCH(gen_L2FSRNu, LorentzVector);
-        BRANCH(gen_L1FSR, LorentzVector);
-        BRANCH(gen_L2FSR, LorentzVector);
-        BRANCH(gen_LLFSR, LorentzVector);
-        BRANCH(gen_NuNu, LorentzVector);
-        BRANCH(gen_LLNuNu, LorentzVector);
-        BRANCH(gen_LLFSRNuNu, LorentzVector);
-        BRANCH(gen_LLFSRNuNuBB, LorentzVector);
-        gen_B1.SetPxPyPzE(0.,0.,0.,0.);
-        gen_B2.SetPxPyPzE(0.,0.,0.,0.);
-        gen_B1FSR.SetPxPyPzE(0.,0.,0.,0.);
-        gen_B2FSR.SetPxPyPzE(0.,0.,0.,0.);
-        gen_Nu1.SetPxPyPzE(0.,0.,0.,0.);
-        gen_Nu2.SetPxPyPzE(0.,0.,0.,0.);
-        gen_L1.SetPxPyPzE(0.,0.,0.,0.);
-        gen_L2.SetPxPyPzE(0.,0.,0.,0.);
-        gen_LL.SetPxPyPzE(0.,0.,0.,0.);
-        gen_BB.SetPxPyPzE(0.,0.,0.,0.);
-        gen_BBFSR.SetPxPyPzE(0.,0.,0.,0.);
-        gen_L1FSRNu.SetPxPyPzE(0.,0.,0.,0.);
-        gen_L2FSRNu.SetPxPyPzE(0.,0.,0.,0.);
-        gen_L1FSR.SetPxPyPzE(0.,0.,0.,0.);
-        gen_L2FSR.SetPxPyPzE(0.,0.,0.,0.);
-        gen_LLFSR.SetPxPyPzE(0.,0.,0.,0.);
-        gen_NuNu.SetPxPyPzE(0.,0.,0.,0.);
-        gen_LLNuNu.SetPxPyPzE(0.,0.,0.,0.);
-        gen_LLFSRNuNu.SetPxPyPzE(0.,0.,0.,0.);
-        gen_LLFSRNuNuBB.SetPxPyPzE(0.,0.,0.,0.);
-    
-        BRANCH(gen_iX, int);
-        BRANCH(gen_iV1, int);
-        BRANCH(gen_iV2, int);
-        BRANCH(gen_iB1, int);
-        BRANCH(gen_iB2, int);
-        BRANCH(gen_iL1, int);
-        BRANCH(gen_iL2, int);
-        BRANCH(gen_iNu1, int);
-        BRANCH(gen_iNu2, int);
-        BRANCH(gen_iG1, std::vector<int>);
-        BRANCH(gen_iG2, std::vector<int>);
-        BRANCH(gen_iGlu1, std::vector<int>);
-        BRANCH(gen_iGlu2, std::vector<int>);
-        gen_iX = -1;
-        gen_iV1 = gen_iV2 = -1;
-        gen_iB1 = gen_iB2 = -1;
-        gen_iL1 = gen_iL2 = -1;
-        gen_iNu1 = gen_iNu2 = -1;
-        gen_iG1.clear();
-        gen_iG2.clear();
-        gen_iGlu1.clear();
-        gen_iGlu2.clear();
-        bool isThereFSRforL1 = false;
-        bool isThereFSRforL2 = false;
-        bool isThereFSRforB1 = false;
-        bool isThereFSRforB2 = false;
-    
-        // Construct the signal gen-level info
-        for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
-            std::bitset<15> flags (gp.pruned_status_flags[ip]);
-            if (!flags.test(14)) continue; // take the last copies before FSR
-            if (flags.test(8)) // first look at the hard process
-            {
-                if (HHANADEBUG)
-                    std::cout << "\tip= " << ip << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[ip] << "\tflags= " << flags << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[ip].Pt() << ", " << gp.pruned_p4[ip].Eta() << ", " << gp.pruned_p4[ip].Phi() << ", " << gp.pruned_p4[ip].E() << ", " << gp.pruned_p4[ip].M() << ")" << std::endl;
-                if (abs(gp.pruned_pdg_id[ip]) == 5)
-                {
-                    if (gen_iB1 == -1)
-                    {
-                        if (flags.test(8) && !flags.test(7))
-                            isThereFSRforB1 = true;
-                        gen_iB1 = ip;
-                    }
-                    else if (gen_iB2 == -1)
-                    {
-                        if (flags.test(8) && !flags.test(7))
-                            isThereFSRforB2 = true;
-                        gen_iB2 = ip;
-                    }
-                }
-                else if (abs(gp.pruned_pdg_id[ip]) == 11 || abs(gp.pruned_pdg_id[ip]) == 13)
-                {
-                // if the lepton is not in the hard process itself, then look for FSR photons later on
-                    if (gen_iL1 == -1)
-                    {
-                        if (flags.test(8) && !flags.test(7))
-                            isThereFSRforL1 = true;
-                        gen_iL1 = ip;
-                    }
-                    else if (gen_iL2 == -1)
-                    {
-                        if (flags.test(8) && !flags.test(7))
-                            isThereFSRforL2 = true;
-                        gen_iL2 = ip;
-                    }
-                }
-                else if (abs(gp.pruned_pdg_id[ip]) == 12 || abs(gp.pruned_pdg_id[ip]) == 14 || abs(gp.pruned_pdg_id[ip]) == 16)
-                {
-                    if (gen_iNu1 == -1)
-                        gen_iNu1 = ip;
-                    else if (gen_iNu2 == -1)
-                        gen_iNu2 = ip;
-                }
-                else if (abs(gp.pruned_pdg_id[ip]) == 35 || abs(gp.pruned_pdg_id[ip]) == 39)
-                {
-                    if (gen_iX == -1)
-                        gen_iX = ip;
-                }
-                else if (abs(gp.pruned_pdg_id[ip]) == 23 || abs(gp.pruned_pdg_id[ip]) == 24)
-                {
-                    if (gen_iV1 == -1)
-                        gen_iV1 = ip;
-                    else if (gen_iV2 == -1)
-                        gen_iV2 = ip;
-                }
-            } // end if coming from hard process
-        } // end of loop over pruned gen particles
-        // new loop to find FSR photons
-        if (isThereFSRforL1 || isThereFSRforL2)
-        {
-            for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
-                if (gp.pruned_pdg_id[ip] != 22) continue;
-                std::bitset<15> flags (gp.pruned_status_flags[ip]);
-                if (!flags.test(14)) continue; // take the last copies
-                for (unsigned int imother = 0; imother < gp.pruned_mothers_index[ip].size(); imother++)
-                {
-                    if (isThereFSRforL1)
-                    {
-                        for (unsigned int jmother = 0; jmother < gp.pruned_mothers_index[gen_iL1].size(); jmother++)
-                        {
-                            if (gp.pruned_mothers_index[ip][imother] == gp.pruned_mothers_index[gen_iL1][jmother])
-                                gen_iG1.push_back(ip);
-                        }
-                    }
-                    if (isThereFSRforL2) 
-                    {
-                        for (unsigned int jmother = 0; jmother < gp.pruned_mothers_index[gen_iL2].size(); jmother++)
-                        {
-                            if (gp.pruned_mothers_index[ip][imother] == gp.pruned_mothers_index[gen_iL2][jmother])
-                                gen_iG2.push_back(ip);
-                        }
-                    }
-                }
-            } // end of loop over pruned gen particles
-        } // end of FSR loop
-        // new loop to find FSR gluons
-        if (isThereFSRforB1 || isThereFSRforB2)
-        {
-            for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
-                if (gp.pruned_pdg_id[ip] != 21) continue;
-                std::bitset<15> flags (gp.pruned_status_flags[ip]);
-                if (!flags.test(14)) continue; // take the last copies
-                for (unsigned int imother = 0; imother < gp.pruned_mothers_index[ip].size(); imother++)
-                {
-                    if (isThereFSRforB1)
-                    {
-                        for (unsigned int jmother = 0; jmother < gp.pruned_mothers_index[gen_iB1].size(); jmother++)
-                        {
-                            if (gp.pruned_mothers_index[ip][imother] == gp.pruned_mothers_index[gen_iB1][jmother])
-                                gen_iGlu1.push_back(ip);
-                        }
-                    }
-                    if (isThereFSRforB2) 
-                    {
-                        for (unsigned int jmother = 0; jmother < gp.pruned_mothers_index[gen_iB2].size(); jmother++)
-                        {
-                            if (gp.pruned_mothers_index[ip][imother] == gp.pruned_mothers_index[gen_iB2][jmother])
-                                gen_iGlu2.push_back(ip);
-                        }
-                    }
-                }
-            } // end of loop over pruned gen particles
-        } // end of FSR loop
-    
-        if (HHANADEBUG)
-        {
-            if (gen_iX != -1)
-                std::cout << "\tiX= " << gen_iX << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iX] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iX]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iX].Pt() << ", " << gp.pruned_p4[gen_iX].Eta() << ", " << gp.pruned_p4[gen_iX].Phi() << ", " << gp.pruned_p4[gen_iX].E() << ", " << gp.pruned_p4[gen_iX].M() << ")" << std::endl;
-            std::cout << "\tiB1= " << gen_iB1 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iB1] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iB1]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iB1].Pt() << ", " << gp.pruned_p4[gen_iB1].Eta() << ", " << gp.pruned_p4[gen_iB1].Phi() << ", " << gp.pruned_p4[gen_iB1].E() << ", " << gp.pruned_p4[gen_iB1].M() << ")" << std::endl;
-            std::cout << "\tiB2= " << gen_iB2 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iB2] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iB2]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iB2].Pt() << ", " << gp.pruned_p4[gen_iB2].Eta() << ", " << gp.pruned_p4[gen_iB2].Phi() << ", " << gp.pruned_p4[gen_iB2].E() << ", " << gp.pruned_p4[gen_iB2].M() << ")" << std::endl;
-            if (gen_iV1 != -1)
-                std::cout << "\tiV1= " << gen_iV1 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iV1] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iV1]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iV1].Pt() << ", " << gp.pruned_p4[gen_iV1].Eta() << ", " << gp.pruned_p4[gen_iV1].Phi() << ", " << gp.pruned_p4[gen_iV1].E() << ", " << gp.pruned_p4[gen_iV1].M() << ")" << std::endl;
-            if (gen_iV2 != -1)
-                std::cout << "\tiV2= " << gen_iV2 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iV2] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iV2]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iV2].Pt() << ", " << gp.pruned_p4[gen_iV2].Eta() << ", " << gp.pruned_p4[gen_iV2].Phi() << ", " << gp.pruned_p4[gen_iV2].E() << ", " << gp.pruned_p4[gen_iV2].M() << ")" << std::endl;
-            std::cout << "\tiL1= " << gen_iL1 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iL1] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iL1]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iL1].Pt() << ", " << gp.pruned_p4[gen_iL1].Eta() << ", " << gp.pruned_p4[gen_iL1].Phi() << ", " << gp.pruned_p4[gen_iL1].E() << ", " << gp.pruned_p4[gen_iL1].M() << ")" << std::endl;
-            std::cout << "\tiL2= " << gen_iL2 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iL2] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iL2]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iL2].Pt() << ", " << gp.pruned_p4[gen_iL2].Eta() << ", " << gp.pruned_p4[gen_iL2].Phi() << ", " << gp.pruned_p4[gen_iL2].E() << ", " << gp.pruned_p4[gen_iL2].M() << ")" << std::endl;
-            std::cout << "\tiNu1= " << gen_iNu1 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iNu1] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iNu1]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iNu1].Pt() << ", " << gp.pruned_p4[gen_iNu1].Eta() << ", " << gp.pruned_p4[gen_iNu1].Phi() << ", " << gp.pruned_p4[gen_iNu1].E() << ", " << gp.pruned_p4[gen_iNu1].M() << ")" << std::endl;
-            std::cout << "\tiNu2= " << gen_iNu2 << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iNu2] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iNu2]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iNu2].Pt() << ", " << gp.pruned_p4[gen_iNu2].Eta() << ", " << gp.pruned_p4[gen_iNu2].Phi() << ", " << gp.pruned_p4[gen_iNu2].E() << ", " << gp.pruned_p4[gen_iNu2].M() << ")" << std::endl;
+
+#if HH_GEN_DEBUG
+        PRINT_PARTICULE(X);
+        PRINT_RESONANCE(H1, H2);
+        PRINT_RESONANCE(B, Bbar);
+        PRINT_RESONANCE(V1, V2);
+        PRINT_RESONANCE(Lminus, Lplus);
+        PRINT_RESONANCE_NO_FSR(Nu1, Nu2);
+
+        // Rebuild resonances for consistency checks
+        auto LminusNu1 = gen_Lminus + gen_Nu1;
+        std::cout << "    gen_(L- Nu1).M() = " << LminusNu1.M() << std::endl;
+
+        auto LplusNu2 = gen_Lplus + gen_Nu2;
+        std::cout << "    gen_(L+ Nu2).M() = " << LplusNu2.M() << std::endl;
+
+        auto LminusNu1_afterFSR = gen_Lminus_afterFSR + gen_Nu1;
+        std::cout << "    gen_(L- Nu1)_afterFSR.M() = " << LminusNu1_afterFSR.M() << std::endl;
+
+        auto LplusNu2_afterFSR = gen_Lplus_afterFSR + gen_Nu2;
+        std::cout << "    gen_(L+ Nu2)_afterFSR.M() = " << LplusNu2_afterFSR.M() << std::endl;
         
-            for (unsigned int iG = 0; iG < gen_iG1.size(); iG++)
-            {
-                std::cout << "\tiG1[" << iG << "]= " << gen_iG1[iG] << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iG1[iG]] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iG1[iG]]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iG1[iG]].Pt() << ", " << gp.pruned_p4[gen_iG1[iG]].Eta() << ", " << gp.pruned_p4[gen_iG1[iG]].Phi() << ", " << gp.pruned_p4[gen_iG1[iG]].E() << ", " << gp.pruned_p4[gen_iG1[iG]].M() << ")" << std::endl;
-            }
-            for (unsigned int iG = 0; iG < gen_iG2.size(); iG++)
-            {
-                std::cout << "\tiG2[" << iG << "]= " << gen_iG2[iG] << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iG2[iG]] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iG2[iG]]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iG2[iG]].Pt() << ", " << gp.pruned_p4[gen_iG2[iG]].Eta() << ", " << gp.pruned_p4[gen_iG2[iG]].Phi() << ", " << gp.pruned_p4[gen_iG2[iG]].E() << ", " << gp.pruned_p4[gen_iG2[iG]].M() << ")" << std::endl;
-            }
-            for (unsigned int iGlu = 0; iGlu < gen_iGlu1.size(); iGlu++)
-            {
-                std::cout << "\tiGlu1[" << iGlu << "]= " << gen_iGlu1[iGlu] << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iGlu1[iGlu]] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iGlu1[iGlu]]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iGlu1[iGlu]].Pt() << ", " << gp.pruned_p4[gen_iGlu1[iGlu]].Eta() << ", " << gp.pruned_p4[gen_iGlu1[iGlu]].Phi() << ", " << gp.pruned_p4[gen_iGlu1[iGlu]].E() << ", " << gp.pruned_p4[gen_iGlu1[iGlu]].M() << ")" << std::endl;
-            }
-            for (unsigned int iGlu = 0; iGlu < gen_iGlu2.size(); iGlu++)
-            {
-                std::cout << "\tiGlu2[" << iGlu << "]= " << gen_iGlu2[iGlu] << "\tgp.pruned_pdg_id= " << gp.pruned_pdg_id[gen_iGlu2[iGlu]] << "\tflags= " << std::bitset<15>(gp.pruned_status_flags[gen_iGlu2[iGlu]]) << "\t(pt, eta, phi, e, mass)= (" << gp.pruned_p4[gen_iGlu2[iGlu]].Pt() << ", " << gp.pruned_p4[gen_iGlu2[iGlu]].Eta() << ", " << gp.pruned_p4[gen_iGlu2[iGlu]].Phi() << ", " << gp.pruned_p4[gen_iGlu2[iGlu]].E() << ", " << gp.pruned_p4[gen_iGlu2[iGlu]].M() << ")" << std::endl;
-            }
-        } // end if HHANADEBUG
-    
-    
-        gen_B1 += gp.pruned_p4[gen_iB1];
-        gen_B2 += gp.pruned_p4[gen_iB2];
-        gen_Nu1 += gp.pruned_p4[gen_iNu1];
-        gen_Nu2 += gp.pruned_p4[gen_iNu2];
-        gen_L1 += gp.pruned_p4[gen_iL1];
-        gen_L2 += gp.pruned_p4[gen_iL2];
-        gen_LL += gen_L1 + gen_L2;
-        gen_NuNu += gen_Nu1 + gen_Nu2;
-        gen_B1FSR += gen_B1;
-        gen_B2FSR += gen_B2;
-        gen_L1FSR += gen_L1;
-        gen_L2FSR += gen_L2;
-        for (unsigned int iG = 0; iG < gen_iG1.size(); iG++)
-            gen_L1FSR += gp.pruned_p4[gen_iG1[iG]];
-        for (unsigned int iG = 0; iG < gen_iG2.size(); iG++)
-            gen_L2FSR += gp.pruned_p4[gen_iG2[iG]];
-        for (unsigned int iGlu = 0; iGlu < gen_iGlu1.size(); iGlu++)
-            gen_B1FSR += gp.pruned_p4[gen_iGlu1[iGlu]];
-        for (unsigned int iGlu = 0; iGlu < gen_iGlu2.size(); iGlu++)
-            gen_B2FSR += gp.pruned_p4[gen_iGlu2[iGlu]];
-        gen_BB += gen_B1 + gen_B2;
-        gen_BBFSR += gen_B1FSR + gen_B2FSR;
-        gen_L1FSRNu += gen_L1FSR + gen_Nu1;
-        gen_L2FSRNu += gen_L2FSR + gen_Nu2;
-        gen_LLFSR += gen_L1FSR + gen_L2FSR;
-        gen_LLNuNu += gen_LL + gen_NuNu;
-        gen_LLFSRNuNu += gen_LLFSR + gen_NuNu;
-        gen_LLFSRNuNuBB += gen_LLFSRNuNu + gen_BBFSR;
-    
-        if (HHANADEBUG)
-        {
-            std::cout << "\tgen_B1.M()= " << gen_B1.M() << std::endl;
-            std::cout << "\tgen_B2.M()= " << gen_B2.M() << std::endl;
-            std::cout << "\tgen_B1FSR.M()= " << gen_B1FSR.M() << std::endl;
-            std::cout << "\tgen_B2FSR.M()= " << gen_B2FSR.M() << std::endl;
-            std::cout << "\tgen_Nu1.M()= " << gen_Nu1.M() << std::endl;
-            std::cout << "\tgen_Nu2.M()= " << gen_Nu2.M() << std::endl;
-            std::cout << "\tgen_L1.M()= " << gen_L1.M() << std::endl;
-            std::cout << "\tgen_L2.M()= " << gen_L2.M() << std::endl;
-            std::cout << "\tgen_LL.M()= " << gen_LL.M() << std::endl;
-            std::cout << "\tgen_L1FSRNu.M()= " << gen_L1FSRNu.M() << std::endl;
-            std::cout << "\tgen_L2FSRNu.M()= " << gen_L2FSRNu.M() << std::endl;
-            std::cout << "\tgen_L1FSR.M()= " << gen_L1FSR.M() << std::endl;
-            std::cout << "\tgen_L2FSR.M()= " << gen_L2FSR.M() << std::endl;
-            std::cout << "\tgen_LLFSR.M()= " << gen_LLFSR.M() << std::endl;
-            std::cout << "\tgen_NuNu.M()= " << gen_NuNu.M() << std::endl;
-            std::cout << "\tgen_LLNuNu.M()= " << gen_LLNuNu.M() << std::endl;
-            std::cout << "\tgen_LLFSRNuNu.M()= " << gen_LLFSRNuNu.M() << std::endl;
-            std::cout << "\tgen_BB.M()= " << gen_BB.M() << std::endl;
-            std::cout << "\tgen_BBFSR.M()= " << gen_BBFSR.M() << std::endl;
-            std::cout << "\tgen_LLFSRNuNuBB.M()= " << gen_LLFSRNuNuBB.M() << std::endl;
-        }
+        auto LLNuNu = gen_Lplus + gen_Lminus + gen_Nu1 + gen_Nu2;
+        std::cout << "    gen_(LL NuNu).M() = " << LLNuNu.M() << std::endl;
+
+        auto LLNuNu_afterFSR = gen_Lplus_afterFSR + gen_Lminus_afterFSR + gen_Nu1 + gen_Nu2;
+        std::cout << "    gen_(LL NuNu)_afterFSR.M() = " << LLNuNu_afterFSR.M() << std::endl;
+
+        auto LLNuNuBB = gen_Lplus + gen_Lminus + gen_Nu1 + gen_Nu2 + gen_B + gen_Bbar;
+        std::cout << "    gen_(LL NuNu BB).M() = " << LLNuNuBB.M() << std::endl;
+
+        auto LLNuNuBB_afterFSR = gen_Lplus_afterFSR + gen_Lminus_afterFSR + gen_Nu1 + gen_Nu2 + gen_B_afterFSR + gen_Bbar_afterFSR;
+        std::cout << "    gen_(LL NuNu BB)_afterFSR.M() = " << LLNuNuBB_afterFSR.M() << std::endl;
+#endif
 
         // ***** ***** *****
         // Matching
         // ***** ***** *****
-        BRANCH(gen_deltaR_jet_B1, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_B2, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_B1FSR, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_B2FSR, std::vector<float>);    
+        BRANCH(gen_deltaR_jet_B, std::vector<float>);    
+        BRANCH(gen_deltaR_jet_Bbar, std::vector<float>);    
+        BRANCH(gen_deltaR_jet_B_afterFSR, std::vector<float>);    
+        BRANCH(gen_deltaR_jet_Bbar_afterFSR, std::vector<float>);    
         BRANCH(gen_deltaR_electron_L1, std::vector<float>);    
         BRANCH(gen_deltaR_electron_L2, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L1FSR, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L2FSR, std::vector<float>);    
+        BRANCH(gen_deltaR_electron_L1_afterFSR, std::vector<float>);    
+        BRANCH(gen_deltaR_electron_L2_afterFSR, std::vector<float>);    
         BRANCH(gen_deltaR_muon_L1, std::vector<float>);    
         BRANCH(gen_deltaR_muon_L2, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L1FSR, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L2FSR, std::vector<float>);    
+        BRANCH(gen_deltaR_muon_L1_afterFSR, std::vector<float>);    
+        BRANCH(gen_deltaR_muon_L2_afterFSR, std::vector<float>);    
     
         for (auto p4: alljets.gen_p4) {
-            gen_deltaR_jet_B1.push_back(deltaR(p4, gen_B1));
-            gen_deltaR_jet_B2.push_back(deltaR(p4, gen_B2));
-            gen_deltaR_jet_B1FSR.push_back(deltaR(p4, gen_B1FSR));
-            gen_deltaR_jet_B2FSR.push_back(deltaR(p4, gen_B2FSR));
+            gen_deltaR_jet_B.push_back(deltaR(p4, gen_B));
+            gen_deltaR_jet_Bbar.push_back(deltaR(p4, gen_Bbar));
+            gen_deltaR_jet_B_afterFSR.push_back(deltaR(p4, gen_B_afterFSR));
+            gen_deltaR_jet_Bbar_afterFSR.push_back(deltaR(p4, gen_Bbar_afterFSR));
         }
         for (auto p4: allelectrons.gen_p4) {
-            gen_deltaR_electron_L1.push_back(deltaR(p4, gen_L1));
-            gen_deltaR_electron_L2.push_back(deltaR(p4, gen_L2));
-            gen_deltaR_electron_L1FSR.push_back(deltaR(p4, gen_L1FSR));
-            gen_deltaR_electron_L2FSR.push_back(deltaR(p4, gen_L2FSR));
+            gen_deltaR_electron_L1.push_back(deltaR(p4, gen_Lminus));
+            gen_deltaR_electron_L2.push_back(deltaR(p4, gen_Lplus));
+            gen_deltaR_electron_L1_afterFSR.push_back(deltaR(p4, gen_Lminus_afterFSR));
+            gen_deltaR_electron_L2_afterFSR.push_back(deltaR(p4, gen_Lplus_afterFSR));
         }
         for (auto p4: allmuons.gen_p4) {
-            gen_deltaR_muon_L1.push_back(deltaR(p4, gen_L1));
-            gen_deltaR_muon_L2.push_back(deltaR(p4, gen_L2));
-            gen_deltaR_muon_L1FSR.push_back(deltaR(p4, gen_L1FSR));
-            gen_deltaR_muon_L2FSR.push_back(deltaR(p4, gen_L2FSR));
+            gen_deltaR_muon_L1.push_back(deltaR(p4, gen_Lminus));
+            gen_deltaR_muon_L2.push_back(deltaR(p4, gen_Lplus));
+            gen_deltaR_muon_L1_afterFSR.push_back(deltaR(p4, gen_Lminus_afterFSR));
+            gen_deltaR_muon_L2_afterFSR.push_back(deltaR(p4, gen_Lplus_afterFSR));
         }
 
     // TTBAR MC TRUTH
-    const GenParticlesProducer& gen_particles = producers.get<GenParticlesProducer>("gen_particles");
+    const GenParticlesProducer& gen_particles = gp;
 
     // 'Pruned' particles are from the hard process
     // 'Packed' particles are stable particles
-
-    std::function<bool(size_t, size_t)> pruned_decays_from = [&pruned_decays_from, &gen_particles](size_t particle_index, size_t mother_index) -> bool {
-        // Iterator over all pruned particles to find if the particle `particle_index` has `mother_index` in its decay history
-        if (gen_particles.pruned_mothers_index[particle_index].empty())
-            return false;
-
-        size_t index = gen_particles.pruned_mothers_index[particle_index][0];
-
-        if (index == mother_index) {
-            return true;
-        }
-
-        if (pruned_decays_from(index, mother_index))
-            return true;
-
-        return false;
-    };
 
 #if TT_GEN_DEBUG
     std::function<void(size_t)> print_mother_chain = [&gen_particles, &print_mother_chain](size_t p) {
