@@ -268,7 +268,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             // Some selection
             if (!dilep.isOS)
                 continue;
-            if (event.isRealData() && !(leptons[ilep1].hlt_DR_matchedObject < m_hltDRCut && leptons[ilep1].hlt_DR_matchedObject < m_hltDRCut))
+            if (event.isRealData() && !(leptons[ilep1].hlt_DR_matchedObject < m_hltDRCut && leptons[ilep2].hlt_DR_matchedObject < m_hltDRCut))
                 continue;
             if (!(dilep.id_HWWHWW && dilep.iso_HWWHWW))
                 continue;
