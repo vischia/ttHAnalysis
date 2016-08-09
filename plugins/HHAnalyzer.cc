@@ -487,7 +487,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.btag_L = mybtag > m_jet_bDiscrCut_loose;
             myjet.btag_M = mybtag > m_jet_bDiscrCut_medium;
             myjet.btag_T = mybtag > m_jet_bDiscrCut_tight;
-            myjet.gen_matched_bParton = (alljets.partonFlavor[ijet]) == 5;
+            myjet.gen_matched_bParton = (std::abs(alljets.partonFlavor[ijet]) == 5);
             myjet.gen_matched_bHadron = (alljets.hadronFlavor[ijet]) == 5;
             myjet.gen_matched = alljets.matched[ijet];
             myjet.gen_p4 = myjet.gen_matched ? alljets.gen_p4[ijet] : null_p4;
