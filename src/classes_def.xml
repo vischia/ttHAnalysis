@@ -1,5 +1,4 @@
 <lcgdict>
-    <class name="HH::Lepton"/>
     <class name="HH::Lepton">
         <field name="hlt_already_tried_matching" transient="true"/>
     </class>
