@@ -7,10 +7,10 @@ from cp3_llbb.Framework import METProducer
 
 runOnData = False
 
-globalTag_ = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
+globalTag_ = '80X_mcRun2_asymptotic_2016_miniAODv2_v1'
 processName_ = 'PAT'
 if runOnData :
-    globalTag_ = '76X_dataRun2_16Dec2015_v0'
+    globalTag_ = '80X_dataRun2_Prompt_ICHEP16JEC_v0'
     processName_ = 'RECO'
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
@@ -27,7 +27,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             metProducer = cms.string('met'),
             nohfMETProducer = cms.string('nohf_met'),
             # Here are the default value (just to show what is configurable)
-            # NB : Isolation and IDs did not change from 74 to 76
+            # FIXME: isolation has not been updated for 80X
             electronIsoCut_EB_Loose = cms.untracked.double(0.0893), # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
             electronIsoCut_EE_Loose = cms.untracked.double(0.121),
             electronIsoCut_EB_Tight = cms.untracked.double(0.0354),
@@ -40,9 +40,9 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             leadingMuonPtCut = cms.untracked.double(20),
             subleadingMuonPtCut = cms.untracked.double(10),
             muonEtaCut = cms.untracked.double(2.4),
-            electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
-            electrons_medium_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"),
-            electrons_tight_wp_name = cms.untracked.string("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
+            electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-loose"),
+            electrons_medium_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-medium"),
+            electrons_tight_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-tight"),
             jetEtaCut = cms.untracked.double(2.4),
             jetPtCut = cms.untracked.double(20),
             # BTAG INFO
@@ -84,11 +84,11 @@ process = framework.create()
 
 if runOnData : 
     process.source.fileNames = cms.untracked.vstring(
-        '/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
+        '/store/data/Run2016B/DoubleMuon/MINIAOD/PromptReco-v2/000/273/158/00000/A6AC80E5-121A-E611-A689-02163E01439E.root'
         )
 else : 
     process.source.fileNames = cms.untracked.vstring(
-        '/store/mc/RunIIFall15MiniAODv2/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/50FF8034-BEB9-E511-A09C-001EC9ADDD58.root'
+        '/store/mc/RunIISpring16MiniAODv2/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/60000/022B4AD3-7A1B-E611-812B-28924A33B9AA.root'
         )
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
