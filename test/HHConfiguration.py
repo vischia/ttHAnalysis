@@ -5,7 +5,17 @@ from Configuration.StandardSequences.Eras import eras
 from cp3_llbb.Framework import Framework
 from cp3_llbb.Framework import METProducer
 
-runOnData = False
+from FWCore.ParameterSet.VarParsing import VarParsing
+options = VarParsing()
+options.register('runOnData',
+        0,
+        VarParsing.multiplicity.singleton,
+        VarParsing.varType.int,
+        'If running over MC (0) or data (1)')
+
+options.parseArguments()
+
+runOnData = options.runOnData == 1
 
 globalTag_ = '80X_mcRun2_asymptotic_2016_miniAODv2_v1'
 processName_ = 'PAT'
