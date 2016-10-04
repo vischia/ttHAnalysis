@@ -13,9 +13,16 @@ options.register('runOnData',
         VarParsing.varType.int,
         'If running over MC (0) or data (1)')
 
+options.register('hltProcessName',
+        'HLT',
+        VarParsing.multiplicity.singleton,
+        VarParsing.varType.string,
+        'The HLT processName to use')
+
 options.parseArguments()
 
 runOnData = options.runOnData == 1
+hltProcessName_ = options.hltProcessName
 
 globalTag_ = '80X_mcRun2_asymptotic_2016_miniAODv2_v1'
 processName_ = 'PAT'
@@ -23,7 +30,7 @@ if runOnData :
     globalTag_ = '80X_dataRun2_Prompt_ICHEP16JEC_v0'
     processName_ = 'RECO'
 
-framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
+framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_, hltProcessName=hltProcessName_)
 
 framework.addAnalyzer('hh_analyzer', cms.PSet(
         type = cms.string('hh_analyzer'),
@@ -71,7 +78,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
                 DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8orIsoTkMu8leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
                 DoubleIsoMu17Mu8_IsoMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
                 #DoubleIsoMu17Mu8_TkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_TkMu8leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json')
-            )
+            ),
         )
     )
 )
@@ -98,7 +105,8 @@ if runOnData :
         )
 else : 
     process.source.fileNames = cms.untracked.vstring(
-        '/store/mc/RunIISpring16MiniAODv2/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/60000/022B4AD3-7A1B-E611-812B-28924A33B9AA.root'
+        '/store/mc/RunIISpring16MiniAODv2/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/10000/702A12BA-1B3B-E611-9A14-0025907B4EC0.root'
+#        '/store/mc/RunIISpring16MiniAODv2/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/60000/022B4AD3-7A1B-E611-812B-28924A33B9AA.root'
         )
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
