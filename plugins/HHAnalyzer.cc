@@ -1548,32 +1548,34 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     float eff_lep2_leg1 = 1.;
     float eff_lep2_leg2 = 1.;
     float eff_lep2_tkleg2 = 0.;
+    Parameters p_hlt_lep1 = {{BinningVariable::Eta, lep1.p4.Eta()}, {BinningVariable::Pt, lep1.p4.Pt()}};
+    Parameters p_hlt_lep2 = {{BinningVariable::Eta, lep2.p4.Eta()}, {BinningVariable::Pt, lep2.p4.Pt()}};
 
     if (lep1.isMu && lep2.isMu) {
-        eff_lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        eff_lep1_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        //eff_lep1_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        eff_lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-        eff_lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-        //eff_lep2_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
+        eff_lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[0];
+        eff_lep1_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep1)[0];
+        //eff_lep1_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep1)[0];
+        eff_lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[0];
+        eff_lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep2)[0];
+        //eff_lep2_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep2)[0];
     }
     else if (lep1.isMu && lep2.isEl) {
-        eff_lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        eff_lep1_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        eff_lep2_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-        eff_lep2_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
+        eff_lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[0];
+        eff_lep1_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep1)[0];
+        eff_lep2_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[0];
+        eff_lep2_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[0];
     }
     else if (lep1.isEl && lep2.isMu) {
-        eff_lep1_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        eff_lep1_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        eff_lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-        eff_lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
+        eff_lep1_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[0];
+        eff_lep1_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[0];
+        eff_lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[0];
+        eff_lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep2)[0];
     }
     else if (lep1.isEl && lep2.isEl){
-        eff_lep1_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        eff_lep1_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get({lep1.p4.Eta(), lep1.p4.Pt()})[0];
-        eff_lep2_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
-        eff_lep2_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get({lep2.p4.Eta(), lep2.p4.Pt()})[0];
+        eff_lep1_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[0];
+        eff_lep1_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[0];
+        eff_lep2_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[0];
+        eff_lep2_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[0];
     }
     else 
         std::cout << "We have something else then el or mu !!" << std::endl;
@@ -1586,30 +1588,30 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     float error_eff_lep2_tkleg2_up = 0.;
 
     if (lep1.isMu && lep2.isMu) {
-        error_eff_lep1_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep1_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        //error_eff_lep1_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep2_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
-        error_eff_lep2_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
-        //error_eff_lep2_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
+        error_eff_lep1_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[2];
+        error_eff_lep1_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep1)[2];
+        //error_eff_lep1_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep1)[2];
+        error_eff_lep2_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[2];
+        error_eff_lep2_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep2)[2];
+        //error_eff_lep2_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep2)[2];
     }
     else if (lep1.isMu && lep2.isEl) {
-        error_eff_lep1_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep1_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep2_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
-        error_eff_lep2_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
+        error_eff_lep1_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[2];
+        error_eff_lep1_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep1)[2];
+        error_eff_lep2_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[2];
+        error_eff_lep2_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[2];
     }
     else if (lep1.isEl && lep2.isMu) {
-        error_eff_lep1_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep1_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep2_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
-        error_eff_lep2_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
+        error_eff_lep1_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[2];
+        error_eff_lep1_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[2];
+        error_eff_lep2_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[2];
+        error_eff_lep2_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep2)[2];
     }
     else if (lep1.isEl && lep2.isEl){
-        error_eff_lep1_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep1_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get({lep1.p4.Eta(), lep1.p4.Pt()})[2];
-        error_eff_lep2_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
-        error_eff_lep2_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get({lep2.p4.Eta(), lep2.p4.Pt()})[2];
+        error_eff_lep1_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[2];
+        error_eff_lep1_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[2];
+        error_eff_lep2_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[2];
+        error_eff_lep2_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[2];
     }
 
     float error_eff_lep1_leg1_down = 0.;
@@ -1620,30 +1622,30 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     float error_eff_lep2_tkleg2_down = 0.;
 
     if (lep1.isMu && lep2.isMu) {
-        error_eff_lep1_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep1_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        //error_eff_lep1_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep2_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
-        error_eff_lep2_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
-        //error_eff_lep2_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
+        error_eff_lep1_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[1];
+        error_eff_lep1_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep1)[1];
+        //error_eff_lep1_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep1)[1];
+        error_eff_lep2_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[1];
+        error_eff_lep2_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep2)[1];
+        //error_eff_lep2_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep2)[1];
     }
     else if (lep1.isMu && lep2.isEl) {
-        error_eff_lep1_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep1_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep2_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
-        error_eff_lep2_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
+        error_eff_lep1_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[1];
+        error_eff_lep1_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep1)[1];
+        error_eff_lep2_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[1];
+        error_eff_lep2_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[1];
     }
     else if (lep1.isEl && lep2.isMu) {
-        error_eff_lep1_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep1_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep2_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
-        error_eff_lep2_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
+        error_eff_lep1_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[1];
+        error_eff_lep1_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[1];
+        error_eff_lep2_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[1];
+        error_eff_lep2_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep2)[1];
     }
     else if (lep1.isEl && lep2.isEl){
-        error_eff_lep1_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep1_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get({lep1.p4.Eta(), lep1.p4.Pt()})[1];
-        error_eff_lep2_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
-        error_eff_lep2_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get({lep2.p4.Eta(), lep2.p4.Pt()})[1];
+        error_eff_lep1_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[1];
+        error_eff_lep1_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[1];
+        error_eff_lep2_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[1];
+        error_eff_lep2_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[1];
     }
 
 
