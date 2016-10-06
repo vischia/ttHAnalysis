@@ -238,6 +238,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ll.push_back(dilep); 
         }
     }
+    // have the ll collection sorted by ht
+    std::sort(ll.begin(), ll.end(), [&](HH::Dijet& a, HH::Dijet& b){return a.p4.Pt() > b.p4.Pt();});
 
     // ***** 
     // Adding MET(s)
@@ -389,7 +391,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
     jj.clear();
     // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
-
     for (unsigned int ijet1 = 0; ijet1 < jets.size(); ijet1++)
     {
         for (unsigned int ijet2 = ijet1 + 1; ijet2 < jets.size(); ijet2++)
@@ -427,6 +428,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             jj.push_back(myjj);
         }
     }
+    // have the jj collection sorted by ht
+    std::sort(jj.begin(), jj.end(), [&](HH::Dijet& a, HH::Dijet& b){return a.p4.Pt() > b.p4.Pt();});
 
     // ********** 
     // lljj, llbb, +pf_met
