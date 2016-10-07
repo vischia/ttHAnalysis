@@ -624,6 +624,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             llmetjj_HWWleptons_btagM_csv.push_back(myllmetjj_csv);
         if (myllmetjj_csv.btag_TT)
             llmetjj_HWWleptons_btagT_csv.push_back(myllmetjj_csv);
+        // October 2016: asymmetric btag candidates
+        if (myllmetjj_csv.btag_LM || myllmetjj_csv.btag_ML)
+            llmetjj_HWWleptons_btagLM_csv.push_back(myllmetjj_csv);
+        if (myllmetjj_csv.btag_MT || myllmetjj_csv.btag_TM)
+            llmetjj_HWWleptons_btagMT_csv.push_back(myllmetjj_csv);
     }
 
 

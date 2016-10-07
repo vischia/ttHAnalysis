@@ -80,6 +80,9 @@ class HHAnalyzer: public Framework::Analyzer {
         BRANCH(llmetjj_HWWleptons_btagL_csv, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_HWWleptons_btagM_csv, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_HWWleptons_btagT_csv, std::vector<HH::DileptonMetDijet>);
+        // October 2016: adding some asymmetric btag candidates, for study
+        BRANCH(llmetjj_HWWleptons_btagLM_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_HWWleptons_btagMT_csv, std::vector<HH::DileptonMetDijet>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
