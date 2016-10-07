@@ -171,6 +171,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.ilep1 = ilep1;
             dilep.ilep2 = ilep2;
             dilep.isOS = leptons[ilep1].charge * leptons[ilep2].charge < 0;
+            dilep.isPlusMinus = leptons[ilep1].charge > 0 && leptons[ilep2].charge < 0;
+            dilep.isMinusPlus = leptons[ilep1].charge < 0 && leptons[ilep2].charge > 0;
             dilep.isMuMu = leptons[ilep1].isMu && leptons[ilep2].isMu;
             dilep.isElEl = leptons[ilep1].isEl && leptons[ilep2].isEl;
             dilep.isElMu = leptons[ilep1].isEl && leptons[ilep2].isMu;
@@ -290,6 +292,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.ilep1 = ll[ill].ilep1;
             myllmet.ilep2 = ll[ill].ilep2;
             myllmet.isOS = ll[ill].isOS;
+            myllmet.isPlusMinus = ll[ill].isPlusMinus;
+            myllmet.isMinusPlus = ll[ill].isMinusPlus;
             myllmet.isMuMu = ll[ill].isMuMu;
             myllmet.isElEl = ll[ill].isElEl;
             myllmet.isElMu = ll[ill].isElMu;
@@ -504,6 +508,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.ilep1 = ll[ill].ilep1;
             myllmetjj.ilep2 = ll[ill].ilep2;
             myllmetjj.isOS = ll[ill].isOS;
+            myllmetjj.isPlusMinus = ll[ill].isPlusMinus;
+            myllmetjj.isMinusPlus = ll[ill].isMinusPlus;
             myllmetjj.isMuMu = ll[ill].isMuMu;
             myllmetjj.isElEl = ll[ill].isElEl;
             myllmetjj.isElMu = ll[ill].isElMu;

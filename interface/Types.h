@@ -38,6 +38,8 @@ namespace HH {
         int ilep2; // index in the HH::Lepton collection
         std::pair<int8_t, int8_t> hlt_idxs = std::make_pair(-1,-1); // Stores indices of matched online objects. (-1,-1) if no match
         bool isOS; // Opposite Sign
+        bool isPlusMinus;
+        bool isMinusPlus;
         bool isMuMu;
         bool isElEl;
         bool isElMu;
