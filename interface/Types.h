@@ -131,6 +131,9 @@ namespace HH {
         std::pair<int, int> idxs; // indices in the framework collection
         int ijet1; // indices in the HH::Jet collection
         int ijet2;
+        bool jid_LL;
+        bool jid_TT;
+        bool jid_TLVTLV;
         bool btag_LL;
         bool btag_LM;
         bool btag_LT;

@@ -401,6 +401,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.idxs = std::make_pair(jets[ijet1].idx, jets[ijet2].idx);
             myjj.ijet1 = ijet1;
             myjj.ijet2 = ijet2;
+            myjj.jid_LL = jets[ijet1].id_L && jets[ijet2].id_L;
+            myjj.jid_TT = jets[ijet1].id_T && jets[ijet2].id_T;
+            myjj.jid_TLVTLV = jets[ijet1].id_TLV && jets[ijet2].id_TLV;
             myjj.btag_LL = jets[ijet1].btag_L && jets[ijet2].btag_L;
             myjj.btag_LM = (jets[ijet1].btag_L && jets[ijet2].btag_M) || (jets[ijet2].btag_L && jets[ijet1].btag_M);
             myjj.btag_LT = (jets[ijet1].btag_L && jets[ijet2].btag_T) || (jets[ijet2].btag_L && jets[ijet1].btag_T);
@@ -473,6 +476,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             // blind copy of the jj content
             myllmetjj.ijet1 = jj[ijj].ijet1;
             myllmetjj.ijet2 = jj[ijj].ijet2;
+            myllmetjj.jid_LL = jj[ijj].jid_LL;
+            myllmetjj.jid_TT = jj[ijj].jid_TT;
+            myllmetjj.jid_TLVTLV = jj[ijj].jid_TLVTLV;
             myllmetjj.btag_LL = jj[ijj].btag_LL;
             myllmetjj.btag_LM = jj[ijj].btag_LM;
             myllmetjj.btag_LT = jj[ijj].btag_LT;
