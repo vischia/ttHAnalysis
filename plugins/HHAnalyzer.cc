@@ -1,4 +1,5 @@
 #include <cp3_llbb/HHAnalysis/interface/HHAnalyzer.h>
+#include <cp3_llbb/HHAnalysis/interface/Tools.h>
 #include <cp3_llbb/Framework/interface/BTagsAnalyzer.h>
 #include <cp3_llbb/HHAnalysis/interface/Categories.h>
 #include <cp3_llbb/HHAnalysis/interface/GenStatusFlags.h>
@@ -239,7 +240,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
     // have the ll collection sorted by ht
-    std::sort(ll.begin(), ll.end(), [&](HH::Dijet& a, HH::Dijet& b){return a.p4.Pt() > b.p4.Pt();});
+    std::sort(ll.begin(), ll.end(), [&](HH::Dilepton& a, HH::Dilepton& b){return a.p4.Pt() > b.p4.Pt();});
 
     // ***** 
     // Adding MET(s)
@@ -564,6 +565,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.DPhi_llmet_jj = fabs(ROOT::Math::VectorUtil::DeltaPhi(llmet[illmet].p4, jj[ijj].p4));
             myllmetjj.cosThetaStar_CS = fabs(getCosThetaStar_CS(llmet[illmet].p4, jj[ijj].p4));
             myllmetjj.MT_fullsystem = myllmetjj.p4.Mt();
+            myllmetjj.melaAngles = getMELAAngles(llmet[illmet].p4, jj[ijj].p4, leptons[ilep1].p4, leptons[ilep2].p4, jets[ijet1].p4, jets[ijet2].p4);
+            myllmetjj.visMelaAngles = getMELAAngles(ll[ill].p4, jj[ijj].p4, leptons[ilep1].p4, leptons[ilep2].p4, jets[ijet1].p4, jets[ijet2].p4); // only take the visible part of the H(ww) candidate
+
             // Some selection
             if (myllmetjj.minDR_l_j < m_minDR_l_j_Cut)
                 continue;
@@ -1231,182 +1235,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         gen_ttbar_decay_type = UnknownTT;
     }
     } // end of if !event.isRealData()
-
-}
-
-float HHAnalyzer::getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam /*= 6500*/)
-{// cos theta star angle in the Collins Soper frame
-    LorentzVector p1, p2;
-    p1.SetPxPyPzE(0, 0,  ebeam, ebeam);
-    p2.SetPxPyPzE(0, 0, -ebeam, ebeam);
-
-    LorentzVector hh = h1 + h2;
-    ROOT::Math::Boost boost(-hh.X() / hh.T(), -hh.Y() / hh.T(), -hh.Z() / hh.T());
-    p1 = boost(p1);
-    p2 = boost(p2);
-    LorentzVector newh1 = boost(h1);
-    ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<double>> CSaxis(p1.Vect().Unit() - p2.Vect().Unit());
-
-    return cos(ROOT::Math::VectorUtil::Angle(CSaxis.Unit(), newh1.Vect().Unit()));
-}
-
-void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep) {
-
-    float eff_lep1_leg1 = 1.;
-    float eff_lep1_leg2 = 1.;
-    float eff_lep1_tkleg2 = 0.;
-    float eff_lep2_leg1 = 1.;
-    float eff_lep2_leg2 = 1.;
-    float eff_lep2_tkleg2 = 0.;
-    Parameters p_hlt_lep1 = {{BinningVariable::Eta, lep1.p4.Eta()}, {BinningVariable::Pt, lep1.p4.Pt()}};
-    Parameters p_hlt_lep2 = {{BinningVariable::Eta, lep2.p4.Eta()}, {BinningVariable::Pt, lep2.p4.Pt()}};
-
-    if (lep1.isMu && lep2.isMu) {
-        eff_lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[0];
-        eff_lep1_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep1)[0];
-        //eff_lep1_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep1)[0];
-        eff_lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[0];
-        eff_lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep2)[0];
-        //eff_lep2_tkleg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep2)[0];
-    }
-    else if (lep1.isMu && lep2.isEl) {
-        eff_lep1_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[0];
-        eff_lep1_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep1)[0];
-        eff_lep2_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[0];
-        eff_lep2_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[0];
-    }
-    else if (lep1.isEl && lep2.isMu) {
-        eff_lep1_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[0];
-        eff_lep1_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[0];
-        eff_lep2_leg1 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[0];
-        eff_lep2_leg2 = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep2)[0];
-    }
-    else if (lep1.isEl && lep2.isEl){
-        eff_lep1_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[0];
-        eff_lep1_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[0];
-        eff_lep2_leg1 = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[0];
-        eff_lep2_leg2 = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[0];
-    }
-    else 
-        std::cout << "We have something else then el or mu !!" << std::endl;
-
-    float error_eff_lep1_leg1_up = 0.;
-    float error_eff_lep1_leg2_up = 0.;
-    float error_eff_lep1_tkleg2_up = 0.;
-    float error_eff_lep2_leg1_up = 0.;
-    float error_eff_lep2_leg2_up = 0.;
-    float error_eff_lep2_tkleg2_up = 0.;
-
-    if (lep1.isMu && lep2.isMu) {
-        error_eff_lep1_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[2];
-        error_eff_lep1_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep1)[2];
-        //error_eff_lep1_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep1)[2];
-        error_eff_lep2_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[2];
-        error_eff_lep2_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep2)[2];
-        //error_eff_lep2_tkleg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep2)[2];
-    }
-    else if (lep1.isMu && lep2.isEl) {
-        error_eff_lep1_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[2];
-        error_eff_lep1_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep1)[2];
-        error_eff_lep2_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[2];
-        error_eff_lep2_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[2];
-    }
-    else if (lep1.isEl && lep2.isMu) {
-        error_eff_lep1_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[2];
-        error_eff_lep1_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[2];
-        error_eff_lep2_leg1_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[2];
-        error_eff_lep2_leg2_up = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep2)[2];
-    }
-    else if (lep1.isEl && lep2.isEl){
-        error_eff_lep1_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[2];
-        error_eff_lep1_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[2];
-        error_eff_lep2_leg1_up = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[2];
-        error_eff_lep2_leg2_up = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[2];
-    }
-
-    float error_eff_lep1_leg1_down = 0.;
-    float error_eff_lep1_leg2_down = 0.;
-    float error_eff_lep1_tkleg2_down = 0.;
-    float error_eff_lep2_leg1_down = 0.;
-    float error_eff_lep2_leg2_down = 0.;
-    float error_eff_lep2_tkleg2_down = 0.;
-
-    if (lep1.isMu && lep2.isMu) {
-        error_eff_lep1_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[1];
-        error_eff_lep1_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep1)[1];
-        //error_eff_lep1_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep1)[1];
-        error_eff_lep2_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[1];
-        error_eff_lep2_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg"].get(p_hlt_lep2)[1];
-        //error_eff_lep2_tkleg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_TkMu8leg"].get(p_hlt_lep2)[1];
-    }
-    else if (lep1.isMu && lep2.isEl) {
-        error_eff_lep1_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep1)[1];
-        error_eff_lep1_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep1)[1];
-        error_eff_lep2_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[1];
-        error_eff_lep2_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[1];
-    }
-    else if (lep1.isEl && lep2.isMu) {
-        error_eff_lep1_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[1];
-        error_eff_lep1_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[1];
-        error_eff_lep2_leg1_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu17leg"].get(p_hlt_lep2)[1];
-        error_eff_lep2_leg2_down = m_hlt_efficiencies["DoubleIsoMu17Mu8_IsoMu8leg"].get(p_hlt_lep2)[1];
-    }
-    else if (lep1.isEl && lep2.isEl){
-        error_eff_lep1_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep1)[1];
-        error_eff_lep1_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep1)[1];
-        error_eff_lep2_leg1_down = m_hlt_efficiencies["Ele17_12Leg1"].get(p_hlt_lep2)[1];
-        error_eff_lep2_leg2_down = m_hlt_efficiencies["Ele17_12Leg2"].get(p_hlt_lep2)[1];
-    }
-
-
-    float nominal = -(eff_lep1_leg1 * eff_lep2_leg1) +
-        (1 - (1 - eff_lep1_leg2) * (1 - eff_lep1_tkleg2)) * eff_lep2_leg1 +
-        eff_lep1_leg1 * (1 - (1 - eff_lep2_leg2) * (1 - eff_lep2_tkleg2));
-
-    float error_squared_up =
-        std::pow(1 - eff_lep2_leg1 - (1 - eff_lep2_leg2) * (1 - eff_lep2_tkleg2), 2) *
-        std::pow(error_eff_lep1_leg1_up, 2) +
-        std::pow(1 - eff_lep1_tkleg2, 2) * std::pow(eff_lep2_leg1, 2) *
-        std::pow(error_eff_lep1_leg2_up, 2) +
-        std::pow(1 - eff_lep1_leg2, 2) * std::pow(eff_lep2_leg1, 2) *
-        std::pow(error_eff_lep1_tkleg2_up, 2) +
-        std::pow(1 - eff_lep1_leg1 - (1 - eff_lep1_leg2) * (1 - eff_lep1_tkleg2), 2) *
-        std::pow(error_eff_lep2_leg1_up, 2) +
-        std::pow(eff_lep1_leg1, 2) * std::pow(1 - eff_lep2_tkleg2, 2) *
-        std::pow(error_eff_lep2_leg2_up, 2) +
-        std::pow(eff_lep1_leg1, 2) * std::pow(1 - eff_lep2_leg2, 2) *
-        std::pow(error_eff_lep2_tkleg2_up, 2);
-
-    float error_squared_down = 
-        std::pow(1 - eff_lep2_leg1 - (1 - eff_lep2_leg2) * (1 - eff_lep2_tkleg2), 2) *
-        std::pow(error_eff_lep1_leg1_down, 2) +
-        std::pow(1 - eff_lep1_tkleg2, 2) * std::pow(eff_lep2_leg1, 2) *
-        std::pow(error_eff_lep1_leg2_down, 2) +
-        std::pow(1 - eff_lep1_leg2, 2) * std::pow(eff_lep2_leg1, 2) *
-        std::pow(error_eff_lep1_tkleg2_down, 2) +
-        std::pow(1 - eff_lep1_leg1 - (1 - eff_lep1_leg2) * (1 - eff_lep1_tkleg2), 2) *
-        std::pow(error_eff_lep2_leg1_down, 2) +
-        std::pow(eff_lep1_leg1, 2) * std::pow(1 - eff_lep2_tkleg2, 2) *
-        std::pow(error_eff_lep2_leg2_down, 2) +
-        std::pow(eff_lep1_leg1, 2) * std::pow(1 - eff_lep2_leg2, 2) *
-        std::pow(error_eff_lep2_tkleg2_down, 2);
-
-    dilep.trigger_efficiency = nominal;
-    dilep.trigger_efficiency_upVariated = ((nominal + std::sqrt(error_squared_up)) > 1.)? 1. : nominal + std::sqrt(error_squared_up);
-    dilep.trigger_efficiency_downVariated = ((nominal - std::sqrt(error_squared_down)) < 0.)? 0. : nominal - std::sqrt(error_squared_down);
-    
-    // Arun's method (not using the proper derivative formula)
-    float X = eff_lep1_leg1 * eff_lep2_leg2 * std::sqrt((std::pow((error_eff_lep1_leg1_up/eff_lep1_leg1),2) + std::pow((error_eff_lep2_leg2_up/eff_lep2_leg2),2) ));
-    float Y = eff_lep2_leg1 * eff_lep1_leg2 * std::sqrt((std::pow((error_eff_lep2_leg1_up/eff_lep2_leg1),2) + std::pow((error_eff_lep1_leg2_up/eff_lep1_leg2),2) ));
-    float Z = eff_lep1_leg1 * eff_lep2_leg1 * std::sqrt((std::pow((error_eff_lep1_leg1_up/eff_lep1_leg1),2) + std::pow((error_eff_lep2_leg1_up/eff_lep2_leg1),2) ));
-    float error_squared_up_Arun = X*X + Y*Y + Z*Z ;
-    dilep.trigger_efficiency_upVariated_Arun = ((nominal + std::sqrt(error_squared_up_Arun)) > 1.)? 1. : nominal + std::sqrt(error_squared_up_Arun);
-
-    X = eff_lep1_leg1 * eff_lep2_leg2 * std::sqrt((std::pow((error_eff_lep1_leg1_down/eff_lep1_leg1),2) + std::pow((error_eff_lep2_leg2_down/eff_lep2_leg2),2) ));
-    Y = eff_lep2_leg1 * eff_lep1_leg2 * std::sqrt((std::pow((error_eff_lep2_leg1_down/eff_lep2_leg1),2) + std::pow((error_eff_lep1_leg2_down/eff_lep1_leg2),2) ));
-    Z = eff_lep1_leg1 * eff_lep2_leg1 * std::sqrt((std::pow((error_eff_lep1_leg1_down/eff_lep1_leg1),2) + std::pow((error_eff_lep2_leg1_down/eff_lep2_leg1),2) ));
-    float error_squared_down_Arun = X*X + Y*Y + Z*Z ;
-    dilep.trigger_efficiency_downVariated_Arun = ((nominal - std::sqrt(error_squared_down_Arun)) < 0.)? 0. : nominal - std::sqrt(error_squared_down_Arun);
 
 }
 

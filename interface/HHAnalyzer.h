@@ -85,6 +85,7 @@ class HHAnalyzer: public Framework::Analyzer {
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
 
         float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500);
+        MELAAngles getMELAAngles(const LorentzVector &q1, const LorentzVector &q2, const LorentzVector &q11, const LorentzVector &q12, const LorentzVector &q21, const LorentzVector &q22, float ebeam = 6500);
 
         void fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep);
 

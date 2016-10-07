@@ -156,6 +156,13 @@ namespace HH {
         bool gen_cl;
         bool gen_ll;
     };
+    struct MELAAngles {
+        float theta1;
+        float theta2;
+        float thetaStar; // same angle as cosThetaStar_CS
+        float phi;
+        float psi;
+    };
     struct DileptonMetDijet : public DileptonMet, public Dijet {
         LorentzVector p4;
         LorentzVector lep1_p4;
@@ -192,6 +199,8 @@ namespace HH {
         float gen_DR;
         float gen_DPhi;
         float gen_DPtOverPt;
+        MELAAngles melaAngles;
+        MELAAngles visMelaAngles;
     };
 }
 
