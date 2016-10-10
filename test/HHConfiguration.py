@@ -4,25 +4,10 @@ import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 from cp3_llbb.Framework import Framework
 from cp3_llbb.Framework import METProducer
+from cp3_llbb.Framework.CmdLine import CmdLine
 
-from FWCore.ParameterSet.VarParsing import VarParsing
-options = VarParsing()
-options.register('runOnData',
-        0,
-        VarParsing.multiplicity.singleton,
-        VarParsing.varType.int,
-        'If running over MC (0) or data (1)')
-
-options.register('hltProcessName',
-        'HLT',
-        VarParsing.multiplicity.singleton,
-        VarParsing.varType.string,
-        'The HLT processName to use')
-
-options.parseArguments()
-
+options = CmdLine()
 runOnData = options.runOnData == 1
-hltProcessName_ = options.hltProcessName
 
 globalTag_ = '80X_mcRun2_asymptotic_2016_miniAODv2_v1'
 processName_ = 'PAT'
@@ -30,7 +15,7 @@ if runOnData :
     globalTag_ = '80X_dataRun2_Prompt_ICHEP16JEC_v0'
     processName_ = 'RECO'
 
-framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_, hltProcessName=hltProcessName_)
+framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
 
 framework.addAnalyzer('hh_analyzer', cms.PSet(
         type = cms.string('hh_analyzer'),
