@@ -125,6 +125,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.gen_p4 = ele.gen_matched ? allelectrons.gen_p4[ielectron] : null_p4;
             ele.gen_DR = ele.gen_matched ? ROOT::Math::VectorUtil::DeltaR(ele.p4, ele.gen_p4): -1.;
             ele.gen_DPtOverPt = ele.gen_matched ? (ele.p4.Pt() - ele.gen_p4.Pt()) / ele.p4.Pt() : -10.;
+            // some selection
+            if (!ele.id_HWW || !ele.iso_HWW)
+                continue;
             leptons.push_back(ele);
         }
     }//end of loop on electrons
@@ -152,6 +155,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             mu.gen_p4 = mu.gen_matched ? allmuons.gen_p4[imuon] : null_p4;
             mu.gen_DR = mu.gen_matched ? ROOT::Math::VectorUtil::DeltaR(mu.p4, mu.gen_p4) : -1.;
             mu.gen_DPtOverPt = mu.gen_matched ? (mu.p4.Pt() - mu.gen_p4.Pt()) / mu.p4.Pt() : -10.;
+            // some selection
+            if (!mu.id_HWW || !mu.iso_HWW)
+                continue;
             leptons.push_back(mu);
         }
     }//end of loop on muons
@@ -222,11 +228,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                fillTriggerEfficiencies(leptons[ilep1], leptons[ilep2], dilep);
             }
             // Some selection
+            // Note that ID and isolation criteria are in both electron and muon loops
             if (!dilep.isOS)
                 continue;
             if (event.isRealData() && !(leptons[ilep1].hlt_DR_matchedObject < m_hltDRCut && leptons[ilep2].hlt_DR_matchedObject < m_hltDRCut))
-                continue;
-            if (!(dilep.id_HWWHWW && dilep.iso_HWWHWW))
                 continue;
             // Counters
             tmp_count_has2leptons = event_weight;
@@ -390,7 +395,17 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.gen_b = (alljets.hadronFlavor[ijet]) == 5; // redundant with gen_matched_bHadron defined above
             myjet.gen_c = (alljets.hadronFlavor[ijet]) == 4;
             myjet.gen_l = (alljets.hadronFlavor[ijet]) < 4;
+            // Some selection
             if (!myjet.id_L)
+                continue;
+            bool isThereACloseSelectedLepton = false;
+            for (auto& mylepton: leptons) {
+                if (ROOT::Math::VectorUtil::DeltaR(myjet.p4, mylepton.p4) < m_minDR_l_j_Cut) {
+                    isThereACloseSelectedLepton = true;
+                    break;
+                }
+            }
+            if (isThereACloseSelectedLepton)
                 continue;
             jets.push_back(myjet);
         }
@@ -585,9 +600,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.melaAngles = getMELAAngles(llmet[illmet].p4, jj[ijj].p4, leptons[ilep1].p4, leptons[ilep2].p4, jets[ijet1].p4, jets[ijet2].p4);
             myllmetjj.visMelaAngles = getMELAAngles(ll[ill].p4, jj[ijj].p4, leptons[ilep1].p4, leptons[ilep2].p4, jets[ijet1].p4, jets[ijet2].p4); // only take the visible part of the H(ww) candidate
 
-            // Some selection
-            if (myllmetjj.minDR_l_j < m_minDR_l_j_Cut)
-                continue;
             // Counters
             tmp_count_has2leptons_1llmetjj = event_weight;
             if (myllmetjj.isElEl)
