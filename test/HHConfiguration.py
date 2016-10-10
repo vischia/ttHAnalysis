@@ -4,17 +4,9 @@ import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 from cp3_llbb.Framework import Framework
 from cp3_llbb.Framework import METProducer
+from cp3_llbb.Framework.CmdLine import CmdLine
 
-from FWCore.ParameterSet.VarParsing import VarParsing
-options = VarParsing()
-options.register('runOnData',
-        0,
-        VarParsing.multiplicity.singleton,
-        VarParsing.varType.int,
-        'If running over MC (0) or data (1)')
-
-options.parseArguments()
-
+options = CmdLine()
 runOnData = options.runOnData == 1
 
 globalTag_ = '80X_mcRun2_asymptotic_2016_miniAODv2_v1'
@@ -71,7 +63,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
                 DoubleIsoMu17Mu8_IsoMu8orIsoTkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8orIsoTkMu8leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
                 DoubleIsoMu17Mu8_IsoMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8leg_Run2015D_25ns_PTvsETA_HWW_76X.json'),
                 #DoubleIsoMu17Mu8_TkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_TnP_DoubleIsoMu17Mu8_TkMu8leg_Run2015D_25ns_PTvsETA_binBig_HWW_ID_M_ISO_T.json')
-            )
+            ),
         )
     )
 )
@@ -98,7 +90,8 @@ if runOnData :
         )
 else : 
     process.source.fileNames = cms.untracked.vstring(
-        '/store/mc/RunIISpring16MiniAODv2/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/60000/022B4AD3-7A1B-E611-812B-28924A33B9AA.root'
+        '/store/mc/RunIISpring16MiniAODv2/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/10000/702A12BA-1B3B-E611-9A14-0025907B4EC0.root'
+#        '/store/mc/RunIISpring16MiniAODv2/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/60000/022B4AD3-7A1B-E611-812B-28924A33B9AA.root'
         )
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
