@@ -72,6 +72,7 @@ namespace HH {
         bool iso_HWWHWW;
         float DR_l_l;
         float DPhi_l_l;
+        float ht_l_l;
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
@@ -149,6 +150,7 @@ namespace HH {
         float sumJP;
         float DR_j_j;
         float DPhi_j_j;
+        float ht_j_j;
         bool gen_matched_bbPartons;
         bool gen_matched_bbHadrons;
         bool gen_matched;

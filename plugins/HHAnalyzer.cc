@@ -205,6 +205,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.iso_HWWHWW = leptons[ilep1].iso_HWW && leptons[ilep2].iso_HWW;
             dilep.DR_l_l = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
             dilep.DPhi_l_l = fabs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4));
+            dilep.ht_l_l = leptons[ilep1].p4.Pt() + leptons[ilep2].p4.Pt();
             if (!hlt.paths.empty()) dilep.hlt_idxs = std::make_pair(matchOfflineLepton(leptons[ilep1]),matchOfflineLepton(leptons[ilep2]));
             dilep.gen_matched = leptons[ilep1].gen_matched && leptons[ilep2].gen_matched;
             dilep.gen_p4 = dilep.gen_matched ? leptons[ilep1].gen_p4 + leptons[ilep2].gen_p4 : null_p4;
@@ -242,7 +243,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
     // have the ll collection sorted by ht
-    std::sort(ll.begin(), ll.end(), [&](HH::Dilepton& a, HH::Dilepton& b){return a.p4.Pt() > b.p4.Pt();});
+    std::sort(ll.begin(), ll.end(), [&](HH::Dilepton& a, HH::Dilepton& b){return a.ht_l_l > b.ht_l_l;});
 
     // ***** 
     // Adding MET(s)
@@ -326,6 +327,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.iso_HWWHWW = ll[ill].iso_HWWHWW;
             myllmet.DR_l_l = ll[ill].DR_l_l;
             myllmet.DPhi_l_l = ll[ill].DPhi_l_l;
+            myllmet.ht_l_l = ll[ill].ht_l_l;
             // content specific to HH:DileptonMet
             myllmet.ill = ill;
             myllmet.imet = imet;
@@ -421,6 +423,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.sumJP = jets[ijet1].JP + jets[ijet2].JP;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
             myjj.DPhi_j_j = fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4));
+            myjj.ht_j_j = jets[ijet1].p4.Pt() + jets[ijet2].p4.Pt();
             myjj.gen_matched_bbPartons = jets[ijet1].gen_matched_bParton && jets[ijet2].gen_matched_bParton; 
             myjj.gen_matched_bbHadrons = jets[ijet1].gen_matched_bHadron && jets[ijet2].gen_matched_bHadron; 
             myjj.gen_matched = jets[ijet1].gen_matched && jets[ijet2].gen_matched;
@@ -496,6 +499,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.sumJP = jj[ijj].sumJP;
             myllmetjj.DR_j_j = jj[ijj].DR_j_j;
             myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
+            myllmetjj.ht_j_j = jj[ijj].ht_j_j;
             myllmetjj.gen_matched_bbPartons = jj[ijj].gen_matched_bbPartons;
             myllmetjj.gen_matched_bbHadrons = jj[ijj].gen_matched_bbHadrons;
             myllmetjj.gen_bb = jj[ijj].gen_bb;
@@ -542,6 +546,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.iso_HWWHWW = ll[ill].iso_HWWHWW;
             myllmetjj.DR_l_l = ll[ill].DR_l_l;
             myllmetjj.DPhi_l_l = ll[ill].DPhi_l_l;
+            myllmetjj.ht_l_l = ll[ill].ht_l_l;
             myllmetjj.trigger_efficiency = ll[ill].trigger_efficiency;
             myllmetjj.trigger_efficiency_downVariated = ll[ill].trigger_efficiency_downVariated;
             myllmetjj.trigger_efficiency_downVariated_Arun = ll[ill].trigger_efficiency_downVariated_Arun;
