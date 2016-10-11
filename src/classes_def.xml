@@ -17,4 +17,5 @@
     <class name="HH::DileptonMetDijet"/>
     <class name="std::vector<HH::DileptonMetDijet>"/>
     <class name="std::pair<int8_t, int8_t>"/>
+    <class name="HH::MELAAngles"/>
 </lcgdict>

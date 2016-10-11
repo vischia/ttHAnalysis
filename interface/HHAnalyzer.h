@@ -73,26 +73,22 @@ class HHAnalyzer: public Framework::Analyzer {
         std::vector<HH::DileptonMet> llmet;
         std::vector<HH::Dijet> jj;
         std::vector<HH::DileptonMetDijet> llmetjj;
+        std::vector<HH::DileptonMetDijet> llmetjj_csv;
         // some few custom candidates, for convenience
         // Januray 2016: preapproval freezing custom candidates
         BRANCH(llmetjj_HWWleptons_nobtag_csv, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_HWWleptons_btagL_csv, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_HWWleptons_btagM_csv, std::vector<HH::DileptonMetDijet>);
         BRANCH(llmetjj_HWWleptons_btagT_csv, std::vector<HH::DileptonMetDijet>);
-
-        // maps
-        std::vector<std::vector<int>> map_l = std::vector<std::vector<int>>(lepID::Count * lepIso::Count, std::vector<int>(0));
-        std::vector<std::vector<int>> map_ll = std::vector<std::vector<int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
-        // FIXME: add enum over met?
-        std::vector<std::vector<int>> map_llmet = std::vector<std::vector<int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count, std::vector<int>(0));
-        std::vector<std::vector<int>> map_j = std::vector<std::vector<int>>(jetID::Count * btagWP::Count, std::vector<int>(0));
-        std::vector<std::vector<int>> map_jj = std::vector<std::vector<int>>(jetID::Count * jetID::Count * btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
-        std::vector<std::vector<int>> map_llmetjj = std::vector<std::vector<int>>(lepID::Count * lepIso::Count * lepID::Count * lepIso::Count * jetID::Count * jetID::Count * btagWP::Count * btagWP::Count * jetPair::Count, std::vector<int>(0));
+        // October 2016: adding some asymmetric btag candidates, for study
+        BRANCH(llmetjj_HWWleptons_btagLM_csv, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj_HWWleptons_btagMT_csv, std::vector<HH::DileptonMetDijet>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
 
         float getCosThetaStar_CS(const LorentzVector & h1, const LorentzVector & h2, float ebeam = 6500);
+        MELAAngles getMELAAngles(const LorentzVector &q1, const LorentzVector &q2, const LorentzVector &q11, const LorentzVector &q12, const LorentzVector &q21, const LorentzVector &q22, float ebeam = 6500);
 
         void fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep);
 

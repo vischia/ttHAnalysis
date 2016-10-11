@@ -38,6 +38,8 @@ namespace HH {
         int ilep2; // index in the HH::Lepton collection
         std::pair<int8_t, int8_t> hlt_idxs = std::make_pair(-1,-1); // Stores indices of matched online objects. (-1,-1) if no match
         bool isOS; // Opposite Sign
+        bool isPlusMinus;
+        bool isMinusPlus;
         bool isMuMu;
         bool isElEl;
         bool isElMu;
@@ -70,6 +72,7 @@ namespace HH {
         bool iso_HWWHWW;
         float DR_l_l;
         float DPhi_l_l;
+        float ht_l_l;
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
@@ -131,6 +134,9 @@ namespace HH {
         std::pair<int, int> idxs; // indices in the framework collection
         int ijet1; // indices in the HH::Jet collection
         int ijet2;
+        bool jid_LL;
+        bool jid_TT;
+        bool jid_TLVTLV;
         bool btag_LL;
         bool btag_LM;
         bool btag_LT;
@@ -144,6 +150,7 @@ namespace HH {
         float sumJP;
         float DR_j_j;
         float DPhi_j_j;
+        float ht_j_j;
         bool gen_matched_bbPartons;
         bool gen_matched_bbHadrons;
         bool gen_matched;
@@ -155,6 +162,13 @@ namespace HH {
         bool gen_cc;
         bool gen_cl;
         bool gen_ll;
+    };
+    struct MELAAngles {
+        float theta1;
+        float theta2;
+        float thetaStar; // same angle as cosThetaStar_CS
+        float phi;
+        float psi;
     };
     struct DileptonMetDijet : public DileptonMet, public Dijet {
         LorentzVector p4;
@@ -192,6 +206,8 @@ namespace HH {
         float gen_DR;
         float gen_DPhi;
         float gen_DPtOverPt;
+        MELAAngles melaAngles;
+        MELAAngles visMelaAngles;
     };
 }
 
