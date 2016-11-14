@@ -27,29 +27,25 @@ class HHAnalyzer: public Framework::Analyzer {
             m_met_producer = config.getParameter<std::string>("metProducer");
             m_nohf_met_producer = config.getParameter<std::string>("nohfMETProducer");
             // other parameters
-            m_muonLooseIsoCut = config.getUntrackedParameter<double>("muonLooseIsoCut", 0.25);
-            m_muonTightIsoCut = config.getUntrackedParameter<double>("muonTightIsoCut", 0.15);
+            m_muonLooseIsoCut = config.getUntrackedParameter<double>("muonLooseIsoCut");
+            m_muonTightIsoCut = config.getUntrackedParameter<double>("muonTightIsoCut");
             m_muonEtaCut = config.getUntrackedParameter<double>("muonEtaCut", 2.4);
             m_leadingMuonPtCut = config.getUntrackedParameter<double>("leadingMuonPtCut", 20);
             m_subleadingMuonPtCut = config.getUntrackedParameter<double>("subleadingMuonPtCut", 10);
 
-            m_electronIsoCut_EB_Loose = config.getUntrackedParameter<double>("electronIsoCut_EB_Loose", 0.0893);
-            m_electronIsoCut_EE_Loose = config.getUntrackedParameter<double>("electronIsoCut_EE_Loose", 0.121);
-            m_electronIsoCut_EB_Tight = config.getUntrackedParameter<double>("electronIsoCut_EB_Tight", 0.0354);
-            m_electronIsoCut_EE_Tight = config.getUntrackedParameter<double>("electronIsoCut_EE_Tight", 0.0646);
             m_electronEtaCut = config.getUntrackedParameter<double>("electronEtaCut", 2.5);
             m_leadingElectronPtCut = config.getUntrackedParameter<double>("leadingElectronPtCut", 20);
             m_subleadingElectronPtCut = config.getUntrackedParameter<double>("subleadingElectronPtCut", 15);
-            m_electron_loose_wp_name = config.getUntrackedParameter<std::string>("electrons_loose_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-loose");
-            m_electron_medium_wp_name = config.getUntrackedParameter<std::string>("electrons_medium_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-medium");
-            m_electron_tight_wp_name = config.getUntrackedParameter<std::string>("electrons_tight_wp_name", "cutBasedElectronID-Spring15-50ns-V1-standalone-tight");
+            m_electron_loose_wp_name = config.getUntrackedParameter<std::string>("electrons_loose_wp_name");
+            m_electron_medium_wp_name = config.getUntrackedParameter<std::string>("electrons_medium_wp_name");
+            m_electron_tight_wp_name = config.getUntrackedParameter<std::string>("electrons_tight_wp_name");
 
             m_jetEtaCut = config.getUntrackedParameter<double>("jetEtaCut", 2.4);
             m_jetPtCut = config.getUntrackedParameter<double>("jetPtCut", 20);
             m_jet_bDiscrName = config.getUntrackedParameter<std::string>("discr_name", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
-            m_jet_bDiscrCut_loose = config.getUntrackedParameter<double>("discr_cut_loose", 0.605);
-            m_jet_bDiscrCut_medium = config.getUntrackedParameter<double>("discr_cut_medium", 0.89);
-            m_jet_bDiscrCut_tight = config.getUntrackedParameter<double>("discr_cut_tight", 0.97);
+            m_jet_bDiscrCut_loose = config.getUntrackedParameter<double>("discr_cut_loose");
+            m_jet_bDiscrCut_medium = config.getUntrackedParameter<double>("discr_cut_medium");
+            m_jet_bDiscrCut_tight = config.getUntrackedParameter<double>("discr_cut_tight");
             m_minDR_l_j_Cut = config.getUntrackedParameter<double>("minDR_l_j_Cut", 0.3);
             m_applyBJetRegression = config.getUntrackedParameter<bool>("applyBJetRegression", false);
 

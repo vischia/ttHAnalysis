@@ -29,11 +29,6 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             metProducer = cms.string('met'),
             nohfMETProducer = cms.string('nohf_met'),
             # Here are the default value (just to show what is configurable)
-            # FIXME: isolation has not been updated for 80X
-            electronIsoCut_EB_Loose = cms.untracked.double(0.0893), # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
-            electronIsoCut_EE_Loose = cms.untracked.double(0.121),
-            electronIsoCut_EB_Tight = cms.untracked.double(0.0354),
-            electronIsoCut_EE_Tight = cms.untracked.double(0.0646),
             leadingElectronPtCut = cms.untracked.double(20),
             subleadingElectronPtCut = cms.untracked.double(15),
             electronEtaCut = cms.untracked.double(2.5),
