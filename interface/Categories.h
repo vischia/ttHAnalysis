@@ -14,6 +14,10 @@ class DileptonCategory: public Category {
         }
     private:
         std::string m_analyzer_name;
+
+    protected:
+        float m_leadingLeptonPtCut;
+        float m_subleadingLeptonPtCut;
 };
 
 class MuMuCategory: public DileptonCategory {
@@ -21,6 +25,7 @@ class MuMuCategory: public DileptonCategory {
     virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override;
     virtual void register_cuts(CutManager& manager) override;
     virtual void evaluate_cuts_post_analyzers(CutManager& manager, const ProducersManager& producers, const AnalyzersManager& analyzers) const override;
+    virtual void configure(const edm::ParameterSet& conf) override;
 };
 
 class ElElCategory: public DileptonCategory {
@@ -28,6 +33,7 @@ class ElElCategory: public DileptonCategory {
     virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override;
     virtual void register_cuts(CutManager& manager) override;
     virtual void evaluate_cuts_post_analyzers(CutManager& manager, const ProducersManager& producers, const AnalyzersManager& analyzers) const override;
+    virtual void configure(const edm::ParameterSet& conf) override;
 };
 
 class ElMuCategory: public DileptonCategory {
@@ -35,6 +41,7 @@ class ElMuCategory: public DileptonCategory {
     virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override;
     virtual void register_cuts(CutManager& manager) override;
     virtual void evaluate_cuts_post_analyzers(CutManager& manager, const ProducersManager& producers, const AnalyzersManager& analyzers) const override;
+    virtual void configure(const edm::ParameterSet& conf) override;
 };
 
 class MuElCategory: public DileptonCategory {
@@ -42,6 +49,7 @@ class MuElCategory: public DileptonCategory {
     virtual bool event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const override;
     virtual void register_cuts(CutManager& manager) override;
     virtual void evaluate_cuts_post_analyzers(CutManager& manager, const ProducersManager& producers, const AnalyzersManager& analyzers) const override;
+    virtual void configure(const edm::ParameterSet& conf) override;
 };
 
 #endif

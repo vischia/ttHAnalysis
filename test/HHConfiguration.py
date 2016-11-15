@@ -21,6 +21,17 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
         type = cms.string('hh_analyzer'),
         prefix = cms.string('hh_'),
         enable = cms.bool(True),
+        categories_parameters = cms.PSet(
+            # Per-category lepton pt cuts
+            mumu_leadingLeptonPtCut = cms.untracked.double(20), # muon
+            mumu_subleadingLeptonPtCut = cms.untracked.double(10), # muon
+            elel_leadingLeptonPtCut = cms.untracked.double(25), # electron
+            elel_subleadingLeptonPtCut = cms.untracked.double(15), # electron
+            muel_leadingLeptonPtCut = cms.untracked.double(25), # muon
+            muel_subleadingLeptonPtCut = cms.untracked.double(15), # electron
+            elmu_leadingLeptonPtCut = cms.untracked.double(25), # electron
+            elmu_subleadingLeptonPtCut = cms.untracked.double(10), # muon
+        ),
         parameters = cms.PSet(
             # Producers
             electronsProducer = cms.string('electrons'),
@@ -28,14 +39,16 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             jetsProducer = cms.string('jets'),
             metProducer = cms.string('met'),
             nohfMETProducer = cms.string('nohf_met'),
-            # Here are the default value (just to show what is configurable)
-            leadingElectronPtCut = cms.untracked.double(20),
+
+            # Pre-selection pt cut, applied to all leptons
+            leadingElectronPtCut = cms.untracked.double(25),
             subleadingElectronPtCut = cms.untracked.double(15),
+            leadingMuonPtCut = cms.untracked.double(20),
+            subleadingMuonPtCut = cms.untracked.double(10),
+
             electronEtaCut = cms.untracked.double(2.5),
             muonLooseIsoCut = cms.untracked.double(.25), # https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO 
             muonTightIsoCut = cms.untracked.double(.15), # https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO 
-            leadingMuonPtCut = cms.untracked.double(20),
-            subleadingMuonPtCut = cms.untracked.double(10),
             muonEtaCut = cms.untracked.double(2.4),
             electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-loose"),
             electrons_medium_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-medium"),

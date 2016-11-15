@@ -232,7 +232,6 @@ class HHAnalyzer: public Framework::Analyzer {
         std::string m_electron_tight_wp_name;
         bool m_applyBJetRegression;
         std::unordered_map<std::string, std::unique_ptr<BinnedValues>> m_hlt_efficiencies;
-
 };
 
 // Some macros for gen information
