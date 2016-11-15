@@ -32,20 +32,34 @@ const std::vector<HH::DileptonMetDijet>& DileptonCategory::getDileptonMetDijets(
 // ***** ***** *****
 // Dilepton Mu-Mu category
 // ***** ***** *****
+
+void MuMuCategory::configure(const edm::ParameterSet& conf) {
+    DileptonCategory::configure(conf);
+
+    m_leadingLeptonPtCut = conf.getUntrackedParameter<double>("mumu_leadingLeptonPtCut");
+    m_subleadingLeptonPtCut = conf.getUntrackedParameter<double>("mumu_subleadingLeptonPtCut");
+}
+
 bool MuMuCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
     return (muons.p4.size() >= 2);
 };
 
 bool MuMuCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
+    const std::vector<HH::Lepton>& leptons = getLeptons(analyzers);
     const std::vector<HH::Dilepton>& ll = getDileptons(analyzers);
     const std::vector<HH::DileptonMetDijet>& llmetjj = getDileptonMetDijets(analyzers);
-    bool isMuMu = false;
-    for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
-    {
-        if (ll[idilep].isMuMu) isMuMu = true;
-    }
-    return (isMuMu && llmetjj.size() > 0);
+
+    if (ll.empty())
+        return false;
+
+    if (llmetjj.empty())
+        return false;
+
+    // Only look at the first dilepton pair
+    return ll[0].isMuMu &&
+        (leptons[ll[0].ilep1].p4.Pt() > m_leadingLeptonPtCut) &&
+        (leptons[ll[0].ilep2].p4.Pt() > m_subleadingLeptonPtCut);
 };
 
 void MuMuCategory::register_cuts(CutManager& manager) {
@@ -65,20 +79,34 @@ void MuMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
 // ***** ***** *****
 // Dilepton El-El category
 // ***** ***** *****
+
+void ElElCategory::configure(const edm::ParameterSet& conf) {
+    DileptonCategory::configure(conf);
+
+    m_leadingLeptonPtCut = conf.getUntrackedParameter<double>("elel_leadingLeptonPtCut");
+    m_subleadingLeptonPtCut = conf.getUntrackedParameter<double>("elel_subleadingLeptonPtCut");
+}
+
 bool ElElCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
     return (electrons.p4.size() >= 2);
 };
 
 bool ElElCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
+    const std::vector<HH::Lepton>& leptons = getLeptons(analyzers);
     const std::vector<HH::Dilepton>& ll = getDileptons(analyzers);
     const std::vector<HH::DileptonMetDijet>& llmetjj = getDileptonMetDijets(analyzers);
-    bool isElEl = false;
-    for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
-    {
-        if (ll[idilep].isElEl) isElEl = true;
-    }
-    return (isElEl && llmetjj.size() > 0);
+
+    if (ll.empty())
+        return false;
+
+    if (llmetjj.empty())
+        return false;
+
+    // Only look at the first dilepton pair
+    return ll[0].isElEl &&
+        (leptons[ll[0].ilep1].p4.Pt() > m_leadingLeptonPtCut) &&
+        (leptons[ll[0].ilep2].p4.Pt() > m_subleadingLeptonPtCut);
 };
 
 void ElElCategory::register_cuts(CutManager& manager) {
@@ -98,6 +126,14 @@ void ElElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
 // ***** ***** *****
 // Dilepton El-Mu category
 // ***** ***** *****
+
+void ElMuCategory::configure(const edm::ParameterSet& conf) {
+    DileptonCategory::configure(conf);
+
+    m_leadingLeptonPtCut = conf.getUntrackedParameter<double>("elmu_leadingLeptonPtCut");
+    m_subleadingLeptonPtCut = conf.getUntrackedParameter<double>("elmu_subleadingLeptonPtCut");
+}
+
 bool ElMuCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
@@ -105,14 +141,20 @@ bool ElMuCategory::event_in_category_pre_analyzers(const ProducersManager& produ
 };
 
 bool ElMuCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
+    const std::vector<HH::Lepton>& leptons = getLeptons(analyzers);
     const std::vector<HH::Dilepton>& ll = getDileptons(analyzers);
     const std::vector<HH::DileptonMetDijet>& llmetjj = getDileptonMetDijets(analyzers);
-    bool isElMu = false;
-    for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
-    {
-        if (ll[idilep].isElMu) isElMu = true;
-    }
-    return (isElMu && llmetjj.size() > 0);
+
+    if (ll.empty())
+        return false;
+
+    if (llmetjj.empty())
+        return false;
+
+    // Only look at the first dilepton pair
+    return ll[0].isElMu &&
+        (leptons[ll[0].ilep1].p4.Pt() > m_leadingLeptonPtCut) &&
+        (leptons[ll[0].ilep2].p4.Pt() > m_subleadingLeptonPtCut);
 };
 
 void ElMuCategory::register_cuts(CutManager& manager) {
@@ -132,6 +174,14 @@ void ElMuCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
 // ***** ***** *****
 // Dilepton Mu-El category
 // ***** ***** *****
+
+void MuElCategory::configure(const edm::ParameterSet& conf) {
+    DileptonCategory::configure(conf);
+
+    m_leadingLeptonPtCut = conf.getUntrackedParameter<double>("muel_leadingLeptonPtCut");
+    m_subleadingLeptonPtCut = conf.getUntrackedParameter<double>("muel_subleadingLeptonPtCut");
+}
+
 bool MuElCategory::event_in_category_pre_analyzers(const ProducersManager& producers) const {
     const ElectronsProducer& electrons = producers.get<ElectronsProducer>("electrons");
     const MuonsProducer& muons = producers.get<MuonsProducer>("muons");
@@ -139,14 +189,20 @@ bool MuElCategory::event_in_category_pre_analyzers(const ProducersManager& produ
 };
 
 bool MuElCategory::event_in_category_post_analyzers(const ProducersManager& producers, const AnalyzersManager& analyzers) const {
+    const std::vector<HH::Lepton>& leptons = getLeptons(analyzers);
     const std::vector<HH::Dilepton>& ll = getDileptons(analyzers);
     const std::vector<HH::DileptonMetDijet>& llmetjj = getDileptonMetDijets(analyzers);
-    bool isMuEl = false;
-    for (unsigned int idilep = 0; idilep < ll.size(); idilep++) 
-    {
-        if (ll[idilep].isMuEl) isMuEl = true;
-    }
-    return (isMuEl && llmetjj.size() > 0);
+
+    if (ll.empty())
+        return false;
+
+    if (llmetjj.empty())
+        return false;
+
+    // Only look at the first dilepton pair
+    return ll[0].isMuEl &&
+        (leptons[ll[0].ilep1].p4.Pt() > m_leadingLeptonPtCut) &&
+        (leptons[ll[0].ilep2].p4.Pt() > m_subleadingLeptonPtCut);
 };
 
 void MuElCategory::register_cuts(CutManager& manager) {
@@ -162,4 +218,3 @@ void MuElCategory::evaluate_cuts_post_analyzers(CutManager& manager, const Produ
         }
     }
 }
-
