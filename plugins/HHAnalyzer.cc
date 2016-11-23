@@ -65,44 +65,24 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     leptons.clear();
     ll.clear();
 
-    static auto electron_pass_HWW_id = [&allelectrons](size_t index) {
-        bool result = true;
+    static auto electron_pass_HWW_id = [&allelectrons, this](size_t index) {
         auto electron = allelectrons.products[index];
 
-        static auto dEtaInSeed = [&electron]() {
-            return electron->superCluster().isNonnull() && electron->superCluster()->seed().isNonnull() ? electron->deltaEtaSuperClusterTrackAtVtx() - electron->superCluster()->eta() + electron->superCluster()->seed()->eta() : std::numeric_limits<float>::max();
-        };
+        // Use POG HLT-safe id, which is the same id used by HWW
 
-        // Cuts described at https://twiki.cern.ch/twiki/pub/CMS/HWW2016TriggerAndIdIsoScaleFactorsResults/AN-16-172_temp.pdf
+        bool result = allelectrons.ids[index][m_electron_hlt_safe_wp_name];
+
+        // Add dxy and d0 cuts described at https://twiki.cern.ch/twiki/pub/CMS/HWW2016TriggerAndIdIsoScaleFactorsResults/AN-16-172_temp.pdf
         // page 24
         if (electron->isEB()) {
-            result &= electron->ecalPFClusterIso() < 0.160;
-            result &= electron->full5x5_sigmaIetaIeta() < 0.011;
-            result &= std::abs(dEtaInSeed()) < 0.004;
-            result &= std::abs(electron->deltaPhiSuperClusterTrackAtVtx()) < 0.020;
             result &= std::abs(allelectrons.dz[index]) < 0.373;
             result &= std::abs(allelectrons.dxy[index]) < 0.1;
         } else {
-            result &= electron->ecalPFClusterIso() < 0.120;
-            result &= electron->full5x5_sigmaIetaIeta() < 0.031;
             result &= std::abs(allelectrons.dz[index]) < 0.602;
             result &= std::abs(allelectrons.dxy[index]) < 0.2;
         }
 
-        // Common cuts to EE & EB
-        result &= electron->hcalPFClusterIso() < 0.120;
-        result &= electron->trackIso() < 0.08;
-        result &= electron->hadronicOverEm() < 0.060;
-
-        // Code from https://github.com/ikrav/cmssw/blob/egm_id_80X_v1/RecoEgamma/ElectronIdentification/plugins/cuts/GsfEleEInverseMinusPInverseCut.cc#L43-L45
-        const float ecal_energy_inverse = 1.0 / electron->ecalEnergy();
-        const float eSCoverP = electron->eSuperClusterOverP();
-        const float ooEmooP = std::abs(1.0 - eSCoverP) * ecal_energy_inverse;
-        result &= ooEmooP < 0.013;
-
         result &= (electron->gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS)) < 1;
-
-        // Pass conversion veto is already part of all electron IDs
 
         return result;
     };
@@ -128,7 +108,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
             // For electrons, isolation requirement is already included in ID
             ele.iso_L = ele.id_L;
-            ele.iso_T = ele.iso_T;
+            ele.iso_T = ele.id_T;
             ele.iso_HWW = ele.iso_T;
 
             ele.gen_matched = allelectrons.matched[ielectron];
