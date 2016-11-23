@@ -53,6 +53,7 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-loose"),
             electrons_medium_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-medium"),
             electrons_tight_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-tight"),
+            electrons_hlt_safe_wp_name = cms.untracked.string("cutBasedElectronHLTPreselection-Summer16-V1"),
             jetEtaCut = cms.untracked.double(2.4),
             jetPtCut = cms.untracked.double(20),
             # BTAG INFO
