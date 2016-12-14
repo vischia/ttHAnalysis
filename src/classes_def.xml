@@ -1,21 +1,36 @@
 <lcgdict>
-    <class name="HH::Lepton">
-        <field name="hlt_already_tried_matching" transient="true"/>
+    <class name="HH::Lepton" ClassVersion="10">
+     <version ClassVersion="10" checksum="1833596599"/>
+     <field name="hlt_already_tried_matching" transient="true"/>
     </class>
     <class name="std::vector<HH::Lepton>"/>
-    <class name="HH::Dilepton"/>
+    <class name="HH::Dilepton" ClassVersion="10">
+     <version ClassVersion="10" checksum="2433355583"/>
+    </class>
     <class name="std::vector<HH::Dilepton>"/>
-    <class name="HH::Met"/>
+    <class name="HH::Met" ClassVersion="10">
+     <version ClassVersion="10" checksum="1356748875"/>
+    </class>
     <class name="std::vector<HH::Met>"/>
-    <class name="HH::DileptonMet"/>
+    <class name="HH::DileptonMet" ClassVersion="10">
+     <version ClassVersion="10" checksum="2202889764"/>
+    </class>
     <class name="std::vector<HH::DileptonMet>"/>
     <class name="std::vector< std::vector<int> >"/>
-    <class name="HH::Jet"/>
+    <class name="HH::Jet" ClassVersion="10">
+     <version ClassVersion="10" checksum="194867656"/>
+    </class>
     <class name="std::vector<HH::Jet>"/>
-    <class name="HH::Dijet"/>
+    <class name="HH::Dijet" ClassVersion="10">
+     <version ClassVersion="10" checksum="2119876344"/>
+    </class>
     <class name="std::vector<HH::Dijet>"/>
-    <class name="HH::DileptonMetDijet"/>
+    <class name="HH::DileptonMetDijet" ClassVersion="10">
+     <version ClassVersion="10" checksum="1966451846"/>
+    </class>
     <class name="std::vector<HH::DileptonMetDijet>"/>
     <class name="std::pair<int8_t, int8_t>"/>
-    <class name="HH::MELAAngles"/>
+    <class name="HH::MELAAngles" ClassVersion="10">
+     <version ClassVersion="10" checksum="2939888277"/>
+    </class>
 </lcgdict>
