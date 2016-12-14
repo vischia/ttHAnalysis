@@ -120,7 +120,7 @@ namespace HH {
         bool btag_M;
         bool btag_T;
         float CSV;
-        float JP;
+        float CMVAv2;
         bool gen_matched_bParton;
         bool gen_matched_bHadron;
         bool gen_matched;
@@ -149,7 +149,7 @@ namespace HH {
         bool btag_TM;
         bool btag_TT;
         float sumCSV;
-        float sumJP;
+        float sumCMVAv2;
         float DR_j_j;
         float DPhi_j_j;
         float ht_j_j;

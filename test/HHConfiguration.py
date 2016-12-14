@@ -56,11 +56,14 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             electrons_hlt_safe_wp_name = cms.untracked.string("cutBasedElectronHLTPreselection-Summer16-V1"),
             jetEtaCut = cms.untracked.double(2.4),
             jetPtCut = cms.untracked.double(20),
+
             # BTAG INFO
-            discr_name =  cms.untracked.string("pfCombinedInclusiveSecondaryVertexV2BJetTags"),
-            discr_cut_loose =  cms.untracked.double(0.460),
-            discr_cut_medium =  cms.untracked.double(0.800),
-            discr_cut_tight =  cms.untracked.double(0.935),
+            # Working points from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X
+            discr_name =  cms.untracked.string("pfCombinedMVAV2BJetTags"),
+            discr_cut_loose =  cms.untracked.double(-0.715),
+            discr_cut_medium =  cms.untracked.double(0.185),
+            discr_cut_tight =  cms.untracked.double(0.875),
+
             minDR_l_j_Cut = cms.untracked.double(0.3),
             hltDRCut = cms.untracked.double(0.1),
             hltDPtCut = cms.untracked.double(0.5),  # cut will be DPt/Pt < hltDPtCut

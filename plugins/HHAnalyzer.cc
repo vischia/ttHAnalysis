@@ -385,7 +385,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.id_T = alljets.passTightID[ijet];
             myjet.id_TLV = alljets.passTightLeptonVetoID[ijet];
             myjet.CSV = alljets.getBTagDiscriminant(ijet, "pfCombinedInclusiveSecondaryVertexV2BJetTags");
-            myjet.JP = alljets.getBTagDiscriminant(ijet, "pfJetProbabilityBJetTags");
+            myjet.CMVAv2 = alljets.getBTagDiscriminant(ijet, "pfCombinedMVAV2BJetTags");
             float mybtag = alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName);
             myjet.btag_L = mybtag > m_jet_bDiscrCut_loose;
             myjet.btag_M = mybtag > m_jet_bDiscrCut_medium;
@@ -439,7 +439,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.btag_TM = (jets[ijet1].btag_T && jets[ijet2].btag_M) || (jets[ijet2].btag_T && jets[ijet1].btag_M);
             myjj.btag_TT = jets[ijet1].btag_T && jets[ijet2].btag_T;
             myjj.sumCSV = jets[ijet1].CSV + jets[ijet2].CSV;
-            myjj.sumJP = jets[ijet1].JP + jets[ijet2].JP;
+            myjj.sumCMVAv2 = jets[ijet1].CMVAv2 + jets[ijet2].CMVAv2;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
             myjj.DPhi_j_j = fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[ijet1].p4, jets[ijet2].p4));
             myjj.ht_j_j = jets[ijet1].p4.Pt() + jets[ijet2].p4.Pt();
@@ -515,7 +515,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.btag_TM = jj[ijj].btag_TM;
             myllmetjj.btag_TT = jj[ijj].btag_TT;
             myllmetjj.sumCSV = jj[ijj].sumCSV;
-            myllmetjj.sumJP = jj[ijj].sumJP;
+            myllmetjj.sumCMVAv2 = jj[ijj].sumCMVAv2;
             myllmetjj.DR_j_j = jj[ijj].DR_j_j;
             myllmetjj.DPhi_j_j = jj[ijj].DPhi_j_j;
             myllmetjj.ht_j_j = jj[ijj].ht_j_j;
@@ -645,36 +645,40 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     }
 
 
-
     // Sort the collections
-//    llmetjj_ht.clear(); llmetjj_ht = llmetjj;
-//    llmetjj_pt.clear(); llmetjj_pt = llmetjj;
-//    llmetjj_mh.clear(); llmetjj_mh = llmetjj;
-    llmetjj_csv.clear(); llmetjj_csv = llmetjj;
-//    llmetjj_ptOverM.clear(); llmetjj_ptOverM = llmetjj;
-//    std::sort(llmetjj_ht.begin(), llmetjj_ht.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){return (a.jet1_p4.Pt() + a.jet2_p4.Pt()) > (b.jet1_p4.Pt() + bjet2_p4.Pt());});
-//    std::sort(llmetjj_pt.begin(), llmetjj_pt.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){return a.jj_p4.Pt() > b.jj_p4.Pt();});
-//    std::sort(llmetjj_mh.begin(), llmetjj_mh.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){return fabs(a.jj_p4.M() - mh) > fabs(b.jj_p4.M() - mh);});
-    std::sort(llmetjj_csv.begin(), llmetjj_csv.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){return a.sumCSV > b.sumCSV;});
-//    std::sort(llmetjj_ptOverM.begin(), llmetjj_ptOverM.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){return (a.jj_p4.Pt() / a.jj_p4.M()) > (b.jj_p4.Pt() / b.jj_p4.M());});
+    llmetjj_cmva.clear();
+    llmetjj_cmva = llmetjj;
+
+    std::sort(llmetjj_cmva.begin(), llmetjj_cmva.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){ return a.sumCMVAv2 > b.sumCMVAv2; });
 
     // Adding some few custom candidates, for convenience
-    for (auto &myllmetjj_csv: llmetjj_csv) {
-        if (!myllmetjj_csv.id_HWWHWW) continue;
-        if (!myllmetjj_csv.iso_HWWHWW) continue;
+    for (auto &myllmetjj_cmva: llmetjj_cmva) {
+
+        if (!myllmetjj_cmva.id_HWWHWW)
+            continue;
+
+        if (!myllmetjj_cmva.iso_HWWHWW)
+            continue;
+
         // jetID::L is enforced while filling the jet collection
-        llmetjj_HWWleptons_nobtag_csv.push_back(myllmetjj_csv);
-        if (myllmetjj_csv.btag_LL)
-            llmetjj_HWWleptons_btagL_csv.push_back(myllmetjj_csv);
-        if (myllmetjj_csv.btag_MM)
-            llmetjj_HWWleptons_btagM_csv.push_back(myllmetjj_csv);
-        if (myllmetjj_csv.btag_TT)
-            llmetjj_HWWleptons_btagT_csv.push_back(myllmetjj_csv);
+
+        llmetjj_HWWleptons_nobtag_cmva.push_back(myllmetjj_cmva);
+
+        if (myllmetjj_cmva.btag_LL)
+            llmetjj_HWWleptons_btagL_cmva.push_back(myllmetjj_cmva);
+
+        if (myllmetjj_cmva.btag_MM)
+            llmetjj_HWWleptons_btagM_cmva.push_back(myllmetjj_cmva);
+
+        if (myllmetjj_cmva.btag_TT)
+            llmetjj_HWWleptons_btagT_cmva.push_back(myllmetjj_cmva);
+
         // October 2016: asymmetric btag candidates
-        if (myllmetjj_csv.btag_LM || myllmetjj_csv.btag_ML)
-            llmetjj_HWWleptons_btagLM_csv.push_back(myllmetjj_csv);
-        if (myllmetjj_csv.btag_MT || myllmetjj_csv.btag_TM)
-            llmetjj_HWWleptons_btagMT_csv.push_back(myllmetjj_csv);
+        if (myllmetjj_cmva.btag_LM || myllmetjj_cmva.btag_ML)
+            llmetjj_HWWleptons_btagLM_cmva.push_back(myllmetjj_cmva);
+
+        if (myllmetjj_cmva.btag_MT || myllmetjj_cmva.btag_TM)
+            llmetjj_HWWleptons_btagMT_cmva.push_back(myllmetjj_cmva);
     }
 
 
