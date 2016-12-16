@@ -58,11 +58,11 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
             jetPtCut = cms.untracked.double(20),
 
             # BTAG INFO
-            # Working points from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X
+            # Working points from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
             discr_name =  cms.untracked.string("pfCombinedMVAV2BJetTags"),
-            discr_cut_loose =  cms.untracked.double(-0.715),
-            discr_cut_medium =  cms.untracked.double(0.185),
-            discr_cut_tight =  cms.untracked.double(0.875),
+            discr_cut_loose =  cms.untracked.double(-0.5884),
+            discr_cut_medium =  cms.untracked.double(0.4432),
+            discr_cut_tight =  cms.untracked.double(0.9432),
 
             minDR_l_j_Cut = cms.untracked.double(0.3),
             hltDRCut = cms.untracked.double(0.1),
