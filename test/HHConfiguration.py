@@ -100,9 +100,16 @@ framework.getProducer('hlt').parameters.triggers = cms.untracked.FileInPath('cp3
 #framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
 #framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
 
-framework.redoJEC()
+jecDatabase = 'Spring16_23Sep2016V2_MC.db'
+if runOnData:
+    jecDatabase = 'Spring16_23Sep2016AllV2_DATA.db'
+
+framework.redoJEC(JECDatabase=jecDatabase)
+
 framework.smearJets()
+
 framework.doSystematics(['jec', 'jer'])
+
 process = framework.create()
 
 if runOnData : 
