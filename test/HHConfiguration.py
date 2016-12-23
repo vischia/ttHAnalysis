@@ -9,10 +9,10 @@ from cp3_llbb.Framework.CmdLine import CmdLine
 options = CmdLine()
 runOnData = options.runOnData == 1
 
-globalTag_ = '80X_mcRun2_asymptotic_2016_miniAODv2_v1'
+globalTag_ = '80X_mcRun2_asymptotic_2016_TrancheIV_v7'
 processName_ = 'PAT'
 if runOnData :
-    globalTag_ = '80X_dataRun2_Prompt_ICHEP16JEC_v0'
+    globalTag_ = '80X_dataRun2_2016SeptRepro_v6'
     processName_ = 'RECO'
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
