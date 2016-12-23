@@ -9,10 +9,10 @@ from cp3_llbb.Framework.CmdLine import CmdLine
 options = CmdLine()
 runOnData = options.runOnData == 1
 
-globalTag_ = '80X_mcRun2_asymptotic_2016_miniAODv2_v1'
+globalTag_ = '80X_mcRun2_asymptotic_2016_TrancheIV_v7'
 processName_ = 'PAT'
 if runOnData :
-    globalTag_ = '80X_dataRun2_Prompt_ICHEP16JEC_v0'
+    globalTag_ = '80X_dataRun2_2016SeptRepro_v6'
     processName_ = 'RECO'
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
@@ -100,9 +100,16 @@ framework.getProducer('hlt').parameters.triggers = cms.untracked.FileInPath('cp3
 #framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
 #framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
 
-framework.redoJEC()
+jecDatabase = 'Spring16_23Sep2016V2_MC.db'
+if runOnData:
+    jecDatabase = 'Spring16_23Sep2016AllV2_DATA.db'
+
+framework.redoJEC(JECDatabase=jecDatabase)
+
 framework.smearJets()
+
 framework.doSystematics(['jec', 'jer'])
+
 process = framework.create()
 
 if runOnData : 
