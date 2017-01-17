@@ -100,9 +100,9 @@ framework.getProducer('hlt').parameters.triggers = cms.untracked.FileInPath('cp3
 #framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
 #framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
 
-jecDatabase = 'Spring16_23Sep2016V2_MC.db'
+jecDatabase = 'Summer16_23Sep2016V2_MC.db'
 if runOnData:
-    jecDatabase = 'Spring16_23Sep2016AllV2_DATA.db'
+    jecDatabase = 'Summer16_23Sep2016AllV2_DATA.db'
 
 framework.redoJEC(JECDatabase=jecDatabase)
 
@@ -114,14 +114,18 @@ process = framework.create()
 
 if runOnData : 
     process.source.fileNames = cms.untracked.vstring(
-        '/store/data/Run2016B/DoubleMuon/MINIAOD/PromptReco-v2/000/273/158/00000/A6AC80E5-121A-E611-A689-02163E01439E.root'
-#        '/store/data/Run2016B/DoubleEG/MINIAOD/PromptReco-v2/000/274/442/00000/30D4864F-DD2D-E611-BDF9-02163E013427.root'
-#        '/store/data/Run2016B/MuonEG/MINIAOD/PromptReco-v2/000/275/370/00000/2E773576-D938-E611-9FCE-02163E013753.root'
+            '/store/data/Run2016F/DoubleMuon/MINIAOD/23Sep2016-v1/50000/040EDEBA-0490-E611-A424-008CFA110C68.root'
         )
 else : 
     process.source.fileNames = cms.untracked.vstring(
-        '/store/mc/RunIISpring16MiniAODv2/GluGluToRadionToHHTo2B2VTo2L2Nu_M-450_narrow_13TeV-madgraph/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/10000/702A12BA-1B3B-E611-9A14-0025907B4EC0.root'
-#        '/store/mc/RunIISpring16MiniAODv2/TTTo2L2Nu_13TeV-powheg/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/60000/022B4AD3-7A1B-E611-812B-28924A33B9AA.root'
+            # Signal
+            # ''
+
+            # TT
+            '/store/mc/RunIISummer16MiniAODv2/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/00ED79D3-CFC1-E611-B748-3417EBE64483.root'
+
+            # DY
+            # '/store/mc/RunIISummer16MiniAODv2/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/100000/00CEFB4F-C1D2-E611-BBF4-7845C4FC3C11.root<Paste>'
         )
 
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
