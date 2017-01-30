@@ -10,7 +10,7 @@
 // Dilepton categories
 // ***** ***** *****
 
-static std::regex s_mumu_hlt_regex("^HLT_Mu.*_Mu");
+static std::regex s_mumu_hlt_regex("^HLT_Mu.*_(Tk)?Mu");
 static std::regex s_elel_hlt_regex("^HLT_Ele.*_Ele");
 static std::regex s_muel_elmu_hlt_regex("^HLT_Mu.*_Ele");
 
