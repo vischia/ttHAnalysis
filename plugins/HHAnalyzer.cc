@@ -242,9 +242,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                 tmp_count_has2leptons_elel = event_weight;
             if (dilep.isElMu)
                 tmp_count_has2leptons_elmu = event_weight;
-            if (dilep.isElEl)
+            if (dilep.isMuEl)
                 tmp_count_has2leptons_muel = event_weight;
-            if (dilep.isElEl)
+            if (dilep.isMuMu)
                 tmp_count_has2leptons_mumu = event_weight;
 
             // Fill
@@ -623,9 +623,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                 tmp_count_has2leptons_elel_1llmetjj = event_weight;
             if (myllmetjj.isElMu)
                 tmp_count_has2leptons_elmu_1llmetjj = event_weight;
-            if (myllmetjj.isElEl)
+            if (myllmetjj.isMuEl)
                 tmp_count_has2leptons_muel_1llmetjj = event_weight;
-            if (myllmetjj.isElEl)
+            if (myllmetjj.isMuMu)
                 tmp_count_has2leptons_mumu_1llmetjj = event_weight;
             if (myllmetjj.btag_MM)
             {
@@ -634,9 +634,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                     tmp_count_has2leptons_elel_1llmetjj_2btagM = event_weight;
                 if (myllmetjj.isElMu)
                     tmp_count_has2leptons_elmu_1llmetjj_2btagM = event_weight;
-                if (myllmetjj.isElEl)
+                if (myllmetjj.isMuEl)
                     tmp_count_has2leptons_muel_1llmetjj_2btagM = event_weight;
-                if (myllmetjj.isElEl)
+                if (myllmetjj.isMuMu)
                     tmp_count_has2leptons_mumu_1llmetjj_2btagM = event_weight;
             }
             // Fill
@@ -1295,19 +1295,19 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
 void HHAnalyzer::endJob(MetadataManager& metadata)
 {
-    metadata.add(this->m_name + "count_has2leptons", count_has2leptons);
-    metadata.add(this->m_name + "count_has2leptons_elel", count_has2leptons_elel);
-    metadata.add(this->m_name + "count_has2leptons_elmu", count_has2leptons_elmu);
-    metadata.add(this->m_name + "count_has2leptons_muel", count_has2leptons_muel);
-    metadata.add(this->m_name + "count_has2leptons_mumu", count_has2leptons_mumu);
-    metadata.add(this->m_name + "count_has2leptons_1llmetjj", count_has2leptons_1llmetjj);
-    metadata.add(this->m_name + "count_has2leptons_elel_1llmetjj", count_has2leptons_elel_1llmetjj);
-    metadata.add(this->m_name + "count_has2leptons_elmu_1llmetjj", count_has2leptons_elmu_1llmetjj);
-    metadata.add(this->m_name + "count_has2leptons_muel_1llmetjj", count_has2leptons_muel_1llmetjj);
-    metadata.add(this->m_name + "count_has2leptons_mumu_1llmetjj", count_has2leptons_mumu_1llmetjj);
-    metadata.add(this->m_name + "count_has2leptons_1llmetjj_2btagM", count_has2leptons_1llmetjj_2btagM);
-    metadata.add(this->m_name + "count_has2leptons_elel_1llmetjj_2btagM", count_has2leptons_elel_1llmetjj_2btagM);
-    metadata.add(this->m_name + "count_has2leptons_elmu_1llmetjj_2btagM", count_has2leptons_elmu_1llmetjj_2btagM);
-    metadata.add(this->m_name + "count_has2leptons_muel_1llmetjj_2btagM", count_has2leptons_muel_1llmetjj_2btagM);
-    metadata.add(this->m_name + "count_has2leptons_mumu_1llmetjj_2btagM", count_has2leptons_mumu_1llmetjj_2btagM);
+    metadata.add(this->m_name + "_count_has2leptons", count_has2leptons);
+    metadata.add(this->m_name + "_count_has2leptons_elel", count_has2leptons_elel);
+    metadata.add(this->m_name + "_count_has2leptons_elmu", count_has2leptons_elmu);
+    metadata.add(this->m_name + "_count_has2leptons_muel", count_has2leptons_muel);
+    metadata.add(this->m_name + "_count_has2leptons_mumu", count_has2leptons_mumu);
+    metadata.add(this->m_name + "_count_has2leptons_1llmetjj", count_has2leptons_1llmetjj);
+    metadata.add(this->m_name + "_count_has2leptons_elel_1llmetjj", count_has2leptons_elel_1llmetjj);
+    metadata.add(this->m_name + "_count_has2leptons_elmu_1llmetjj", count_has2leptons_elmu_1llmetjj);
+    metadata.add(this->m_name + "_count_has2leptons_muel_1llmetjj", count_has2leptons_muel_1llmetjj);
+    metadata.add(this->m_name + "_count_has2leptons_mumu_1llmetjj", count_has2leptons_mumu_1llmetjj);
+    metadata.add(this->m_name + "_count_has2leptons_1llmetjj_2btagM", count_has2leptons_1llmetjj_2btagM);
+    metadata.add(this->m_name + "_count_has2leptons_elel_1llmetjj_2btagM", count_has2leptons_elel_1llmetjj_2btagM);
+    metadata.add(this->m_name + "_count_has2leptons_elmu_1llmetjj_2btagM", count_has2leptons_elmu_1llmetjj_2btagM);
+    metadata.add(this->m_name + "_count_has2leptons_muel_1llmetjj_2btagM", count_has2leptons_muel_1llmetjj_2btagM);
+    metadata.add(this->m_name + "_count_has2leptons_mumu_1llmetjj_2btagM", count_has2leptons_mumu_1llmetjj_2btagM);
 }
