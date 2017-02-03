@@ -12,13 +12,15 @@
 
 #include <Math/VectorUtil.h>
 
+#include <random>
+
 using namespace HH;
 using namespace HHAnalysis;
 
 class HHAnalyzer: public Framework::Analyzer {
     public:
         HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
-            Analyzer(name, tree_, config)
+            Analyzer(name, tree_, config), random_generator(42), br_generator(0, 1)
         {
             // Not untracked as these parameters are mandatory
             m_electrons_producer = config.getParameter<std::string>("electronsProducer");
@@ -234,6 +236,9 @@ class HHAnalyzer: public Framework::Analyzer {
         std::string m_electron_hlt_safe_wp_name;
         bool m_applyBJetRegression;
         std::unordered_map<std::string, std::unique_ptr<BinnedValues>> m_hlt_efficiencies;
+
+        std::mt19937 random_generator;
+        std::uniform_real_distribution<double> br_generator;
 };
 
 // Some macros for gen information

@@ -29,9 +29,277 @@ void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::Paramet
 
 void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const AnalyzersManager&, const CategoryManager&) {
 
+    // Reset event
+    leptons.clear();
+    ll.clear();
+    met.clear();
+    llmet.clear();
+    jj.clear();
+    llmetjj.clear();
+    llmetjj_cmva.clear();
+
+    const JetsProducer& alljets = producers.get<JetsProducer>(m_jets_producer);
+    const ElectronsProducer& allelectrons = producers.get<ElectronsProducer>(m_electrons_producer);
+    const MuonsProducer& allmuons = producers.get<MuonsProducer>(m_muons_producer);
+    const EventProducer& fwevent = producers.get<EventProducer>("event");
+    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
+    const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
+
+
+    if (!event.isRealData()) {
+
+        // FIXME Moriond 2017
+        // BR for taus included in HH sample is not correct (BR is tau -> all instead of tau -> e / mu)
+        // If we run over a signal sample, randomly throw events according to BR(tau -> e / mu)
+
+// ***** ***** *****
+// Get the MC truth information on the hard process
+// ***** ***** *****
+// from https://github.com/cms-sw/cmssw/blob/CMSSW_7_4_X/DataFormats/HepMCCandidate/interface/GenStatusFlags.h
+//    enum StatusBits {
+//0      kIsPrompt = 0,
+//1      kIsDecayedLeptonHadron,
+//2      kIsTauDecayProduct,
+//3      kIsPromptTauDecayProduct,
+//4      kIsDirectTauDecayProduct,
+//5      kIsDirectPromptTauDecayProduct,
+//6      kIsDirectHadronDecayProduct,
+//7      kIsHardProcess,
+//8      kFromHardProcess,
+//9      kIsHardProcessTauDecayProduct,
+//10      kIsDirectHardProcessTauDecayProduct,
+//11      kFromHardProcessBeforeFSR,
+//12      kIsFirstCopy,
+//13      kIsLastCopy,
+//14      kIsLastCopyBeforeFSR
+//    };
+
+
+        constexpr double BR_tau_e_mu = 0.3524;
+        size_t n_taus = 0;
+        bool is_signal = false;
+
+        const GenParticlesProducer& gp = producers.get<GenParticlesProducer>("gen_particles");
+
+#if HH_GEN_DEBUG
+    std::function<void(size_t)> print_mother_chain = [&gp, &print_mother_chain](size_t p) {
+
+        if (gp.pruned_mothers_index[p].empty()) {
+            std::cout << std::endl;
+            return;
+        }
+
+        size_t index = gp.pruned_mothers_index[p][0];
+            std::cout << " <- #" << index << "(" << gp.pruned_pdg_id[index] << ")";
+            print_mother_chain(index);
+    };
+#endif
+
+        std::function<bool(size_t, size_t)> pruned_decays_from = [&pruned_decays_from, &gp](size_t particle_index, size_t mother_index) -> bool {
+            // Iterator over all pruned particles to find if the particle `particle_index` has `mother_index` in its decay history
+            if (gp.pruned_mothers_index[particle_index].empty())
+                return false;
+
+            size_t index = gp.pruned_mothers_index[particle_index][0];
+
+            if (index == mother_index) {
+                return true;
+            }
+
+            if (pruned_decays_from(index, mother_index))
+                return true;
+
+            return false;
+        };
+
+        std::function<bool(size_t, size_t, bool)> pruned_decays_from_pdg_id = [&pruned_decays_from_pdg_id, &gp](size_t particle_index, uint64_t pdg_id, bool direct) -> bool {
+            // Iterator over all pruned particles to find if the particle `particle_index` decays from a particle with pdg id == pdg_id
+            if (gp.pruned_mothers_index[particle_index].empty())
+                return false;
+
+            size_t index = gp.pruned_mothers_index[particle_index][0];
+
+            if (std::abs(gp.pruned_pdg_id[index]) == pdg_id) {
+                return true;
+            }
+
+            if (!direct && pruned_decays_from_pdg_id(index, pdg_id, direct))
+                return true;
+
+            return false;
+        };
+
+        // Construct signal gen info
+
+        gen_iX = -1;
+        gen_iH1 = gen_iH2 = -1;
+        gen_iH1_afterFSR = gen_iH2_afterFSR = -1;
+        gen_iB = gen_iBbar = -1;
+        gen_iB_afterFSR = gen_iBbar_afterFSR = -1;
+        gen_iV2 = gen_iV1 = -1;
+        gen_iV2_afterFSR = gen_iV1_afterFSR = -1;
+        gen_iLminus = gen_iLplus = -1;
+        gen_iLminus_afterFSR = gen_iLplus_afterFSR = -1;
+        gen_iNu1 = gen_iNu2 = -1;
+
+        for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
+            std::bitset<15> flags (gp.pruned_status_flags[ip]);
+
+            if (!flags.test(8))
+                continue;
+
+            int64_t pdg_id = gp.pruned_pdg_id[ip];
+
+#if HH_GEN_DEBUG
+            std::cout << "[" << ip << "] pdg id: " << pdg_id << "  flags: " << flags << "  p = " << gp.pruned_p4[ip] << std::endl;
+            print_mother_chain(ip);
+#endif
+
+            auto p4 = gp.pruned_p4[ip];
+
+            if (std::abs(pdg_id) == 35 || std::abs(pdg_id) == 39) {
+                ASSIGN_HH_GEN_INFO_NO_FSR(X, "X");
+            } else if (pdg_id == 25) {
+                ASSIGN_HH_GEN_INFO_2(H1, H2, "Higgs");
+            }
+
+            // Only look for Higgs decays if we have found the two Higgs
+            if ((gen_iH1 == -1) || (gen_iH2 == -1))
+                continue;
+
+            is_signal = true;
+
+            // And if the particle actually come directly from a Higgs
+            bool from_h1_decay = pruned_decays_from(ip, gen_iH1);
+            bool from_h2_decay = pruned_decays_from(ip, gen_iH2);
+
+            // Only keep particles coming from the Higgs decay
+            if (! from_h1_decay && ! from_h2_decay)
+                continue;
+
+            if (pdg_id == 5) {
+                ASSIGN_HH_GEN_INFO(B, "B");
+            } else if (pdg_id == -5) {
+                ASSIGN_HH_GEN_INFO(Bbar, "Bbar");
+            }
+
+            // Ignore B decays
+            if (pruned_decays_from_pdg_id(ip, 5, false))
+                continue;
+
+            // Count the number of tau coming directly from a W or a Z
+            if ((pdg_id == 15) && (pruned_decays_from_pdg_id(ip, 24, true) || pruned_decays_from_pdg_id(ip, 23, true))) {
+                n_taus++;
+            }
+
+            if ((pdg_id == 11) || (pdg_id == 13) || (pdg_id == 15)) {
+                ASSIGN_HH_GEN_INFO(Lminus, "L-");
+            } else if ((pdg_id == -11) || (pdg_id == -13) || (pdg_id == -15)) {
+                ASSIGN_HH_GEN_INFO(Lplus, "L+");
+            } else if ((pdg_id == 23) || (std::abs(pdg_id) == 24)) {
+                ASSIGN_HH_GEN_INFO_2(V1, V2, "W/Z bosons");
+            } else if ((std::abs(pdg_id) == 12) || (std::abs(pdg_id) == 14) || (std::abs(pdg_id) == 16)) {
+                ASSIGN_HH_GEN_INFO_2_NO_FSR(Nu1, Nu2, "neutrinos");
+            }
+        }
+
+        if (is_signal) {
+            // FIXME Moriond 2017
+            if (n_taus > 2) {
+                std::cout << "ERROR: More than two taus coming from Higgs decays. There's something wrong!" << std::endl;
+            }
+
+            double factor = std::pow(BR_tau_e_mu, n_taus);
+            if (br_generator(random_generator) > factor) {
+                return;
+            }
+        }
+
+        // Swap neutrinos if needed
+        if ((gen_iNu1 != -1) && (gen_iNu2 != -1)) {
+            if (gp.pruned_pdg_id[gen_iNu1] > 0) {
+                std::swap(gen_iNu1, gen_iNu2);
+                std::swap(gen_Nu1, gen_Nu2);
+            }
+        }
+
+        if ((gen_iH1 != -1) && (gen_iH2 != -1)) {
+            gen_mHH = (gen_H1 + gen_H2).M();
+            gen_costhetastar = getCosThetaStar_CS(gen_H1, gen_H2);
+        }
+
+#if HH_GEN_DEBUG
+        PRINT_PARTICULE(X);
+        PRINT_RESONANCE(H1, H2);
+        PRINT_RESONANCE(B, Bbar);
+        PRINT_RESONANCE(V1, V2);
+        PRINT_RESONANCE(Lminus, Lplus);
+        PRINT_RESONANCE_NO_FSR(Nu1, Nu2);
+
+        // Rebuild resonances for consistency checks
+        auto LminusNu1 = gen_Lminus + gen_Nu1;
+        std::cout << "    gen_(L- Nu1).M() = " << LminusNu1.M() << std::endl;
+
+        auto LplusNu2 = gen_Lplus + gen_Nu2;
+        std::cout << "    gen_(L+ Nu2).M() = " << LplusNu2.M() << std::endl;
+
+        auto LminusNu1_afterFSR = gen_Lminus_afterFSR + gen_Nu1;
+        std::cout << "    gen_(L- Nu1)_afterFSR.M() = " << LminusNu1_afterFSR.M() << std::endl;
+
+        auto LplusNu2_afterFSR = gen_Lplus_afterFSR + gen_Nu2;
+        std::cout << "    gen_(L+ Nu2)_afterFSR.M() = " << LplusNu2_afterFSR.M() << std::endl;
+        
+        auto LLNuNu = gen_Lplus + gen_Lminus + gen_Nu1 + gen_Nu2;
+        std::cout << "    gen_(LL NuNu).M() = " << LLNuNu.M() << std::endl;
+
+        auto LLNuNu_afterFSR = gen_Lplus_afterFSR + gen_Lminus_afterFSR + gen_Nu1 + gen_Nu2;
+        std::cout << "    gen_(LL NuNu)_afterFSR.M() = " << LLNuNu_afterFSR.M() << std::endl;
+
+        auto LLNuNuBB = gen_Lplus + gen_Lminus + gen_Nu1 + gen_Nu2 + gen_B + gen_Bbar;
+        std::cout << "    gen_(LL NuNu BB).M() = " << LLNuNuBB.M() << std::endl;
+
+        auto LLNuNuBB_afterFSR = gen_Lplus_afterFSR + gen_Lminus_afterFSR + gen_Nu1 + gen_Nu2 + gen_B_afterFSR + gen_Bbar_afterFSR;
+        std::cout << "    gen_(LL NuNu BB)_afterFSR.M() = " << LLNuNuBB_afterFSR.M() << std::endl;
+#endif
+
+        // ***** ***** *****
+        // Matching
+        // ***** ***** *****
+        BRANCH(gen_deltaR_jet_B, std::vector<float>);    
+        BRANCH(gen_deltaR_jet_Bbar, std::vector<float>);    
+        BRANCH(gen_deltaR_jet_B_afterFSR, std::vector<float>);    
+        BRANCH(gen_deltaR_jet_Bbar_afterFSR, std::vector<float>);    
+        BRANCH(gen_deltaR_electron_L1, std::vector<float>);    
+        BRANCH(gen_deltaR_electron_L2, std::vector<float>);    
+        BRANCH(gen_deltaR_electron_L1_afterFSR, std::vector<float>);    
+        BRANCH(gen_deltaR_electron_L2_afterFSR, std::vector<float>);    
+        BRANCH(gen_deltaR_muon_L1, std::vector<float>);    
+        BRANCH(gen_deltaR_muon_L2, std::vector<float>);    
+        BRANCH(gen_deltaR_muon_L1_afterFSR, std::vector<float>);    
+        BRANCH(gen_deltaR_muon_L2_afterFSR, std::vector<float>);    
+    
+        for (auto p4: alljets.gen_p4) {
+            gen_deltaR_jet_B.push_back(deltaR(p4, gen_B));
+            gen_deltaR_jet_Bbar.push_back(deltaR(p4, gen_Bbar));
+            gen_deltaR_jet_B_afterFSR.push_back(deltaR(p4, gen_B_afterFSR));
+            gen_deltaR_jet_Bbar_afterFSR.push_back(deltaR(p4, gen_Bbar_afterFSR));
+        }
+        for (auto p4: allelectrons.gen_p4) {
+            gen_deltaR_electron_L1.push_back(deltaR(p4, gen_Lminus));
+            gen_deltaR_electron_L2.push_back(deltaR(p4, gen_Lplus));
+            gen_deltaR_electron_L1_afterFSR.push_back(deltaR(p4, gen_Lminus_afterFSR));
+            gen_deltaR_electron_L2_afterFSR.push_back(deltaR(p4, gen_Lplus_afterFSR));
+        }
+        for (auto p4: allmuons.gen_p4) {
+            gen_deltaR_muon_L1.push_back(deltaR(p4, gen_Lminus));
+            gen_deltaR_muon_L2.push_back(deltaR(p4, gen_Lplus));
+            gen_deltaR_muon_L1_afterFSR.push_back(deltaR(p4, gen_Lminus_afterFSR));
+            gen_deltaR_muon_L2_afterFSR.push_back(deltaR(p4, gen_Lplus_afterFSR));
+        }
+    }
+
     //float mh = event.isRealData() ? 125.09 : 125.0;
     LorentzVector null_p4(0., 0., 0., 0.);
-    const EventProducer& fwevent = producers.get<EventProducer>("event");
     float event_weight = fwevent.weight;
     float tmp_count_has2leptons = 0.;
     float tmp_count_has2leptons_elel = 0.;
@@ -53,17 +321,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Trigger Matching
     // ***** ***** *****
 
-    const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
     // the actual trigger matching to dilepton HLT paths happens only once we have a dilepton candidate to consider in the event
 
     // ********** 
     // Leptons and dileptons
     // ********** 
-    const ElectronsProducer& allelectrons = producers.get<ElectronsProducer>(m_electrons_producer);
-    const MuonsProducer& allmuons = producers.get<MuonsProducer>(m_muons_producer);
-
-    leptons.clear();
-    ll.clear();
 
     static auto electron_pass_HWW_id = [&allelectrons, this](size_t index) {
         auto electron = allelectrons.products[index];
@@ -257,9 +519,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Adding MET(s)
     // ***** 
-    met.clear();
-    llmet.clear();
-    const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
     HH::Met mymet;
     mymet.p4 = pf_met.p4;
     mymet.isNoHF = false;
@@ -362,7 +621,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Jets and dijets 
     // ***** 
-    const JetsProducer& alljets = producers.get<JetsProducer>(m_jets_producer);
 
     for (unsigned int ijet = 0; ijet < alljets.p4.size(); ijet++)
     {
@@ -415,7 +673,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
 
-    jj.clear();
     // Do NOT change the loop logic here: we expect [0] to be made out of the leading jets
     for (unsigned int ijet1 = 0; ijet1 < jets.size(); ijet1++)
     {
@@ -464,7 +721,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ********** 
     // lljj, llbb, +pf_met
     // ********** 
-    llmetjj.clear();
     for (unsigned int illmet = 0; illmet < llmet.size(); illmet++)
     {
         for (unsigned int ijj = 0; ijj < jj.size(); ijj++)
@@ -646,7 +902,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
 
     // Sort the collections
-    llmetjj_cmva.clear();
     llmetjj_cmva = llmetjj;
 
     std::sort(llmetjj_cmva.begin(), llmetjj_cmva.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){ return a.sumCMVAv2 > b.sumCMVAv2; });
@@ -773,207 +1028,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 //14      kIsLastCopyBeforeFSR
 //    };
 
-        const GenParticlesProducer& gp = producers.get<GenParticlesProducer>("gen_particles");
-
-#if HH_GEN_DEBUG
-    std::function<void(size_t)> print_mother_chain = [&gp, &print_mother_chain](size_t p) {
-
-        if (gp.pruned_mothers_index[p].empty()) {
-            std::cout << std::endl;
-            return;
-        }
-
-        size_t index = gp.pruned_mothers_index[p][0];
-            std::cout << " <- #" << index << "(" << gp.pruned_pdg_id[index] << ")";
-            print_mother_chain(index);
-    };
-#endif
-
-        std::function<bool(size_t, size_t)> pruned_decays_from = [&pruned_decays_from, &gp](size_t particle_index, size_t mother_index) -> bool {
-            // Iterator over all pruned particles to find if the particle `particle_index` has `mother_index` in its decay history
-            if (gp.pruned_mothers_index[particle_index].empty())
-                return false;
-
-            size_t index = gp.pruned_mothers_index[particle_index][0];
-
-            if (index == mother_index) {
-                return true;
-            }
-
-            if (pruned_decays_from(index, mother_index))
-                return true;
-
-            return false;
-        };
-
-        std::function<bool(size_t, size_t)> pruned_decays_from_pdg_id = [&pruned_decays_from_pdg_id, &gp](size_t particle_index, uint64_t pdg_id) -> bool {
-            // Iterator over all pruned particles to find if the particle `particle_index` decays from a particle with pdg id == pdg_id
-            if (gp.pruned_mothers_index[particle_index].empty())
-                return false;
-
-            size_t index = gp.pruned_mothers_index[particle_index][0];
-
-            if (std::abs(gp.pruned_pdg_id[index]) == pdg_id) {
-                return true;
-            }
-
-            if (pruned_decays_from_pdg_id(index, pdg_id))
-                return true;
-
-            return false;
-        };
-
-        // Construct signal gen info
-
-        gen_iX = -1;
-        gen_iH1 = gen_iH2 = -1;
-        gen_iH1_afterFSR = gen_iH2_afterFSR = -1;
-        gen_iB = gen_iBbar = -1;
-        gen_iB_afterFSR = gen_iBbar_afterFSR = -1;
-        gen_iV2 = gen_iV1 = -1;
-        gen_iV2_afterFSR = gen_iV1_afterFSR = -1;
-        gen_iLminus = gen_iLplus = -1;
-        gen_iLminus_afterFSR = gen_iLplus_afterFSR = -1;
-        gen_iNu1 = gen_iNu2 = -1;
-
-        for (unsigned int ip = 0; ip < gp.pruned_p4.size(); ip++) {
-            std::bitset<15> flags (gp.pruned_status_flags[ip]);
-
-            if (!flags.test(8))
-                continue;
-
-            int64_t pdg_id = gp.pruned_pdg_id[ip];
-
-#if HH_GEN_DEBUG
-            std::cout << "[" << ip << "] pdg id: " << pdg_id << "  flags: " << flags << "  p = " << gp.pruned_p4[ip] << std::endl;
-            print_mother_chain(ip);
-#endif
-
-            auto p4 = gp.pruned_p4[ip];
-
-            if (std::abs(pdg_id) == 35 || std::abs(pdg_id) == 39) {
-                ASSIGN_HH_GEN_INFO_NO_FSR(X, "X");
-            } else if (pdg_id == 25) {
-                ASSIGN_HH_GEN_INFO_2(H1, H2, "Higgs");
-            }
-
-            // Only look for Higgs decays if we have found the two Higgs
-            if ((gen_iH1 == -1) || (gen_iH2 == -1))
-                continue;
-
-            // And if the particle actually come directly from a Higgs
-            bool from_h1_decay = pruned_decays_from(ip, gen_iH1);
-            bool from_h2_decay = pruned_decays_from(ip, gen_iH2);
-
-            // Only keep particles coming from the tops decay
-            if (! from_h1_decay && ! from_h2_decay)
-                continue;
-
-            if (pdg_id == 5) {
-                ASSIGN_HH_GEN_INFO(B, "B");
-            } else if (pdg_id == -5) {
-                ASSIGN_HH_GEN_INFO(Bbar, "Bbar");
-            }
-
-            // Ignore B decays
-            if (pruned_decays_from_pdg_id(ip, 5))
-                continue;
-
-            if ((pdg_id == 11) || (pdg_id == 13) || (pdg_id == 15)) {
-                ASSIGN_HH_GEN_INFO(Lminus, "L-");
-            } else if ((pdg_id == -11) || (pdg_id == -13) || (pdg_id == -15)) {
-                ASSIGN_HH_GEN_INFO(Lplus, "L+");
-            } else if ((pdg_id == 23) || (std::abs(pdg_id) == 24)) {
-                ASSIGN_HH_GEN_INFO_2(V1, V2, "W/Z bosons");
-            } else if ((std::abs(pdg_id) == 12) || (std::abs(pdg_id) == 14) || (std::abs(pdg_id) == 16)) {
-                ASSIGN_HH_GEN_INFO_2_NO_FSR(Nu1, Nu2, "neutrinos");
-            }
-        }
-
-        // Swap neutrinos if needed
-        if ((gen_iNu1 != -1) && (gen_iNu2 != -1)) {
-            if (gp.pruned_pdg_id[gen_iNu1] > 0) {
-                std::swap(gen_iNu1, gen_iNu2);
-                std::swap(gen_Nu1, gen_Nu2);
-            }
-        }
-
-        if ((gen_iH1 != -1) && (gen_iH2 != -1)) {
-            gen_mHH = (gen_H1 + gen_H2).M();
-            gen_costhetastar = getCosThetaStar_CS(gen_H1, gen_H2);
-        }
-
-#if HH_GEN_DEBUG
-        PRINT_PARTICULE(X);
-        PRINT_RESONANCE(H1, H2);
-        PRINT_RESONANCE(B, Bbar);
-        PRINT_RESONANCE(V1, V2);
-        PRINT_RESONANCE(Lminus, Lplus);
-        PRINT_RESONANCE_NO_FSR(Nu1, Nu2);
-
-        // Rebuild resonances for consistency checks
-        auto LminusNu1 = gen_Lminus + gen_Nu1;
-        std::cout << "    gen_(L- Nu1).M() = " << LminusNu1.M() << std::endl;
-
-        auto LplusNu2 = gen_Lplus + gen_Nu2;
-        std::cout << "    gen_(L+ Nu2).M() = " << LplusNu2.M() << std::endl;
-
-        auto LminusNu1_afterFSR = gen_Lminus_afterFSR + gen_Nu1;
-        std::cout << "    gen_(L- Nu1)_afterFSR.M() = " << LminusNu1_afterFSR.M() << std::endl;
-
-        auto LplusNu2_afterFSR = gen_Lplus_afterFSR + gen_Nu2;
-        std::cout << "    gen_(L+ Nu2)_afterFSR.M() = " << LplusNu2_afterFSR.M() << std::endl;
-        
-        auto LLNuNu = gen_Lplus + gen_Lminus + gen_Nu1 + gen_Nu2;
-        std::cout << "    gen_(LL NuNu).M() = " << LLNuNu.M() << std::endl;
-
-        auto LLNuNu_afterFSR = gen_Lplus_afterFSR + gen_Lminus_afterFSR + gen_Nu1 + gen_Nu2;
-        std::cout << "    gen_(LL NuNu)_afterFSR.M() = " << LLNuNu_afterFSR.M() << std::endl;
-
-        auto LLNuNuBB = gen_Lplus + gen_Lminus + gen_Nu1 + gen_Nu2 + gen_B + gen_Bbar;
-        std::cout << "    gen_(LL NuNu BB).M() = " << LLNuNuBB.M() << std::endl;
-
-        auto LLNuNuBB_afterFSR = gen_Lplus_afterFSR + gen_Lminus_afterFSR + gen_Nu1 + gen_Nu2 + gen_B_afterFSR + gen_Bbar_afterFSR;
-        std::cout << "    gen_(LL NuNu BB)_afterFSR.M() = " << LLNuNuBB_afterFSR.M() << std::endl;
-#endif
-
-        // ***** ***** *****
-        // Matching
-        // ***** ***** *****
-        BRANCH(gen_deltaR_jet_B, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_Bbar, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_B_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_Bbar_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L1, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L2, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L1_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L2_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L1, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L2, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L1_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L2_afterFSR, std::vector<float>);    
-    
-        for (auto p4: alljets.gen_p4) {
-            gen_deltaR_jet_B.push_back(deltaR(p4, gen_B));
-            gen_deltaR_jet_Bbar.push_back(deltaR(p4, gen_Bbar));
-            gen_deltaR_jet_B_afterFSR.push_back(deltaR(p4, gen_B_afterFSR));
-            gen_deltaR_jet_Bbar_afterFSR.push_back(deltaR(p4, gen_Bbar_afterFSR));
-        }
-        for (auto p4: allelectrons.gen_p4) {
-            gen_deltaR_electron_L1.push_back(deltaR(p4, gen_Lminus));
-            gen_deltaR_electron_L2.push_back(deltaR(p4, gen_Lplus));
-            gen_deltaR_electron_L1_afterFSR.push_back(deltaR(p4, gen_Lminus_afterFSR));
-            gen_deltaR_electron_L2_afterFSR.push_back(deltaR(p4, gen_Lplus_afterFSR));
-        }
-        for (auto p4: allmuons.gen_p4) {
-            gen_deltaR_muon_L1.push_back(deltaR(p4, gen_Lminus));
-            gen_deltaR_muon_L2.push_back(deltaR(p4, gen_Lplus));
-            gen_deltaR_muon_L1_afterFSR.push_back(deltaR(p4, gen_Lminus_afterFSR));
-            gen_deltaR_muon_L2_afterFSR.push_back(deltaR(p4, gen_Lplus_afterFSR));
-        }
 
     // TTBAR MC TRUTH
-    const GenParticlesProducer& gen_particles = gp;
+    const GenParticlesProducer& gen_particles = producers.get<GenParticlesProducer>("gen_particles");
 
     // 'Pruned' particles are from the hard process
     // 'Packed' particles are stable particles
@@ -991,6 +1048,23 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             print_mother_chain(index);
     };
 #endif
+
+        std::function<bool(size_t, size_t)> pruned_decays_from = [&pruned_decays_from, &gen_particles](size_t particle_index, size_t mother_index) -> bool {
+            // Iterator over all pruned particles to find if the particle `particle_index` has `mother_index` in its decay history
+            if (gen_particles.pruned_mothers_index[particle_index].empty())
+                return false;
+
+            size_t index = gen_particles.pruned_mothers_index[particle_index][0];
+
+            if (index == mother_index) {
+                return true;
+            }
+
+            if (pruned_decays_from(index, mother_index))
+                return true;
+
+            return false;
+        };
 
 #define ASSIGN_INDEX( X ) \
     if (flags.isLastCopy()) { \
