@@ -9,10 +9,10 @@ from cp3_llbb.Framework.CmdLine import CmdLine
 options = CmdLine()
 runOnData = options.runOnData == 1
 
-globalTag_ = '80X_mcRun2_asymptotic_2016_TrancheIV_v7'
+globalTag_ = '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
 processName_ = 'PAT'
 if runOnData :
-    globalTag_ = '80X_dataRun2_2016SeptRepro_v6'
+    globalTag_ = '80X_dataRun2_2016SeptRepro_v7'
     processName_ = 'RECO'
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
@@ -100,11 +100,7 @@ framework.getProducer('hlt').parameters.triggers = cms.untracked.FileInPath('cp3
 #framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
 #framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
 
-jecDatabase = 'Summer16_23Sep2016V3_MC.db'
-if runOnData:
-    jecDatabase = 'Summer16_23Sep2016AllV3_DATA.db'
-
-framework.redoJEC(JECDatabase=jecDatabase)
+framework.redoJEC()
 
 framework.smearJets()
 
@@ -119,10 +115,10 @@ if runOnData :
 else : 
     process.source.fileNames = cms.untracked.vstring(
             # Signal
-            # ''
+            '/store/mc/RunIISummer16MiniAODv2/GluGluToHHTo2B2VTo2L2Nu_node_SM_13TeV-madgraph-v2/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/60000/2E1015E2-71D9-E611-911E-02163E019E19.root'
 
             # TT
-            '/store/mc/RunIISummer16MiniAODv2/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/00ED79D3-CFC1-E611-B748-3417EBE64483.root'
+            # '/store/mc/RunIISummer16MiniAODv2/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/00ED79D3-CFC1-E611-B748-3417EBE64483.root'
 
             # DY
             # '/store/mc/RunIISummer16MiniAODv2/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/100000/00CEFB4F-C1D2-E611-BBF4-7845C4FC3C11.root<Paste>'
