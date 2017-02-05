@@ -327,28 +327,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Leptons and dileptons
     // ********** 
 
-    static auto electron_pass_HWW_id = [&allelectrons, this](size_t index) {
-        auto electron = allelectrons.products[index];
-
-        // Use POG HLT-safe id, which is the same id used by HWW
-
-        bool result = allelectrons.ids[index][m_electron_hlt_safe_wp_name];
-
-        // Add dxy and d0 cuts described at https://twiki.cern.ch/twiki/pub/CMS/HWW2016TriggerAndIdIsoScaleFactorsResults/AN-16-172_temp.pdf
-        // page 24
-        if (electron->isEB()) {
-            result &= std::abs(allelectrons.dz[index]) < 0.373;
-            result &= std::abs(allelectrons.dxy[index]) < 0.1;
-        } else {
-            result &= std::abs(allelectrons.dz[index]) < 0.602;
-            result &= std::abs(allelectrons.dxy[index]) < 0.2;
-        }
-
-        result &= (electron->gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS)) < 1;
-
-        return result;
-    };
-
     // Fill lepton structures
     for (unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
@@ -366,12 +344,15 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.id_M = allelectrons.ids[ielectron][m_electron_medium_wp_name];
             ele.id_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
 
-            ele.id_HWW = ele.id_T && electron_pass_HWW_id(ielectron);
+            // Use POG medium ID, but keep old HWW name for backward compatibility
+            ele.id_HWW = ele.id_M;
 
             // For electrons, isolation requirement is already included in ID
             ele.iso_L = ele.id_L;
             ele.iso_T = ele.id_T;
-            ele.iso_HWW = ele.iso_T;
+
+            // Use POG medium ID isolation cut, but keep old HWW name for backward compatibility
+            ele.iso_HWW = ele.id_M;
 
             ele.gen_matched = allelectrons.matched[ielectron];
             ele.gen_p4 = ele.gen_matched ? allelectrons.gen_p4[ielectron] : null_p4;
@@ -379,6 +360,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.gen_DPtOverPt = ele.gen_matched ? (ele.p4.Pt() - ele.gen_p4.Pt()) / ele.p4.Pt() : -10.;
             ele.hlt_leg1 = false;
             ele.hlt_leg2 = false;
+
             // some selection
             if (!ele.id_HWW || !ele.iso_HWW)
                 continue;
@@ -401,9 +383,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             mu.id_L = allmuons.isLoose[imuon];
             mu.id_M = allmuons.isMedium[imuon];
             mu.id_T = allmuons.isTight[imuon];
-            mu.id_HWW = mu.id_T && (mu.p4.Pt() < 20. ? fabs(allmuons.dxy[imuon]) < 0.01 : fabs(allmuons.dxy[imuon]) < 0.02) && (fabs(allmuons.dz[imuon]) < 0.1);
+            // Use POG tight ID, but keep old HWW name for backward compatibility
+            mu.id_HWW = mu.id_T;
             mu.iso_L = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonLooseIsoCut;
             mu.iso_T = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonTightIsoCut;
+            // Use POG tight ISO, but keep old HWW name for backward compatibility
             mu.iso_HWW = mu.iso_T;
             mu.gen_matched = allmuons.matched[imuon];
             mu.gen_p4 = mu.gen_matched ? allmuons.gen_p4[imuon] : null_p4;
