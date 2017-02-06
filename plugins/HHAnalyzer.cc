@@ -188,7 +188,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                 continue;
 
             // Count the number of tau coming directly from a W or a Z
-            if ((pdg_id == 15) && (pruned_decays_from_pdg_id(ip, 24, true) || pruned_decays_from_pdg_id(ip, 23, true))) {
+            if ((std::abs(pdg_id) == 15) && (pruned_decays_from_pdg_id(ip, 24, true) || pruned_decays_from_pdg_id(ip, 23, true))) {
                 n_taus++;
             }
 
