@@ -35,8 +35,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     met.clear();
     llmet.clear();
     jj.clear();
-    llmetjj.clear();
-    llmetjj_cmva.clear();
+    //llmetjj.clear();
+    //llmetjj_cmva.clear();
 
     const JetsProducer& alljets = producers.get<JetsProducer>(m_jets_producer);
     const ElectronsProducer& allelectrons = producers.get<ElectronsProducer>(m_electrons_producer);
@@ -46,7 +46,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
 
 
-    if (!event.isRealData()) {
+    if (!event.isRealData() && !doingSystematics()) {
 
         // FIXME Moriond 2017
         // BR for taus included in HH sample is not correct (BR is tau -> all instead of tau -> e / mu)
@@ -265,18 +265,18 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         // ***** ***** *****
         // Matching
         // ***** ***** *****
-        BRANCH(gen_deltaR_jet_B, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_Bbar, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_B_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_jet_Bbar_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L1, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L2, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L1_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_electron_L2_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L1, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L2, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L1_afterFSR, std::vector<float>);    
-        BRANCH(gen_deltaR_muon_L2_afterFSR, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_B, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_Bbar, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_B_afterFSR, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_Bbar_afterFSR, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L1, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L2, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L1_afterFSR, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L2_afterFSR, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L1, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L2, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L1_afterFSR, std::vector<float>);    
+        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L2_afterFSR, std::vector<float>);    
     
         for (auto p4: alljets.gen_p4) {
             gen_deltaR_jet_B.push_back(deltaR(p4, gen_B));
@@ -333,26 +333,17 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         if (allelectrons.p4[ielectron].Pt() > m_subleadingElectronPtCut
             && fabs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
         {
-            electrons.push_back(ielectron);
+            // some selection
+            // Ask for medium ID
+            if (!allelectrons.ids[ielectron][m_electron_medium_wp_name])
+                continue;
+
             HH::Lepton ele;
             ele.p4 = allelectrons.p4[ielectron];
             ele.charge = allelectrons.charge[ielectron];
             ele.idx = ielectron;
             ele.isMu = false;
             ele.isEl = true;
-            ele.id_L = allelectrons.ids[ielectron][m_electron_loose_wp_name];
-            ele.id_M = allelectrons.ids[ielectron][m_electron_medium_wp_name];
-            ele.id_T = allelectrons.ids[ielectron][m_electron_tight_wp_name];
-
-            // Use POG medium ID, but keep old HWW name for backward compatibility
-            ele.id_HWW = ele.id_M;
-
-            // For electrons, isolation requirement is already included in ID
-            ele.iso_L = ele.id_L;
-            ele.iso_T = ele.id_T;
-
-            // Use POG medium ID isolation cut, but keep old HWW name for backward compatibility
-            ele.iso_HWW = ele.id_M;
 
             ele.gen_matched = allelectrons.matched[ielectron];
             ele.gen_p4 = ele.gen_matched ? allelectrons.gen_p4[ielectron] : null_p4;
@@ -361,9 +352,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.hlt_leg1 = false;
             ele.hlt_leg2 = false;
 
-            // some selection
-            if (!ele.id_HWW || !ele.iso_HWW)
-                continue;
             leptons.push_back(ele);
         }
     }//end of loop on electrons
@@ -373,37 +361,29 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         if (allmuons.p4[imuon].Pt() > m_subleadingMuonPtCut
             && fabs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
         {
-            muons.push_back(imuon);
+            // Ask for tight ID & tight ISO
+            if (!allmuons.isTight[imuon] || allmuons.relativeIsoR04_deltaBeta[imuon] >= m_muonTightIsoCut)
+                continue;
+
             HH::Lepton mu;
             mu.p4 = allmuons.p4[imuon];
             mu.charge = allmuons.charge[imuon];
             mu.idx = imuon;
             mu.isMu = true;
             mu.isEl = false;
-            mu.id_L = allmuons.isLoose[imuon];
-            mu.id_M = allmuons.isMedium[imuon];
-            mu.id_T = allmuons.isTight[imuon];
-            // Use POG tight ID, but keep old HWW name for backward compatibility
-            mu.id_HWW = mu.id_T;
-            mu.iso_L = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonLooseIsoCut;
-            mu.iso_T = allmuons.relativeIsoR04_deltaBeta[imuon] < m_muonTightIsoCut;
-            // Use POG tight ISO, but keep old HWW name for backward compatibility
-            mu.iso_HWW = mu.iso_T;
             mu.gen_matched = allmuons.matched[imuon];
             mu.gen_p4 = mu.gen_matched ? allmuons.gen_p4[imuon] : null_p4;
             mu.gen_DR = mu.gen_matched ? ROOT::Math::VectorUtil::DeltaR(mu.p4, mu.gen_p4) : -1.;
             mu.gen_DPtOverPt = mu.gen_matched ? (mu.p4.Pt() - mu.gen_p4.Pt()) / mu.p4.Pt() : -10.;
             mu.hlt_leg1 = false;
             mu.hlt_leg2 = false;
-            // some selection
-            if (!mu.id_HWW || !mu.iso_HWW)
-                continue;
+
             leptons.push_back(mu);
         }
     }//end of loop on muons
 
     // sort leptons by pt (ignoring flavour, id and iso)
-    std::sort(leptons.begin(), leptons.end(), [](const HH::Lepton& lep1, const HH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });     
+    std::sort(leptons.begin(), leptons.end(), [](const HH::Lepton& lep1, const HH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });
 
     for (unsigned int ilep1 = 0; ilep1 < leptons.size(); ilep1++)
     {
@@ -424,31 +404,31 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.isElMu = leptons[ilep1].isEl && leptons[ilep2].isMu;
             dilep.isMuEl = leptons[ilep1].isMu && leptons[ilep2].isEl;
             dilep.isSF = dilep.isMuMu || dilep.isElEl;
-            dilep.id_LL = leptons[ilep1].id_L && leptons[ilep2].id_L;
-            dilep.id_LM = (leptons[ilep1].id_L && leptons[ilep2].id_M) || (leptons[ilep2].id_L && leptons[ilep1].id_M);
-            dilep.id_LT = (leptons[ilep1].id_L && leptons[ilep2].id_T) || (leptons[ilep2].id_L && leptons[ilep1].id_T);
-            dilep.id_LHWW = (leptons[ilep1].id_L && leptons[ilep2].id_HWW) || (leptons[ilep2].id_L && leptons[ilep1].id_HWW);
-            dilep.id_ML = (leptons[ilep1].id_M && leptons[ilep2].id_L) || (leptons[ilep2].id_M && leptons[ilep1].id_L);
-            dilep.id_MM = leptons[ilep1].id_M && leptons[ilep2].id_M;
-            dilep.id_MT = (leptons[ilep1].id_T && leptons[ilep2].id_M) || (leptons[ilep2].id_T && leptons[ilep1].id_M);
-            dilep.id_MHWW = (leptons[ilep1].id_M && leptons[ilep2].id_HWW) || (leptons[ilep2].id_M && leptons[ilep1].id_HWW);
-            dilep.id_TL = (leptons[ilep1].id_T && leptons[ilep2].id_L) || (leptons[ilep2].id_T && leptons[ilep1].id_L);
-            dilep.id_TM = (leptons[ilep1].id_T && leptons[ilep2].id_M) || (leptons[ilep2].id_T && leptons[ilep1].id_M);
-            dilep.id_TT = leptons[ilep1].id_T && leptons[ilep2].id_T;
-            dilep.id_THWW = (leptons[ilep1].id_T && leptons[ilep2].id_HWW) || (leptons[ilep2].id_T && leptons[ilep1].id_HWW);
-            dilep.id_HWWL = (leptons[ilep1].id_HWW && leptons[ilep2].id_L) || (leptons[ilep2].id_HWW && leptons[ilep1].id_L);
-            dilep.id_HWWM = (leptons[ilep1].id_HWW && leptons[ilep2].id_M) || (leptons[ilep2].id_HWW && leptons[ilep1].id_M);
-            dilep.id_HWWT = (leptons[ilep1].id_HWW && leptons[ilep2].id_T) || (leptons[ilep2].id_HWW && leptons[ilep1].id_T);
-            dilep.id_HWWHWW = leptons[ilep1].id_HWW && leptons[ilep2].id_HWW;
-            dilep.iso_LL = leptons[ilep1].iso_L && leptons[ilep2].iso_L;
-            dilep.iso_LT = (leptons[ilep1].iso_L && leptons[ilep2].iso_T) || (leptons[ilep2].iso_L && leptons[ilep1].iso_T);
-            dilep.iso_LHWW = (leptons[ilep1].iso_L && leptons[ilep2].iso_HWW) || (leptons[ilep2].iso_L && leptons[ilep1].iso_HWW);
-            dilep.iso_TL = (leptons[ilep1].iso_T && leptons[ilep2].iso_L) || (leptons[ilep2].iso_T && leptons[ilep1].iso_L);
-            dilep.iso_TT = leptons[ilep1].iso_T && leptons[ilep2].iso_T;
-            dilep.iso_THWW = (leptons[ilep1].iso_T && leptons[ilep2].iso_HWW) || (leptons[ilep2].iso_T && leptons[ilep1].iso_HWW);
-            dilep.iso_HWWL = (leptons[ilep1].iso_HWW && leptons[ilep2].iso_L) || (leptons[ilep2].iso_HWW && leptons[ilep1].iso_L);
-            dilep.iso_HWWT = (leptons[ilep1].iso_HWW && leptons[ilep2].iso_T) || (leptons[ilep2].iso_HWW && leptons[ilep1].iso_T);
-            dilep.iso_HWWHWW = leptons[ilep1].iso_HWW && leptons[ilep2].iso_HWW;
+            //dilep.id_LL = leptons[ilep1].id_L && leptons[ilep2].id_L;
+            //dilep.id_LM = (leptons[ilep1].id_L && leptons[ilep2].id_M) || (leptons[ilep2].id_L && leptons[ilep1].id_M);
+            //dilep.id_LT = (leptons[ilep1].id_L && leptons[ilep2].id_T) || (leptons[ilep2].id_L && leptons[ilep1].id_T);
+            //dilep.id_LHWW = (leptons[ilep1].id_L && leptons[ilep2].id_HWW) || (leptons[ilep2].id_L && leptons[ilep1].id_HWW);
+            //dilep.id_ML = (leptons[ilep1].id_M && leptons[ilep2].id_L) || (leptons[ilep2].id_M && leptons[ilep1].id_L);
+            //dilep.id_MM = leptons[ilep1].id_M && leptons[ilep2].id_M;
+            //dilep.id_MT = (leptons[ilep1].id_T && leptons[ilep2].id_M) || (leptons[ilep2].id_T && leptons[ilep1].id_M);
+            //dilep.id_MHWW = (leptons[ilep1].id_M && leptons[ilep2].id_HWW) || (leptons[ilep2].id_M && leptons[ilep1].id_HWW);
+            //dilep.id_TL = (leptons[ilep1].id_T && leptons[ilep2].id_L) || (leptons[ilep2].id_T && leptons[ilep1].id_L);
+            //dilep.id_TM = (leptons[ilep1].id_T && leptons[ilep2].id_M) || (leptons[ilep2].id_T && leptons[ilep1].id_M);
+            //dilep.id_TT = leptons[ilep1].id_T && leptons[ilep2].id_T;
+            //dilep.id_THWW = (leptons[ilep1].id_T && leptons[ilep2].id_HWW) || (leptons[ilep2].id_T && leptons[ilep1].id_HWW);
+            //dilep.id_HWWL = (leptons[ilep1].id_HWW && leptons[ilep2].id_L) || (leptons[ilep2].id_HWW && leptons[ilep1].id_L);
+            //dilep.id_HWWM = (leptons[ilep1].id_HWW && leptons[ilep2].id_M) || (leptons[ilep2].id_HWW && leptons[ilep1].id_M);
+            //dilep.id_HWWT = (leptons[ilep1].id_HWW && leptons[ilep2].id_T) || (leptons[ilep2].id_HWW && leptons[ilep1].id_T);
+            //dilep.id_HWWHWW = leptons[ilep1].id_HWW && leptons[ilep2].id_HWW;
+            //dilep.iso_LL = leptons[ilep1].iso_L && leptons[ilep2].iso_L;
+            //dilep.iso_LT = (leptons[ilep1].iso_L && leptons[ilep2].iso_T) || (leptons[ilep2].iso_L && leptons[ilep1].iso_T);
+            //dilep.iso_LHWW = (leptons[ilep1].iso_L && leptons[ilep2].iso_HWW) || (leptons[ilep2].iso_L && leptons[ilep1].iso_HWW);
+            //dilep.iso_TL = (leptons[ilep1].iso_T && leptons[ilep2].iso_L) || (leptons[ilep2].iso_T && leptons[ilep1].iso_L);
+            //dilep.iso_TT = leptons[ilep1].iso_T && leptons[ilep2].iso_T;
+            //dilep.iso_THWW = (leptons[ilep1].iso_T && leptons[ilep2].iso_HWW) || (leptons[ilep2].iso_T && leptons[ilep1].iso_HWW);
+            //dilep.iso_HWWL = (leptons[ilep1].iso_HWW && leptons[ilep2].iso_L) || (leptons[ilep2].iso_HWW && leptons[ilep1].iso_L);
+            //dilep.iso_HWWT = (leptons[ilep1].iso_HWW && leptons[ilep2].iso_T) || (leptons[ilep2].iso_HWW && leptons[ilep1].iso_T);
+            //dilep.iso_HWWHWW = leptons[ilep1].iso_HWW && leptons[ilep2].iso_HWW;
             dilep.DR_l_l = ROOT::Math::VectorUtil::DeltaR(leptons[ilep1].p4, leptons[ilep2].p4);
             dilep.DPhi_l_l = fabs(ROOT::Math::VectorUtil::DeltaPhi(leptons[ilep1].p4, leptons[ilep2].p4));
             dilep.ht_l_l = leptons[ilep1].p4.Pt() + leptons[ilep2].p4.Pt();
@@ -463,9 +443,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             if (event.isRealData()) {
                dilep.trigger_efficiency = 1.;
                dilep.trigger_efficiency_downVariated = 1.;
-               dilep.trigger_efficiency_downVariated_Arun = 1.;
                dilep.trigger_efficiency_upVariated = 1.;
-               dilep.trigger_efficiency_upVariated_Arun = 1.;
             }
             else {
                fillTriggerEfficiencies(leptons[ilep1], leptons[ilep2], dilep);
@@ -500,6 +478,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // have the ll collection sorted by ht
     std::sort(ll.begin(), ll.end(), [&](HH::Dilepton& a, HH::Dilepton& b){return a.ht_l_l > b.ht_l_l;});
 
+    // Keep only the first ll candidate
+    if (ll.size() > 1) {
+        ll.resize(1);
+    }
+
     // ***** 
     // Adding MET(s)
     // ***** 
@@ -528,6 +511,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         mymet.gen_DPtOverPt = mymet.gen_matched ? (mymet.p4.Pt() - mymet.gen_p4.Pt()) / mymet.p4.Pt() : -10.;
     }
     met.push_back(mymet);
+
     //const METProducer& nohf_met = producers.get<METProducer>(m_nohf_met_producer);  // so that nohfmet is available in the tree
     //const METProducer& puppi_met = producers.get<METProducer>("puppimet");
     // TODO: adding puppi met will require changing the Met AND DileptonMet struct
@@ -552,31 +536,31 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.isElMu = ll[ill].isElMu;
             myllmet.isMuEl = ll[ill].isMuEl;
             myllmet.isSF = ll[ill].isSF;
-            myllmet.id_LL = ll[ill].id_LL;
-            myllmet.id_LM = ll[ill].id_LM;
-            myllmet.id_LT = ll[ill].id_LT;
-            myllmet.id_LHWW = ll[ill].id_LHWW;
-            myllmet.id_ML = ll[ill].id_ML;
-            myllmet.id_MM = ll[ill].id_MM;
-            myllmet.id_MT = ll[ill].id_MT;
-            myllmet.id_MHWW = ll[ill].id_MHWW;
-            myllmet.id_TL = ll[ill].id_TL;
-            myllmet.id_TM = ll[ill].id_TM;
-            myllmet.id_TT = ll[ill].id_TT;
-            myllmet.id_THWW = ll[ill].id_THWW;
-            myllmet.id_HWWL = ll[ill].id_HWWL;
-            myllmet.id_HWWM = ll[ill].id_HWWM;
-            myllmet.id_HWWT = ll[ill].id_HWWT;
-            myllmet.id_HWWHWW = ll[ill].id_HWWHWW;
-            myllmet.iso_LL = ll[ill].iso_LL;
-            myllmet.iso_LT = ll[ill].iso_LT;
-            myllmet.iso_LHWW = ll[ill].iso_LHWW;
-            myllmet.iso_TL = ll[ill].iso_TL;
-            myllmet.iso_TT = ll[ill].iso_TT;
-            myllmet.iso_THWW = ll[ill].iso_THWW;
-            myllmet.iso_HWWL = ll[ill].iso_HWWL;
-            myllmet.iso_HWWT = ll[ill].iso_HWWT;
-            myllmet.iso_HWWHWW = ll[ill].iso_HWWHWW;
+            //myllmet.id_LL = ll[ill].id_LL;
+            //myllmet.id_LM = ll[ill].id_LM;
+            //myllmet.id_LT = ll[ill].id_LT;
+            //myllmet.id_LHWW = ll[ill].id_LHWW;
+            //myllmet.id_ML = ll[ill].id_ML;
+            //myllmet.id_MM = ll[ill].id_MM;
+            //myllmet.id_MT = ll[ill].id_MT;
+            //myllmet.id_MHWW = ll[ill].id_MHWW;
+            //myllmet.id_TL = ll[ill].id_TL;
+            //myllmet.id_TM = ll[ill].id_TM;
+            //myllmet.id_TT = ll[ill].id_TT;
+            //myllmet.id_THWW = ll[ill].id_THWW;
+            //myllmet.id_HWWL = ll[ill].id_HWWL;
+            //myllmet.id_HWWM = ll[ill].id_HWWM;
+            //myllmet.id_HWWT = ll[ill].id_HWWT;
+            //myllmet.id_HWWHWW = ll[ill].id_HWWHWW;
+            //myllmet.iso_LL = ll[ill].iso_LL;
+            //myllmet.iso_LT = ll[ill].iso_LT;
+            //myllmet.iso_LHWW = ll[ill].iso_LHWW;
+            //myllmet.iso_TL = ll[ill].iso_TL;
+            //myllmet.iso_TT = ll[ill].iso_TT;
+            //myllmet.iso_THWW = ll[ill].iso_THWW;
+            //myllmet.iso_HWWL = ll[ill].iso_HWWL;
+            //myllmet.iso_HWWT = ll[ill].iso_HWWT;
+            //myllmet.iso_HWWHWW = ll[ill].iso_HWWHWW;
             myllmet.DR_l_l = ll[ill].DR_l_l;
             myllmet.DPhi_l_l = ll[ill].DPhi_l_l;
             myllmet.ht_l_l = ll[ill].ht_l_l;
@@ -620,18 +604,20 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         if ((alljets.p4[ijet].Pt() * correctionFactor > m_jetPtCut) 
             && (fabs(alljets.p4[ijet].Eta()) < m_jetEtaCut))
         {
+
+            if (!alljets.passLooseID[ijet])
+                continue;
+
             HH::Jet myjet;
             myjet.p4 = alljets.p4[ijet] * correctionFactor;
             myjet.idx = ijet;
-            myjet.id_L = alljets.passLooseID[ijet];
-            myjet.id_T = alljets.passTightID[ijet];
-            myjet.id_TLV = alljets.passTightLeptonVetoID[ijet];
+
             myjet.CSV = alljets.getBTagDiscriminant(ijet, "pfCombinedInclusiveSecondaryVertexV2BJetTags");
             myjet.CMVAv2 = alljets.getBTagDiscriminant(ijet, "pfCombinedMVAV2BJetTags");
             float mybtag = alljets.getBTagDiscriminant(ijet, m_jet_bDiscrName);
-            myjet.btag_L = mybtag > m_jet_bDiscrCut_loose;
+            //myjet.btag_L = mybtag > m_jet_bDiscrCut_loose;
             myjet.btag_M = mybtag > m_jet_bDiscrCut_medium;
-            myjet.btag_T = mybtag > m_jet_bDiscrCut_tight;
+            //myjet.btag_T = mybtag > m_jet_bDiscrCut_tight;
             myjet.gen_matched_bParton = (std::abs(alljets.partonFlavor[ijet]) == 5);
             myjet.gen_matched_bHadron = (alljets.hadronFlavor[ijet]) == 5;
             myjet.gen_matched = alljets.matched[ijet];
@@ -641,9 +627,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjet.gen_b = (alljets.hadronFlavor[ijet]) == 5; // redundant with gen_matched_bHadron defined above
             myjet.gen_c = (alljets.hadronFlavor[ijet]) == 4;
             myjet.gen_l = (alljets.hadronFlavor[ijet]) < 4;
-            // Some selection
-            if (!myjet.id_L)
-                continue;
+
             bool isThereACloseSelectedLepton = false;
             for (auto& mylepton: leptons) {
                 if (ROOT::Math::VectorUtil::DeltaR(myjet.p4, mylepton.p4) < m_minDR_l_j_Cut) {
@@ -651,8 +635,10 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                     break;
                 }
             }
+
             if (isThereACloseSelectedLepton)
                 continue;
+
             jets.push_back(myjet);
         }
     }
@@ -667,18 +653,18 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myjj.idxs = std::make_pair(jets[ijet1].idx, jets[ijet2].idx);
             myjj.ijet1 = ijet1;
             myjj.ijet2 = ijet2;
-            myjj.jid_LL = jets[ijet1].id_L && jets[ijet2].id_L;
-            myjj.jid_TT = jets[ijet1].id_T && jets[ijet2].id_T;
-            myjj.jid_TLVTLV = jets[ijet1].id_TLV && jets[ijet2].id_TLV;
-            myjj.btag_LL = jets[ijet1].btag_L && jets[ijet2].btag_L;
-            myjj.btag_LM = (jets[ijet1].btag_L && jets[ijet2].btag_M) || (jets[ijet2].btag_L && jets[ijet1].btag_M);
-            myjj.btag_LT = (jets[ijet1].btag_L && jets[ijet2].btag_T) || (jets[ijet2].btag_L && jets[ijet1].btag_T);
-            myjj.btag_ML = (jets[ijet1].btag_M && jets[ijet2].btag_L) || (jets[ijet2].btag_M && jets[ijet1].btag_L);
+            //myjj.jid_LL = jets[ijet1].id_L && jets[ijet2].id_L;
+            //myjj.jid_TT = jets[ijet1].id_T && jets[ijet2].id_T;
+            //myjj.jid_TLVTLV = jets[ijet1].id_TLV && jets[ijet2].id_TLV;
+            //myjj.btag_LL = jets[ijet1].btag_L && jets[ijet2].btag_L;
+            //myjj.btag_LM = (jets[ijet1].btag_L && jets[ijet2].btag_M) || (jets[ijet2].btag_L && jets[ijet1].btag_M);
+            //myjj.btag_LT = (jets[ijet1].btag_L && jets[ijet2].btag_T) || (jets[ijet2].btag_L && jets[ijet1].btag_T);
+            //myjj.btag_ML = (jets[ijet1].btag_M && jets[ijet2].btag_L) || (jets[ijet2].btag_M && jets[ijet1].btag_L);
             myjj.btag_MM = jets[ijet1].btag_M && jets[ijet2].btag_M;
-            myjj.btag_MT = (jets[ijet1].btag_M && jets[ijet2].btag_T) || (jets[ijet2].btag_M && jets[ijet1].btag_T);
-            myjj.btag_TL = (jets[ijet1].btag_T && jets[ijet2].btag_L) || (jets[ijet2].btag_T && jets[ijet1].btag_L);
-            myjj.btag_TM = (jets[ijet1].btag_T && jets[ijet2].btag_M) || (jets[ijet2].btag_T && jets[ijet1].btag_M);
-            myjj.btag_TT = jets[ijet1].btag_T && jets[ijet2].btag_T;
+            //myjj.btag_MT = (jets[ijet1].btag_M && jets[ijet2].btag_T) || (jets[ijet2].btag_M && jets[ijet1].btag_T);
+            //myjj.btag_TL = (jets[ijet1].btag_T && jets[ijet2].btag_L) || (jets[ijet2].btag_T && jets[ijet1].btag_L);
+            //myjj.btag_TM = (jets[ijet1].btag_T && jets[ijet2].btag_M) || (jets[ijet2].btag_T && jets[ijet1].btag_M);
+            //myjj.btag_TT = jets[ijet1].btag_T && jets[ijet2].btag_T;
             myjj.sumCSV = jets[ijet1].CSV + jets[ijet2].CSV;
             myjj.sumCMVAv2 = jets[ijet1].CMVAv2 + jets[ijet2].CMVAv2;
             myjj.DR_j_j = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, jets[ijet2].p4);
@@ -699,6 +685,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             jj.push_back(myjj);
         }
     }
+
     // have the jj collection sorted by ht
     std::sort(jj.begin(), jj.end(), [&](HH::Dijet& a, HH::Dijet& b){return a.p4.Pt() > b.p4.Pt();});
 
@@ -742,18 +729,18 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             // blind copy of the jj content
             myllmetjj.ijet1 = jj[ijj].ijet1;
             myllmetjj.ijet2 = jj[ijj].ijet2;
-            myllmetjj.jid_LL = jj[ijj].jid_LL;
-            myllmetjj.jid_TT = jj[ijj].jid_TT;
-            myllmetjj.jid_TLVTLV = jj[ijj].jid_TLVTLV;
-            myllmetjj.btag_LL = jj[ijj].btag_LL;
-            myllmetjj.btag_LM = jj[ijj].btag_LM;
-            myllmetjj.btag_LT = jj[ijj].btag_LT;
-            myllmetjj.btag_ML = jj[ijj].btag_ML;
+            //myllmetjj.jid_LL = jj[ijj].jid_LL;
+            //myllmetjj.jid_TT = jj[ijj].jid_TT;
+            //myllmetjj.jid_TLVTLV = jj[ijj].jid_TLVTLV;
+            //myllmetjj.btag_LL = jj[ijj].btag_LL;
+            //myllmetjj.btag_LM = jj[ijj].btag_LM;
+            //myllmetjj.btag_LT = jj[ijj].btag_LT;
+            //myllmetjj.btag_ML = jj[ijj].btag_ML;
             myllmetjj.btag_MM = jj[ijj].btag_MM;
-            myllmetjj.btag_MT = jj[ijj].btag_MT;
-            myllmetjj.btag_TL = jj[ijj].btag_TL;
-            myllmetjj.btag_TM = jj[ijj].btag_TM;
-            myllmetjj.btag_TT = jj[ijj].btag_TT;
+            //myllmetjj.btag_MT = jj[ijj].btag_MT;
+            //myllmetjj.btag_TL = jj[ijj].btag_TL;
+            //myllmetjj.btag_TM = jj[ijj].btag_TM;
+            //myllmetjj.btag_TT = jj[ijj].btag_TT;
             myllmetjj.sumCSV = jj[ijj].sumCSV;
             myllmetjj.sumCMVAv2 = jj[ijj].sumCMVAv2;
             myllmetjj.DR_j_j = jj[ijj].DR_j_j;
@@ -778,40 +765,38 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.isElMu = ll[ill].isElMu;
             myllmetjj.isMuEl = ll[ill].isMuEl;
             myllmetjj.isSF = ll[ill].isSF;
-            myllmetjj.id_LL = ll[ill].id_LL;
-            myllmetjj.id_LM = ll[ill].id_LM;
-            myllmetjj.id_LT = ll[ill].id_LT;
-            myllmetjj.id_LHWW = ll[ill].id_LHWW;
-            myllmetjj.id_ML = ll[ill].id_ML;
-            myllmetjj.id_MM = ll[ill].id_MM;
-            myllmetjj.id_MT = ll[ill].id_MT;
-            myllmetjj.id_MHWW = ll[ill].id_MHWW;
-            myllmetjj.id_TL = ll[ill].id_TL;
-            myllmetjj.id_TM = ll[ill].id_TM;
-            myllmetjj.id_TT = ll[ill].id_TT;
-            myllmetjj.id_THWW = ll[ill].id_THWW;
-            myllmetjj.id_HWWL = ll[ill].id_HWWL;
-            myllmetjj.id_HWWM = ll[ill].id_HWWM;
-            myllmetjj.id_HWWT = ll[ill].id_HWWT;
-            myllmetjj.id_HWWHWW = ll[ill].id_HWWHWW;
-            myllmetjj.iso_LL = ll[ill].iso_LL;
-            myllmetjj.iso_LT = ll[ill].iso_LT;
-            myllmetjj.iso_LHWW = ll[ill].iso_LHWW;
-            myllmetjj.iso_TL = ll[ill].iso_TL;
-            myllmetjj.iso_TT = ll[ill].iso_TT;
-            myllmetjj.iso_THWW = ll[ill].iso_THWW;
-            myllmetjj.iso_HWWL = ll[ill].iso_HWWL;
-            myllmetjj.iso_HWWT = ll[ill].iso_HWWT;
-            myllmetjj.iso_HWWHWW = ll[ill].iso_HWWHWW;
+            //myllmetjj.id_LL = ll[ill].id_LL;
+            //myllmetjj.id_LM = ll[ill].id_LM;
+            //myllmetjj.id_LT = ll[ill].id_LT;
+            //myllmetjj.id_LHWW = ll[ill].id_LHWW;
+            //myllmetjj.id_ML = ll[ill].id_ML;
+            //myllmetjj.id_MM = ll[ill].id_MM;
+            //myllmetjj.id_MT = ll[ill].id_MT;
+            //myllmetjj.id_MHWW = ll[ill].id_MHWW;
+            //myllmetjj.id_TL = ll[ill].id_TL;
+            //myllmetjj.id_TM = ll[ill].id_TM;
+            //myllmetjj.id_TT = ll[ill].id_TT;
+            //myllmetjj.id_THWW = ll[ill].id_THWW;
+            //myllmetjj.id_HWWL = ll[ill].id_HWWL;
+            //myllmetjj.id_HWWM = ll[ill].id_HWWM;
+            //myllmetjj.id_HWWT = ll[ill].id_HWWT;
+            //myllmetjj.id_HWWHWW = ll[ill].id_HWWHWW;
+            //myllmetjj.iso_LL = ll[ill].iso_LL;
+            //myllmetjj.iso_LT = ll[ill].iso_LT;
+            //myllmetjj.iso_LHWW = ll[ill].iso_LHWW;
+            //myllmetjj.iso_TL = ll[ill].iso_TL;
+            //myllmetjj.iso_TT = ll[ill].iso_TT;
+            //myllmetjj.iso_THWW = ll[ill].iso_THWW;
+            //myllmetjj.iso_HWWL = ll[ill].iso_HWWL;
+            //myllmetjj.iso_HWWT = ll[ill].iso_HWWT;
+            //myllmetjj.iso_HWWHWW = ll[ill].iso_HWWHWW;
             myllmetjj.DR_l_l = ll[ill].DR_l_l;
             myllmetjj.DPhi_l_l = ll[ill].DPhi_l_l;
             myllmetjj.ht_l_l = ll[ill].ht_l_l;
             myllmetjj.trigger_efficiency = ll[ill].trigger_efficiency;
             myllmetjj.trigger_efficiency_downVariated = ll[ill].trigger_efficiency_downVariated;
-            myllmetjj.trigger_efficiency_downVariated_Arun = ll[ill].trigger_efficiency_downVariated_Arun;
             myllmetjj.trigger_efficiency_upVariated = ll[ill].trigger_efficiency_upVariated;
-            myllmetjj.trigger_efficiency_upVariated_Arun = ll[ill].trigger_efficiency_upVariated_Arun;
-            myllmetjj.ill = ill;
+            //myllmetjj.ill = ill;
             myllmetjj.imet = imet;
             myllmetjj.isNoHF = met[imet].isNoHF;
             myllmetjj.DPhi_ll_met = llmet[illmet].DPhi_ll_met;
@@ -826,8 +811,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.minDPhi_j_met = std::min(fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
             myllmetjj.maxDPhi_j_met = std::max(fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
             // content specific to HH::DileptonMetDijet
-            myllmetjj.illmet = illmet;
-            myllmetjj.ijj = ijj;
+            //myllmetjj.illmet = illmet;
+            //myllmetjj.ijj = ijj;
             float DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2;
             DR_j1l1 = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, leptons[ilep1].p4);
             DR_j1l2 = ROOT::Math::VectorUtil::DeltaR(jets[ijet1].p4, leptons[ilep2].p4);
@@ -884,111 +869,56 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
 
+    std::sort(llmetjj.begin(), llmetjj.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){ return a.sumCMVAv2 > b.sumCMVAv2; });
 
-    // Sort the collections
-    llmetjj_cmva = llmetjj;
-
-    std::sort(llmetjj_cmva.begin(), llmetjj_cmva.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){ return a.sumCMVAv2 > b.sumCMVAv2; });
-
-    // Adding some few custom candidates, for convenience
-    for (auto &myllmetjj_cmva: llmetjj_cmva) {
-
-        if (!myllmetjj_cmva.id_HWWHWW)
-            continue;
-
-        if (!myllmetjj_cmva.iso_HWWHWW)
-            continue;
-
-        // jetID::L is enforced while filling the jet collection
-
-        llmetjj_HWWleptons_nobtag_cmva.push_back(myllmetjj_cmva);
-
-        if (myllmetjj_cmva.btag_LL)
-            llmetjj_HWWleptons_btagL_cmva.push_back(myllmetjj_cmva);
-
-        if (myllmetjj_cmva.btag_MM)
-            llmetjj_HWWleptons_btagM_cmva.push_back(myllmetjj_cmva);
-
-        if (myllmetjj_cmva.btag_TT)
-            llmetjj_HWWleptons_btagT_cmva.push_back(myllmetjj_cmva);
-
-        // October 2016: asymmetric btag candidates
-        if (myllmetjj_cmva.btag_LM || myllmetjj_cmva.btag_ML)
-            llmetjj_HWWleptons_btagLM_cmva.push_back(myllmetjj_cmva);
-
-        if (myllmetjj_cmva.btag_MT || myllmetjj_cmva.btag_TM)
-            llmetjj_HWWleptons_btagMT_cmva.push_back(myllmetjj_cmva);
+    // Keep only the first candidate
+    if (llmetjj.size() > 1) {
+        llmetjj.resize(1);
     }
-
 
     // ***** ***** *****
     // Event variables
     // ***** ***** *****
-    nJets = jets.size();
-    nJetsL = 0;
-    for (unsigned int ijet = 0; ijet < jets.size(); ijet++)
-        if (jets[ijet].id_L)
-            nJetsL++;
-    nBJetsL = 0;
-    nBJetsM = 0;
-    nBJetsT = 0;
-    for (unsigned int ijet = 0; ijet < jets.size(); ijet++)
-    {
-        if (!jets[ijet].id_L) continue;
-        if (jets[ijet].btag_L)
-            nBJetsL++;
-        if (jets[ijet].btag_M)
-            nBJetsM++;
-        if (jets[ijet].btag_T)
-            nBJetsT++;
-    }
-    nMuons = muons.size();
-    nMuonsL = 0;
-    nMuonsT = 0;
-    nElectrons = electrons.size();
-    nElectronsL = 0;
-    nElectronsT = 0;
-    nLeptons = leptons.size();
-    nLeptonsL = 0;
-    nLeptonsT = 0;
-    for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
-    {
-        if (leptons[ilepton].id_L && leptons[ilepton].iso_L)
-        {
-            nLeptonsL++;
-            if (leptons[ilepton].isMu)
-                nMuonsL++;
-            if (leptons[ilepton].isEl)
-                nElectronsL++;
+    nJetsL = jets.size();
+    if (! doingSystematics()) {
+        nBJetsM = 0;
+        for (unsigned int ijet = 0; ijet < jets.size(); ijet++) {
+            if (jets[ijet].btag_M)
+                nBJetsM++;
         }
-        if (leptons[ilepton].id_T && leptons[ilepton].iso_T)
+
+        nMuonsT = 0;
+        nElectronsM = 0;
+        for (unsigned int ilepton = 0; ilepton < leptons.size(); ilepton++)
         {
-            nLeptonsT++;
-            if (leptons[ilepton].isMu)
+            if (leptons[ilepton].isMu) {
                 nMuonsT++;
-            if (leptons[ilepton].isEl)
-                nElectronsT++;
+            }
+
+            if (leptons[ilepton].isEl) {
+                nElectronsM++;
+            }
         }
+
+        count_has2leptons += tmp_count_has2leptons;
+        count_has2leptons_elel += tmp_count_has2leptons_elel;
+        count_has2leptons_elmu += tmp_count_has2leptons_elmu;
+        count_has2leptons_muel += tmp_count_has2leptons_muel;
+        count_has2leptons_mumu += tmp_count_has2leptons_mumu;
+        count_has2leptons_1llmetjj += tmp_count_has2leptons_1llmetjj;
+        count_has2leptons_elel_1llmetjj += tmp_count_has2leptons_elel_1llmetjj;
+        count_has2leptons_elmu_1llmetjj += tmp_count_has2leptons_elmu_1llmetjj;
+        count_has2leptons_muel_1llmetjj += tmp_count_has2leptons_muel_1llmetjj;
+        count_has2leptons_mumu_1llmetjj += tmp_count_has2leptons_mumu_1llmetjj;
+        count_has2leptons_1llmetjj_2btagM += tmp_count_has2leptons_1llmetjj_2btagM;
+        count_has2leptons_elel_1llmetjj_2btagM += tmp_count_has2leptons_elel_1llmetjj_2btagM;
+        count_has2leptons_elmu_1llmetjj_2btagM += tmp_count_has2leptons_elmu_1llmetjj_2btagM;
+        count_has2leptons_muel_1llmetjj_2btagM += tmp_count_has2leptons_muel_1llmetjj_2btagM;
+        count_has2leptons_mumu_1llmetjj_2btagM += tmp_count_has2leptons_mumu_1llmetjj_2btagM;
     }
 
-    count_has2leptons += tmp_count_has2leptons;
-    count_has2leptons_elel += tmp_count_has2leptons_elel;
-    count_has2leptons_elmu += tmp_count_has2leptons_elmu;
-    count_has2leptons_muel += tmp_count_has2leptons_muel;
-    count_has2leptons_mumu += tmp_count_has2leptons_mumu;
-    count_has2leptons_1llmetjj += tmp_count_has2leptons_1llmetjj;
-    count_has2leptons_elel_1llmetjj += tmp_count_has2leptons_elel_1llmetjj;
-    count_has2leptons_elmu_1llmetjj += tmp_count_has2leptons_elmu_1llmetjj;
-    count_has2leptons_muel_1llmetjj += tmp_count_has2leptons_muel_1llmetjj;
-    count_has2leptons_mumu_1llmetjj += tmp_count_has2leptons_mumu_1llmetjj;
-    count_has2leptons_1llmetjj_2btagM += tmp_count_has2leptons_1llmetjj_2btagM;
-    count_has2leptons_elel_1llmetjj_2btagM += tmp_count_has2leptons_elel_1llmetjj_2btagM;
-    count_has2leptons_elmu_1llmetjj_2btagM += tmp_count_has2leptons_elmu_1llmetjj_2btagM;
-    count_has2leptons_muel_1llmetjj_2btagM += tmp_count_has2leptons_muel_1llmetjj_2btagM;
-    count_has2leptons_mumu_1llmetjj_2btagM += tmp_count_has2leptons_mumu_1llmetjj_2btagM;
 
-
-    if (!event.isRealData())
+    if (!event.isRealData() && !doingSystematics())
     {
 // ***** ***** *****
 // Get the MC truth information on the hard process
@@ -1351,21 +1281,23 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
 }
 
-void HHAnalyzer::endJob(MetadataManager& metadata)
-{
-    metadata.add(this->m_name + "_count_has2leptons", count_has2leptons);
-    metadata.add(this->m_name + "_count_has2leptons_elel", count_has2leptons_elel);
-    metadata.add(this->m_name + "_count_has2leptons_elmu", count_has2leptons_elmu);
-    metadata.add(this->m_name + "_count_has2leptons_muel", count_has2leptons_muel);
-    metadata.add(this->m_name + "_count_has2leptons_mumu", count_has2leptons_mumu);
-    metadata.add(this->m_name + "_count_has2leptons_1llmetjj", count_has2leptons_1llmetjj);
-    metadata.add(this->m_name + "_count_has2leptons_elel_1llmetjj", count_has2leptons_elel_1llmetjj);
-    metadata.add(this->m_name + "_count_has2leptons_elmu_1llmetjj", count_has2leptons_elmu_1llmetjj);
-    metadata.add(this->m_name + "_count_has2leptons_muel_1llmetjj", count_has2leptons_muel_1llmetjj);
-    metadata.add(this->m_name + "_count_has2leptons_mumu_1llmetjj", count_has2leptons_mumu_1llmetjj);
-    metadata.add(this->m_name + "_count_has2leptons_1llmetjj_2btagM", count_has2leptons_1llmetjj_2btagM);
-    metadata.add(this->m_name + "_count_has2leptons_elel_1llmetjj_2btagM", count_has2leptons_elel_1llmetjj_2btagM);
-    metadata.add(this->m_name + "_count_has2leptons_elmu_1llmetjj_2btagM", count_has2leptons_elmu_1llmetjj_2btagM);
-    metadata.add(this->m_name + "_count_has2leptons_muel_1llmetjj_2btagM", count_has2leptons_muel_1llmetjj_2btagM);
-    metadata.add(this->m_name + "_count_has2leptons_mumu_1llmetjj_2btagM", count_has2leptons_mumu_1llmetjj_2btagM);
+void HHAnalyzer::endJob(MetadataManager& metadata) {
+
+    if (! doingSystematics()) {
+        metadata.add(this->m_name + "_count_has2leptons", count_has2leptons);
+        metadata.add(this->m_name + "_count_has2leptons_elel", count_has2leptons_elel);
+        metadata.add(this->m_name + "_count_has2leptons_elmu", count_has2leptons_elmu);
+        metadata.add(this->m_name + "_count_has2leptons_muel", count_has2leptons_muel);
+        metadata.add(this->m_name + "_count_has2leptons_mumu", count_has2leptons_mumu);
+        metadata.add(this->m_name + "_count_has2leptons_1llmetjj", count_has2leptons_1llmetjj);
+        metadata.add(this->m_name + "_count_has2leptons_elel_1llmetjj", count_has2leptons_elel_1llmetjj);
+        metadata.add(this->m_name + "_count_has2leptons_elmu_1llmetjj", count_has2leptons_elmu_1llmetjj);
+        metadata.add(this->m_name + "_count_has2leptons_muel_1llmetjj", count_has2leptons_muel_1llmetjj);
+        metadata.add(this->m_name + "_count_has2leptons_mumu_1llmetjj", count_has2leptons_mumu_1llmetjj);
+        metadata.add(this->m_name + "_count_has2leptons_1llmetjj_2btagM", count_has2leptons_1llmetjj_2btagM);
+        metadata.add(this->m_name + "_count_has2leptons_elel_1llmetjj_2btagM", count_has2leptons_elel_1llmetjj_2btagM);
+        metadata.add(this->m_name + "_count_has2leptons_elmu_1llmetjj_2btagM", count_has2leptons_elmu_1llmetjj_2btagM);
+        metadata.add(this->m_name + "_count_has2leptons_muel_1llmetjj_2btagM", count_has2leptons_muel_1llmetjj_2btagM);
+        metadata.add(this->m_name + "_count_has2leptons_mumu_1llmetjj_2btagM", count_has2leptons_mumu_1llmetjj_2btagM);
+    }
 }

@@ -1,10 +1,13 @@
 <lcgdict>
-    <class name="HH::Lepton" ClassVersion="10">
+    <class name="HH::Lepton" ClassVersion="11">
+     <version ClassVersion="11" checksum="3678847574"/>
      <version ClassVersion="10" checksum="1833596599"/>
      <field name="hlt_already_tried_matching" transient="true"/>
     </class>
     <class name="std::vector<HH::Lepton>"/>
-    <class name="HH::Dilepton" ClassVersion="10">
+    <class name="HH::Dilepton" ClassVersion="12">
+     <version ClassVersion="12" checksum="1015244358"/>
+     <version ClassVersion="11" checksum="3795415179"/>
      <version ClassVersion="10" checksum="2433355583"/>
     </class>
     <class name="std::vector<HH::Dilepton>"/>
@@ -12,21 +15,33 @@
      <version ClassVersion="10" checksum="1356748875"/>
     </class>
     <class name="std::vector<HH::Met>"/>
-    <class name="HH::DileptonMet" ClassVersion="10">
-     <version ClassVersion="10" checksum="2202889764"/>
+    <class name="HH::DileptonMet" ClassVersion="12">
+     <version ClassVersion="12" checksum="1019123979"/>
+     <version ClassVersion="11" checksum="3666464930"/>
+     <field name="ill" transient="true"/>
     </class>
     <class name="std::vector<HH::DileptonMet>"/>
     <class name="std::vector< std::vector<int> >"/>
-    <class name="HH::Jet" ClassVersion="10">
+    <class name="HH::Jet" ClassVersion="12">
+     <version ClassVersion="12" checksum="700635934"/>
+     <version ClassVersion="11" checksum="1040758844"/>
      <version ClassVersion="10" checksum="194867656"/>
     </class>
     <class name="std::vector<HH::Jet>"/>
-    <class name="HH::Dijet" ClassVersion="10">
+    <class name="HH::Dijet" ClassVersion="11">
+     <version ClassVersion="11" checksum="667858264"/>
      <version ClassVersion="10" checksum="2119876344"/>
     </class>
     <class name="std::vector<HH::Dijet>"/>
-    <class name="HH::DileptonMetDijet" ClassVersion="10">
-     <version ClassVersion="10" checksum="1966451846"/>
+    <class name="HH::DileptonMetDijet" ClassVersion="12">
+     <version ClassVersion="12" checksum="2284378963"/>
+     <version ClassVersion="11" checksum="4193054634"/>
+     <field name="ill" transient="true"/>
+     <field name="lep1_p4" transient="true"/>
+     <field name="lep2_p4" transient="true"/>
+     <field name="jet1_p4" transient="true"/>
+     <field name="jet2_p4" transient="true"/>
+     <field name="met_p4" transient="true"/>
     </class>
     <class name="std::vector<HH::DileptonMetDijet>"/>
     <class name="std::pair<int8_t, int8_t>"/>

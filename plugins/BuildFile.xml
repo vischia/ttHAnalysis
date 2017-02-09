@@ -4,3 +4,4 @@
 <use name="cp3_llbb/Framework"/>
 <use name="cp3_llbb/TreeWrapper"/>
 <flags EDM_PLUGIN="1"/>
+<flags CXXFLAGS="-g" />

@@ -87,24 +87,18 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
     )
 )
 
-# Add PUPPI MET
-puppiCfg = cms.PSet(METProducer.default_configuration.clone())
-puppiCfg.prefix = cms.string('puppimet_')
-puppiCfg.parameters.met = cms.untracked.InputTag('slimmedMETsPuppi')
-framework.addProducer('puppimet', puppiCfg)
-
 # Remove fat jets
 framework.removeProducer('fat_jets')
 
 framework.getProducer('hlt').parameters.triggers = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/triggers.xml')
-#framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
+# framework.getProducer('jets').parameters.cut = cms.untracked.string("pt > 20")
 #framework.getProducer('jets').parameters.computeRegression = cms.untracked.bool(True)
 
 framework.redoJEC()
 
-framework.smearJets(resolutionFile='cp3_llbb/Framework/data/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt', scaleFactorFile='cp3_llbb/Framework/data/Spring16_25nsV10_MC_SF_AK4PFchs.txt')
-
-framework.doSystematics(['jec', 'jer'])
+if not runOnData:
+    framework.smearJets(resolutionFile='cp3_llbb/Framework/data/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt', scaleFactorFile='cp3_llbb/Framework/data/Spring16_25nsV10_MC_SF_AK4PFchs.txt')
+    framework.doSystematics(['jec', 'jer'], jec={'uncertaintiesFile': 'cp3_llbb/HHAnalysis/data/Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt', 'splitBySources': True})
 
 process = framework.create()
 
