@@ -71,17 +71,17 @@ framework.addAnalyzer('hh_analyzer', cms.PSet(
 
             hlt_efficiencies = cms.untracked.PSet(
 
-                    IsoMu17leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu17leg_Run2016_PTvsETA_Run271036to276811_HWW_weighted.json'),
-                    IsoMu8orIsoTkMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8orIsoTkMu8leg_Run2016_PTvsETA_Run271036to276811_HWW_weighted.json'),
+                    IsoMu17leg = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/Efficiencies/Muon_DoubleIsoMu17Mu8_IsoMu17leg.json'),
+                    IsoMu8orIsoTkMu8leg = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/Efficiencies/Muon_DoubleIsoMu17TkMu8_IsoMu8legORTkMu8leg.json'),
 
-                    DoubleEleHighPtleg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_DoubleEleLegHigPt_HWW.json'),
-                    DoubleEleLowPtleg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_DoubleEleLegLowPt_HWW.json'),
+                    DoubleEleHighPtleg = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/Efficiencies/Electron_IsoEle23Leg.json'),
+                    DoubleEleLowPtleg = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/Efficiencies/Electron_IsoEle12Leg.json'),
 
-                    EleMuHighPtleg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_EleMuLegHigPt_HWW.json'),
-                    MuEleLowPtleg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Electron_HLT_MuEleLegLowPt_HWW.json'),
+                    EleMuHighPtleg = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/Efficiencies/Electron_IsoEle23Leg.json'),
+                    MuEleLowPtleg = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/Efficiencies/Electron_IsoEle12Leg.json'),
 
-                    IsoMu8leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu8leg_Run2016_PTvsETA_Run271036to276811_HWW_weighted.json'),
-                    IsoMu23leg = cms.untracked.FileInPath('cp3_llbb/Framework/data/Efficiencies/Muon_DoubleMu_IsoMu23leg_Run2016_PTvsETA_Run271036to276811_HWW_weighted.json'),
+                    IsoMu8leg = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/Efficiencies/Muon_XPathIsoMu8leg.json'),
+                    IsoMu23leg = cms.untracked.FileInPath('cp3_llbb/HHAnalysis/data/Efficiencies/Muon_XPathIsoMu23leg.json'),
             )
         )
     )
