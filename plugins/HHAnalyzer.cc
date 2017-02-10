@@ -879,6 +879,15 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** ***** *****
     // Event variables
     // ***** ***** *****
+
+    // HT: the two selected leptons - if present - plus all selected jets
+    HT = 0;
+    if (llmetjj.size() > 0)
+        HT += llmetjj[0].lep1_p4.Pt() + llmetjj[0].lep2_p4.Pt();
+    for (unsigned int ijet = 0; ijet < jets.size(); ijet++) {
+        HT += jets[ijet].p4.Pt();
+    }
+
     nJetsL = jets.size();
     if (! doingSystematics()) {
         nBJetsM = 0;

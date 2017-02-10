@@ -105,6 +105,7 @@ class HHAnalyzer: public Framework::Analyzer {
         void fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep);
 
         // global event stuff (selected objects multiplicity)
+        BRANCH(HT, float);
         BRANCH(nJetsL, unsigned int);
         ONLY_NOMINAL_BRANCH(nBJetsM, unsigned int);
         ONLY_NOMINAL_BRANCH(nMuonsT, unsigned int);
