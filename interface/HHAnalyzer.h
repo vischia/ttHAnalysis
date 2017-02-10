@@ -74,26 +74,26 @@ class HHAnalyzer: public Framework::Analyzer {
         }
         virtual void endJob(MetadataManager&) override;
 
-        // leptons and dileptons stuff
-        BRANCH(electrons, std::vector<unsigned int>);
-        BRANCH(muons, std::vector<unsigned int>);
         BRANCH(leptons, std::vector<HH::Lepton>);
         BRANCH(met, std::vector<HH::Met>);
         BRANCH(jets, std::vector<HH::Jet>);
         std::vector<HH::Dilepton> ll;
         std::vector<HH::DileptonMet> llmet;
         std::vector<HH::Dijet> jj;
-        std::vector<HH::DileptonMetDijet> llmetjj;
-        std::vector<HH::DileptonMetDijet> llmetjj_cmva;
+
+        //std::vector<HH::DileptonMetDijet> llmetjj;
+        //std::vector<HH::DileptonMetDijet> llmetjj_cmva;
         // some few custom candidates, for convenience
         // Januray 2016: preapproval freezing custom candidates
-        BRANCH(llmetjj_HWWleptons_nobtag_cmva, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_HWWleptons_btagL_cmva, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_HWWleptons_btagM_cmva, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_HWWleptons_btagT_cmva, std::vector<HH::DileptonMetDijet>);
-        // October 2016: adding some asymmetric btag candidates, for study
-        BRANCH(llmetjj_HWWleptons_btagLM_cmva, std::vector<HH::DileptonMetDijet>);
-        BRANCH(llmetjj_HWWleptons_btagMT_cmva, std::vector<HH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_nobtag_cmva, std::vector<HH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagL_cmva, std::vector<HH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagM_cmva, std::vector<HH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagT_cmva, std::vector<HH::DileptonMetDijet>);
+        //// October 2016: adding some asymmetric btag candidates, for study
+        //BRANCH(llmetjj_HWWleptons_btagLM_cmva, std::vector<HH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagMT_cmva, std::vector<HH::DileptonMetDijet>);
+        
+        BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
@@ -105,20 +105,11 @@ class HHAnalyzer: public Framework::Analyzer {
         void fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep);
 
         // global event stuff (selected objects multiplicity)
-        BRANCH(nJets, unsigned int);
+        BRANCH(HT, float);
         BRANCH(nJetsL, unsigned int);
-        BRANCH(nBJetsL, unsigned int);
-        BRANCH(nBJetsM, unsigned int);
-        BRANCH(nBJetsT, unsigned int);
-        BRANCH(nMuons, unsigned int);
-        BRANCH(nMuonsL, unsigned int);
-        BRANCH(nMuonsT, unsigned int);
-        BRANCH(nElectrons, unsigned int);
-        BRANCH(nElectronsL, unsigned int);
-        BRANCH(nElectronsT, unsigned int);
-        BRANCH(nLeptons, unsigned int);
-        BRANCH(nLeptonsL, unsigned int);
-        BRANCH(nLeptonsT, unsigned int);
+        ONLY_NOMINAL_BRANCH(nBJetsM, unsigned int);
+        ONLY_NOMINAL_BRANCH(nMuonsT, unsigned int);
+        ONLY_NOMINAL_BRANCH(nElectronsM, unsigned int);
 
         float count_has2leptons = 0.;
         float count_has2leptons_elel = 0.;
@@ -168,54 +159,54 @@ class HHAnalyzer: public Framework::Analyzer {
         uint16_t gen_neutrino_tbar; // Index of the neutrino from the anti-top decay chain
         uint16_t gen_neutrino_tbar_beforeFSR; // Index of the neutrino from the anti-top decay chain, before any FSR
 
-        BRANCH(gen_ttbar_decay_type, char); // Type of ttbar decay. Can take any values from TTDecayType enum
+        ONLY_NOMINAL_BRANCH(gen_ttbar_decay_type, char); // Type of ttbar decay. Can take any values from TTDecayType enum
 
         // Di-higgs gen system
-        BRANCH(gen_iX, char);
-        BRANCH(gen_X, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_iX, char);
+        ONLY_NOMINAL_BRANCH(gen_X, LorentzVector);
 
-        BRANCH(gen_iH1, char);
-        BRANCH(gen_iH2, char);
-        BRANCH(gen_H1, LorentzVector);
-        BRANCH(gen_H2, LorentzVector);
-        BRANCH(gen_mHH, double);
-        BRANCH(gen_costhetastar, double);
-        BRANCH(gen_iH1_afterFSR, char);
-        BRANCH(gen_iH2_afterFSR, char);
-        BRANCH(gen_H1_afterFSR, LorentzVector);
-        BRANCH(gen_H2_afterFSR, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_iH1, char);
+        ONLY_NOMINAL_BRANCH(gen_iH2, char);
+        ONLY_NOMINAL_BRANCH(gen_H1, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_H2, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_mHH, double);
+        ONLY_NOMINAL_BRANCH(gen_costhetastar, double);
+        ONLY_NOMINAL_BRANCH(gen_iH1_afterFSR, char);
+        ONLY_NOMINAL_BRANCH(gen_iH2_afterFSR, char);
+        ONLY_NOMINAL_BRANCH(gen_H1_afterFSR, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_H2_afterFSR, LorentzVector);
 
-        BRANCH(gen_iB, char);
-        BRANCH(gen_iBbar, char);
-        BRANCH(gen_iB_afterFSR, char);
-        BRANCH(gen_iBbar_afterFSR, char);
-        BRANCH(gen_B, LorentzVector);
-        BRANCH(gen_Bbar, LorentzVector);
-        BRANCH(gen_B_afterFSR, LorentzVector);
-        BRANCH(gen_Bbar_afterFSR, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_iB, char);
+        ONLY_NOMINAL_BRANCH(gen_iBbar, char);
+        ONLY_NOMINAL_BRANCH(gen_iB_afterFSR, char);
+        ONLY_NOMINAL_BRANCH(gen_iBbar_afterFSR, char);
+        ONLY_NOMINAL_BRANCH(gen_B, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_Bbar, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_B_afterFSR, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_Bbar_afterFSR, LorentzVector);
 
-        BRANCH(gen_iV2, char);
-        BRANCH(gen_iV1, char);
-        BRANCH(gen_iV2_afterFSR, char);
-        BRANCH(gen_iV1_afterFSR, char);
-        BRANCH(gen_V2, LorentzVector);
-        BRANCH(gen_V1, LorentzVector);
-        BRANCH(gen_V2_afterFSR, LorentzVector);
-        BRANCH(gen_V1_afterFSR, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_iV2, char);
+        ONLY_NOMINAL_BRANCH(gen_iV1, char);
+        ONLY_NOMINAL_BRANCH(gen_iV2_afterFSR, char);
+        ONLY_NOMINAL_BRANCH(gen_iV1_afterFSR, char);
+        ONLY_NOMINAL_BRANCH(gen_V2, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_V1, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_V2_afterFSR, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_V1_afterFSR, LorentzVector);
 
-        BRANCH(gen_iLminus, char);
-        BRANCH(gen_iLplus, char);
-        BRANCH(gen_iLminus_afterFSR, char);
-        BRANCH(gen_iLplus_afterFSR, char);
-        BRANCH(gen_Lminus, LorentzVector);
-        BRANCH(gen_Lplus, LorentzVector);
-        BRANCH(gen_Lminus_afterFSR, LorentzVector);
-        BRANCH(gen_Lplus_afterFSR, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_iLminus, char);
+        ONLY_NOMINAL_BRANCH(gen_iLplus, char);
+        ONLY_NOMINAL_BRANCH(gen_iLminus_afterFSR, char);
+        ONLY_NOMINAL_BRANCH(gen_iLplus_afterFSR, char);
+        ONLY_NOMINAL_BRANCH(gen_Lminus, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_Lplus, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_Lminus_afterFSR, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_Lplus_afterFSR, LorentzVector);
 
-        BRANCH(gen_iNu1, char);
-        BRANCH(gen_iNu2, char);
-        BRANCH(gen_Nu1, LorentzVector);
-        BRANCH(gen_Nu2, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_iNu1, char);
+        ONLY_NOMINAL_BRANCH(gen_iNu2, char);
+        ONLY_NOMINAL_BRANCH(gen_Nu1, LorentzVector);
+        ONLY_NOMINAL_BRANCH(gen_Nu2, LorentzVector);
 
     private:
         // Producers name

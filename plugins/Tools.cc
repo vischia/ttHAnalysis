@@ -345,6 +345,29 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     float eff_lep1_leg2 = 1.;
     float eff_lep2_leg1 = 1.;
     float eff_lep2_leg2 = 1.;
+
+    // See https://cp3-llbb.slack.com/archives/hh/p1486479524001043
+    // See https://cp3-llbb.slack.com/archives/hh/p1486482180001053
+    constexpr float DZ_filter_eff_MuMu = 0.982;
+    constexpr float DZ_filter_eff_ElEl = 0.983;
+    constexpr float DZ_filter_eff_MuEl = 0.954;
+    constexpr float DZ_filter_eff_ElMu = 0.969;
+
+    // See https://cp3-llbb.slack.com/archives/hh/p1486566100001301
+    constexpr float L1_EMTF_bug_eff_MuMu = 0.5265;
+    auto getMuonsSector = [](const LorentzVector& mu) -> int {
+        float phi = mu.Phi();
+        float phiPositive = (phi > 0) ? phi : (2 * M_PI + phi);
+        float phiTranslated = (phiPositive - M_PI / 12) > 0 ? (phiPositive - M_PI / 12) : (23 * M_PI / 12 + phiPositive);
+        int phiSector = static_cast<int>(floor(phiTranslated / (M_PI / 3)));
+        return phiSector;
+    };
+    auto sameEndcap = [](const LorentzVector& p1, const LorentzVector& p2) -> bool {
+        return p1.Eta() * p2.Eta() > 0 && std::abs(p1.Eta()) > 1.2 && std::abs(p2.Eta()) > 1.2;
+    };
+
+    float DZ_filter_eff = 1.;
+
     Parameters p_hlt_lep1 = {{BinningVariable::Eta, lep1.p4.Eta()}, {BinningVariable::Pt, lep1.p4.Pt()}};
     Parameters p_hlt_lep2 = {{BinningVariable::Eta, lep2.p4.Eta()}, {BinningVariable::Pt, lep2.p4.Pt()}};
 
@@ -353,24 +376,32 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
         eff_lep1_leg2 = m_hlt_efficiencies.at("IsoMu8orIsoTkMu8leg")->get(p_hlt_lep1)[0];
         eff_lep2_leg1 = m_hlt_efficiencies.at("IsoMu17leg")->get(p_hlt_lep2)[0];
         eff_lep2_leg2 = m_hlt_efficiencies.at("IsoMu8orIsoTkMu8leg")->get(p_hlt_lep2)[0];
+        DZ_filter_eff = DZ_filter_eff_MuMu;
+        // L1 EMTF bug
+        if (getMuonsSector(lep1.p4) == getMuonsSector(lep2.p4) && sameEndcap(lep1.p4, lep2.p4)) {
+            DZ_filter_eff *= L1_EMTF_bug_eff_MuMu;
+        }
     }
     else if (lep1.isMu && lep2.isEl) {
         eff_lep1_leg1 = m_hlt_efficiencies.at("IsoMu23leg")->get(p_hlt_lep1)[0];
         eff_lep1_leg2 = m_hlt_efficiencies.at("IsoMu8leg")->get(p_hlt_lep1)[0];
         eff_lep2_leg1 = m_hlt_efficiencies.at("EleMuHighPtleg")->get(p_hlt_lep2)[0];
         eff_lep2_leg2 = m_hlt_efficiencies.at("MuEleLowPtleg")->get(p_hlt_lep2)[0];
+        DZ_filter_eff = DZ_filter_eff_MuEl;
     }
     else if (lep1.isEl && lep2.isMu) {
         eff_lep1_leg1 = m_hlt_efficiencies.at("EleMuHighPtleg")->get(p_hlt_lep1)[0];
         eff_lep1_leg2 = m_hlt_efficiencies.at("MuEleLowPtleg")->get(p_hlt_lep1)[0];
         eff_lep2_leg1 = m_hlt_efficiencies.at("IsoMu23leg")->get(p_hlt_lep2)[0];
         eff_lep2_leg2 = m_hlt_efficiencies.at("IsoMu8leg")->get(p_hlt_lep2)[0];
+        DZ_filter_eff = DZ_filter_eff_ElMu;
     }
     else if (lep1.isEl && lep2.isEl){
         eff_lep1_leg1 = m_hlt_efficiencies.at("DoubleEleHighPtleg")->get(p_hlt_lep1)[0];
         eff_lep1_leg2 = m_hlt_efficiencies.at("DoubleEleLowPtleg")->get(p_hlt_lep1)[0];
         eff_lep2_leg1 = m_hlt_efficiencies.at("DoubleEleHighPtleg")->get(p_hlt_lep2)[0];
         eff_lep2_leg2 = m_hlt_efficiencies.at("DoubleEleLowPtleg")->get(p_hlt_lep2)[0];
+        DZ_filter_eff = DZ_filter_eff_ElEl;
     }
     else 
         std::cout << "We have something else then el or mu !!" << std::endl;
@@ -460,23 +491,13 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
         std::pow(eff_lep1_leg1, 2) *
         std::pow(error_eff_lep2_leg2_down, 2);
 
+    nominal *= DZ_filter_eff;
+    error_squared_up *= DZ_filter_eff * DZ_filter_eff;
+    error_squared_down *= DZ_filter_eff * DZ_filter_eff;
+
     dilep.trigger_efficiency = nominal;
-    dilep.trigger_efficiency_upVariated = ((nominal + std::sqrt(error_squared_up)) > 1.)? 1. : nominal + std::sqrt(error_squared_up);
-    dilep.trigger_efficiency_downVariated = ((nominal - std::sqrt(error_squared_down)) < 0.)? 0. : nominal - std::sqrt(error_squared_down);
-    
-    // Arun's method (not using the proper derivative formula)
-    float X = eff_lep1_leg1 * eff_lep2_leg2 * std::sqrt((std::pow((error_eff_lep1_leg1_up/eff_lep1_leg1),2) + std::pow((error_eff_lep2_leg2_up/eff_lep2_leg2),2) ));
-    float Y = eff_lep2_leg1 * eff_lep1_leg2 * std::sqrt((std::pow((error_eff_lep2_leg1_up/eff_lep2_leg1),2) + std::pow((error_eff_lep1_leg2_up/eff_lep1_leg2),2) ));
-    float Z = eff_lep1_leg1 * eff_lep2_leg1 * std::sqrt((std::pow((error_eff_lep1_leg1_up/eff_lep1_leg1),2) + std::pow((error_eff_lep2_leg1_up/eff_lep2_leg1),2) ));
-    float error_squared_up_Arun = X*X + Y*Y + Z*Z ;
-    dilep.trigger_efficiency_upVariated_Arun = ((nominal + std::sqrt(error_squared_up_Arun)) > 1.)? 1. : nominal + std::sqrt(error_squared_up_Arun);
-
-    X = eff_lep1_leg1 * eff_lep2_leg2 * std::sqrt((std::pow((error_eff_lep1_leg1_down/eff_lep1_leg1),2) + std::pow((error_eff_lep2_leg2_down/eff_lep2_leg2),2) ));
-    Y = eff_lep2_leg1 * eff_lep1_leg2 * std::sqrt((std::pow((error_eff_lep2_leg1_down/eff_lep2_leg1),2) + std::pow((error_eff_lep1_leg2_down/eff_lep1_leg2),2) ));
-    Z = eff_lep1_leg1 * eff_lep2_leg1 * std::sqrt((std::pow((error_eff_lep1_leg1_down/eff_lep1_leg1),2) + std::pow((error_eff_lep2_leg1_down/eff_lep2_leg1),2) ));
-    float error_squared_down_Arun = X*X + Y*Y + Z*Z ;
-    dilep.trigger_efficiency_downVariated_Arun = ((nominal - std::sqrt(error_squared_down_Arun)) < 0.)? 0. : nominal - std::sqrt(error_squared_down_Arun);
-
+    dilep.trigger_efficiency_upVariated = ((nominal + std::sqrt(error_squared_up)) > 1.) ? 1. : (nominal + std::sqrt(error_squared_up));
+    dilep.trigger_efficiency_downVariated = ((nominal - std::sqrt(error_squared_down)) < 0.) ? 0. : (nominal - std::sqrt(error_squared_down));
 }
 
 

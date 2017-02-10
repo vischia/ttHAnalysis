@@ -21,13 +21,13 @@ namespace HH {
         bool hlt_leg2;
         bool isMu;
         bool isEl;
-        bool id_L; // Loose
-        bool id_M; // Medium
-        bool id_T; // Tight
-        bool id_HWW; // HWW-like id
-        bool iso_L; // Loose
-        bool iso_T; // Tight
-        bool iso_HWW;
+        //bool id_L; // Loose
+        //bool id_M; // Medium
+        //bool id_T; // Tight
+        //bool id_HWW; // HWW-like id
+        //bool iso_L; // Loose
+        //bool iso_T; // Tight
+        //bool iso_HWW;
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
@@ -47,31 +47,31 @@ namespace HH {
         bool isElMu;
         bool isMuEl;
         bool isSF; // Same Flavour
-        bool id_LL;
-        bool id_LM;
-        bool id_LT;
-        bool id_LHWW;
-        bool id_ML;
-        bool id_MM;
-        bool id_MT;
-        bool id_MHWW;
-        bool id_TL;
-        bool id_TM;
-        bool id_TT;
-        bool id_THWW;
-        bool id_HWWL;
-        bool id_HWWM;
-        bool id_HWWT;
-        bool id_HWWHWW;
-        bool iso_LL;
-        bool iso_LT;
-        bool iso_LHWW;
-        bool iso_TL;
-        bool iso_TT;
-        bool iso_THWW;
-        bool iso_HWWL;
-        bool iso_HWWT;
-        bool iso_HWWHWW;
+        //bool id_LL;
+        //bool id_LM;
+        //bool id_LT;
+        //bool id_LHWW;
+        //bool id_ML;
+        //bool id_MM;
+        //bool id_MT;
+        //bool id_MHWW;
+        //bool id_TL;
+        //bool id_TM;
+        //bool id_TT;
+        //bool id_THWW;
+        //bool id_HWWL;
+        //bool id_HWWM;
+        //bool id_HWWT;
+        //bool id_HWWHWW;
+        //bool iso_LL;
+        //bool iso_LT;
+        //bool iso_LHWW;
+        //bool iso_TL;
+        //bool iso_TT;
+        //bool iso_THWW;
+        //bool iso_HWWL;
+        //bool iso_HWWT;
+        //bool iso_HWWHWW;
         float DR_l_l;
         float DPhi_l_l;
         float ht_l_l;
@@ -80,9 +80,7 @@ namespace HH {
         float gen_DPtOverPt;
         float trigger_efficiency;
         float trigger_efficiency_downVariated;
-        float trigger_efficiency_downVariated_Arun;
         float trigger_efficiency_upVariated;
-        float trigger_efficiency_upVariated_Arun;
     };
     struct Met {
         LorentzVector p4;
@@ -113,12 +111,12 @@ namespace HH {
         LorentzVector p4;
         LorentzVector gen_p4;
         int idx;
-        bool id_L;
-        bool id_T;
-        bool id_TLV;
-        bool btag_L;
+        //bool id_L;
+        //bool id_T;
+        //bool id_TLV;
+        //bool btag_L;
         bool btag_M;
-        bool btag_T;
+        //bool btag_T;
         float CSV;
         float CMVAv2;
         bool gen_matched_bParton;
@@ -130,24 +128,25 @@ namespace HH {
         bool gen_c;
         bool gen_l;
     };
+
     struct Dijet {
         LorentzVector p4;
         LorentzVector gen_p4;
         std::pair<int, int> idxs; // indices in the framework collection
         int ijet1; // indices in the HH::Jet collection
         int ijet2;
-        bool jid_LL;
-        bool jid_TT;
-        bool jid_TLVTLV;
-        bool btag_LL;
-        bool btag_LM;
-        bool btag_LT;
-        bool btag_ML;
+        //bool jid_LL;
+        //bool jid_TT;
+        //bool jid_TLVTLV;
+        //bool btag_LL;
+        //bool btag_LM;
+        //bool btag_LT;
+        //bool btag_ML;
         bool btag_MM;
-        bool btag_MT;
-        bool btag_TL;
-        bool btag_TM;
-        bool btag_TT;
+        //bool btag_MT;
+        //bool btag_TL;
+        //bool btag_TM;
+        //bool btag_TT;
         float sumCSV;
         float sumCMVAv2;
         float DR_j_j;
@@ -165,6 +164,7 @@ namespace HH {
         bool gen_cl;
         bool gen_ll;
     };
+
     struct MELAAngles {
         float theta1;
         float theta2;
@@ -172,6 +172,7 @@ namespace HH {
         float phi;
         float psi;
     };
+
     struct DileptonMetDijet : public DileptonMet, public Dijet {
         LorentzVector p4;
         LorentzVector lep1_p4;
@@ -182,6 +183,7 @@ namespace HH {
         LorentzVector ll_p4;
         LorentzVector jj_p4;
         LorentzVector lljj_p4;
+
         LorentzVector gen_p4;
         LorentzVector gen_lep1_p4;
         LorentzVector gen_lep2_p4;
@@ -191,8 +193,8 @@ namespace HH {
         LorentzVector gen_ll_p4;
         LorentzVector gen_jj_p4;
         LorentzVector gen_lljj_p4;
-        int illmet; // index in the HH::DileptonMet collection
-        int ijj; // index in the HH::Dijet collection
+        //int illmet; // index in the HH::DileptonMet collection
+        //int ijj; // index in the HH::Dijet collection
         float DPhi_jj_met;
         float minDPhi_j_met;
         float maxDPhi_j_met;
