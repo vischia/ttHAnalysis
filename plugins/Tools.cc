@@ -363,7 +363,7 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
         return phiSector;
     };
     auto sameEndcap = [](const LorentzVector& p1, const LorentzVector& p2) -> bool {
-        return p1.Eta() * p2.Eta() > 0 && p1.Eta() > 1.2 && p2.Eta() > 1.2;
+        return p1.Eta() * p2.Eta() > 0 && std::abs(p1.Eta()) > 1.2 && std::abs(p2.Eta()) > 1.2;
     };
 
     float DZ_filter_eff = 1.;
