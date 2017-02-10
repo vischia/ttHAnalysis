@@ -353,6 +353,19 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     constexpr float DZ_filter_eff_MuEl = 0.954;
     constexpr float DZ_filter_eff_ElMu = 0.969;
 
+    // See https://cp3-llbb.slack.com/archives/hh/p1486566100001301
+    constexpr float L1_EMTF_bug_eff_MuMu = 0.5265;
+    auto getMuonsSector = [](const LorentzVector& mu) -> int {
+        float phi = mu.Phi();
+        float phiPositive = (phi > 0) ? phi : (2 * M_PI + phi);
+        float phiTranslated = (phiPositive - M_PI / 12) > 0 ? (phiPositive - M_PI / 12) : (23 * M_PI / 12 + phiPositive);
+        int phiSector = static_cast<int>(floor(phiTranslated / (M_PI / 3)));
+        return phiSector;
+    };
+    auto sameEndcap = [](const LorentzVector& p1, const LorentzVector& p2) -> bool {
+        return p1.Eta() * p2.Eta() > 0 && p1.Eta() > 1.2 && p2.Eta() > 1.2;
+    };
+
     float DZ_filter_eff = 1.;
 
     Parameters p_hlt_lep1 = {{BinningVariable::Eta, lep1.p4.Eta()}, {BinningVariable::Pt, lep1.p4.Pt()}};
@@ -364,6 +377,10 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
         eff_lep2_leg1 = m_hlt_efficiencies.at("IsoMu17leg")->get(p_hlt_lep2)[0];
         eff_lep2_leg2 = m_hlt_efficiencies.at("IsoMu8orIsoTkMu8leg")->get(p_hlt_lep2)[0];
         DZ_filter_eff = DZ_filter_eff_MuMu;
+        // L1 EMTF bug
+        if (getMuonsSector(lep1.p4) == getMuonsSector(lep2.p4) && sameEndcap(lep1.p4, lep2.p4)) {
+            DZ_filter_eff *= L1_EMTF_bug_eff_MuMu;
+        }
     }
     else if (lep1.isMu && lep2.isEl) {
         eff_lep1_leg1 = m_hlt_efficiencies.at("IsoMu23leg")->get(p_hlt_lep1)[0];
