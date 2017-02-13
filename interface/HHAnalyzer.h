@@ -92,7 +92,7 @@ class HHAnalyzer: public Framework::Analyzer {
         //// October 2016: adding some asymmetric btag candidates, for study
         //BRANCH(llmetjj_HWWleptons_btagLM_cmva, std::vector<HH::DileptonMetDijet>);
         //BRANCH(llmetjj_HWWleptons_btagMT_cmva, std::vector<HH::DileptonMetDijet>);
-        
+
         BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
@@ -207,6 +207,20 @@ class HHAnalyzer: public Framework::Analyzer {
         ONLY_NOMINAL_BRANCH(gen_iNu2, char);
         ONLY_NOMINAL_BRANCH(gen_Nu1, LorentzVector);
         ONLY_NOMINAL_BRANCH(gen_Nu2, LorentzVector);
+
+        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_B, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_Bbar, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_B_afterFSR, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_Bbar_afterFSR, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L1, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L2, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L1_afterFSR, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L2_afterFSR, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L1, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L2, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L1_afterFSR, std::vector<float>);
+        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L2_afterFSR, std::vector<float>);
+
 
     private:
         // Producers name

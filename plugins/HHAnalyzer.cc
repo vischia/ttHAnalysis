@@ -265,19 +265,6 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         // ***** ***** *****
         // Matching
         // ***** ***** *****
-        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_B, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_Bbar, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_B_afterFSR, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_jet_Bbar_afterFSR, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L1, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L2, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L1_afterFSR, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_electron_L2_afterFSR, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L1, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L2, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L1_afterFSR, std::vector<float>);    
-        ONLY_NOMINAL_BRANCH(gen_deltaR_muon_L2_afterFSR, std::vector<float>);    
-    
         for (auto p4: alljets.gen_p4) {
             gen_deltaR_jet_B.push_back(deltaR(p4, gen_B));
             gen_deltaR_jet_Bbar.push_back(deltaR(p4, gen_Bbar));
