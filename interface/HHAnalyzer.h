@@ -103,6 +103,19 @@ class HHAnalyzer: public Framework::Analyzer {
         MELAAngles getMELAAngles(const LorentzVector &q1, const LorentzVector &q2, const LorentzVector &q11, const LorentzVector &q12, const LorentzVector &q21, const LorentzVector &q22, float ebeam = 6500);
         void matchOfflineLepton(const HLTProducer& hlt, Dilepton& dilepton);
         void fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep);
+        
+        // Stuff for L1 EMTF muon mitigation
+        float getL1TPhi(int charge, const LorentzVector& p);
+        bool sameEndCap(const LorentzVector& p1, const LorentzVector& p2);
+        // Translate phi by 'translation', and put it into [0, 2pi[
+        float translatePhi(float phi, float translation=0);
+        // Get N s.t. start + 60° * N <= phi < end + 60° + N; return -1 if no such N
+        int getPhiSector(float phi, float start, float end);
+        // See https://twiki.cern.ch/twiki/bin/view/CMS/EndcapHighPtMuonEfficiencyProblem:
+        // Case 2) -- using gen info (to apply weights on MC)
+        bool isCSCSameSector(const Lepton& lep1, const Lepton& lep2);
+        // Case 3) -- using reco info (to reject data and MC)
+        bool isCSCWithOverlap(const Lepton& lep1, const Lepton& lep2);
 
         // global event stuff (selected objects multiplicity)
         BRANCH(HT, float);

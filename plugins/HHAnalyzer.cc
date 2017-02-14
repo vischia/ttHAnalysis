@@ -427,17 +427,21 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             dilep.gen_p4 = dilep.gen_matched ? leptons[ilep1].gen_p4 + leptons[ilep2].gen_p4 : null_p4;
             dilep.gen_DR = dilep.gen_matched ? ROOT::Math::VectorUtil::DeltaR(dilep.p4, dilep.gen_p4) : -1.;
             dilep.gen_DPtOverPt = dilep.gen_matched ? (dilep.p4.Pt() - dilep.gen_p4.Pt()) / dilep.p4.Pt() : -10.;
+
             if (event.isRealData()) {
                dilep.trigger_efficiency = 1.;
                dilep.trigger_efficiency_downVariated = 1.;
                dilep.trigger_efficiency_upVariated = 1.;
-            }
-            else {
+            } else {
                fillTriggerEfficiencies(leptons[ilep1], leptons[ilep2], dilep);
             }
             // Some selection
             // Note that ID and isolation criteria are in both electron and muon loops
             if (!dilep.isOS)
+                continue;
+
+            // FIXME L1 EMTF bug mitigation -- cut the overlap on both MC and data
+            if (dilep.isMuMu && isCSCWithOverlap(leptons[ilep1], leptons[ilep2]))
                 continue;
 
             // Throw event if there is no matched dilepton trigger path (only on data)
