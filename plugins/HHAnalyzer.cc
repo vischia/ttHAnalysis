@@ -707,8 +707,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.gen_DPtOverPt = myllmetjj.gen_matched ? (myllmetjj.p4.Pt() - myllmetjj.gen_p4.Pt()) / myllmetjj.p4.Pt() : -10.;
             myllmetjj.gen_lep1_p4 = leptons[ilep1].gen_p4;
             myllmetjj.gen_lep2_p4 = leptons[ilep2].gen_p4;
-            myllmetjj.gen_jet1_p4 = leptons[ijet1].gen_p4;
-            myllmetjj.gen_jet2_p4 = leptons[ijet2].gen_p4;
+            myllmetjj.gen_jet1_p4 = jets[ijet1].gen_p4;
+            myllmetjj.gen_jet2_p4 = jets[ijet2].gen_p4;
             myllmetjj.gen_met_p4 = met[imet].gen_p4;
             myllmetjj.gen_ll_p4 = ll[ill].gen_p4;
             myllmetjj.gen_jj_p4 = jj[ijj].gen_p4;
