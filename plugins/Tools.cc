@@ -339,6 +339,78 @@ void HHAnalyzer::matchOfflineLepton(const HLTProducer& hlt, HH::Dilepton& dilept
     }
 }
 
+float HHAnalyzer::getL1TPhi(int charge, const LorentzVector& p) {
+    /*float pt = p.Pt();
+    float phi = p.Phi();
+    float theta = p.Theta();
+    return phi + charge * (1. / pt) * (10.48 - 5.1412 * theta + 0.02308 * theta * theta);*/
+    // FIXME
+    return p.Phi();
+}
+
+bool HHAnalyzer::sameEndCap(const LorentzVector& p1, const LorentzVector& p2) {
+    return p1.Eta() * p2.Eta() > 0 && std::abs(p1.Eta()) > 1.24 && std::abs(p2.Eta()) > 1.24;
+}
+
+float HHAnalyzer::translatePhi(float phi, float translation/*=0*/) {
+    phi += translation; // translate
+    phi = std::fmod(phi, 2 * M_PI); // put between -2pi, 2pi
+    phi = (phi > 0) ? phi : (2 * M_PI + phi); // put between 0, 2pi
+    return phi;
+}
+
+int HHAnalyzer::getPhiSector(float phi, float start, float end) {
+    for (int i = 0; i < 6; i++) {
+        if (start + i * M_PI / 3 <= phi && phi < end + i * M_PI / 3)
+            return i;
+    }
+    return -1;
+}
+
+bool HHAnalyzer::isCSCSameSector(const Lepton& lep1, const Lepton& lep2) {
+    if (!sameEndCap(lep1.p4, lep2.p4))
+        return false;
+
+    float phi1 = translatePhi(getL1TPhi(lep1.charge, lep1.p4));
+    float phi2 = translatePhi(getL1TPhi(lep2.charge, lep2.p4));
+
+    int sector1 = getPhiSector(phi1, 15*M_PI/180, 65*M_PI/180);
+    int sector2 = getPhiSector(phi2, 15*M_PI/180, 65*M_PI/180);
+
+    int overlap1 = getPhiSector(phi1, 5*M_PI/180, 15*M_PI/180);
+    int overlap2 = getPhiSector(phi2, 5*M_PI/180, 15*M_PI/180);
+
+    if (sector1 >= 0 && sector2 >= 0 && sector1 == sector2)
+        return true;
+
+    if (overlap1 >= 0 && overlap2 >= 0 && overlap1 == overlap2)
+        return true;
+
+    return false;
+}
+
+bool HHAnalyzer::isCSCWithOverlap(const Lepton& lep1, const Lepton& lep2) {
+    if (!sameEndCap(lep1.p4, lep2.p4))
+        return false;
+
+    float phi1 = translatePhi(getL1TPhi(lep1.charge, lep1.p4));
+    float phi2 = translatePhi(getL1TPhi(lep2.charge, lep2.p4));
+
+    int sector1 = getPhiSector(phi1, 15*M_PI/180, 55*M_PI/180);
+    int sector2 = getPhiSector(phi2, 15*M_PI/180, 55*M_PI/180);
+
+    int overlap1 = getPhiSector(phi1, 5*M_PI/180, 15*M_PI/180);
+    int overlap2 = getPhiSector(phi2, 5*M_PI/180, 15*M_PI/180);
+
+    if (sector1 >= 0 && overlap2 >= 0 && sector1 == overlap2)
+        return true;
+
+    if (sector2 >= 0 && overlap1 >= 0 && sector2 == overlap1)
+        return true;
+
+    return false;
+}
+
 void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep2, Dilepton & dilep) {
 
     float eff_lep1_leg1 = 1.;
@@ -355,16 +427,6 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
 
     // See https://cp3-llbb.slack.com/archives/hh/p1486566100001301
     constexpr float L1_EMTF_bug_eff_MuMu = 0.5265;
-    auto getMuonsSector = [](const LorentzVector& mu) -> int {
-        float phi = mu.Phi();
-        float phiPositive = (phi > 0) ? phi : (2 * M_PI + phi);
-        float phiTranslated = (phiPositive - M_PI / 12) > 0 ? (phiPositive - M_PI / 12) : (23 * M_PI / 12 + phiPositive);
-        int phiSector = static_cast<int>(floor(phiTranslated / (M_PI / 3)));
-        return phiSector;
-    };
-    auto sameEndcap = [](const LorentzVector& p1, const LorentzVector& p2) -> bool {
-        return p1.Eta() * p2.Eta() > 0 && std::abs(p1.Eta()) > 1.2 && std::abs(p2.Eta()) > 1.2;
-    };
 
     float DZ_filter_eff = 1.;
 
@@ -377,10 +439,9 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
         eff_lep2_leg1 = m_hlt_efficiencies.at("IsoMu17leg")->get(p_hlt_lep2)[0];
         eff_lep2_leg2 = m_hlt_efficiencies.at("IsoMu8orIsoTkMu8leg")->get(p_hlt_lep2)[0];
         DZ_filter_eff = DZ_filter_eff_MuMu;
-        // L1 EMTF bug
-        if (getMuonsSector(lep1.p4) == getMuonsSector(lep2.p4) && sameEndcap(lep1.p4, lep2.p4)) {
+        // FIXME L1 EMTF bug
+        if (isCSCSameSector(lep1, lep2))
             DZ_filter_eff *= L1_EMTF_bug_eff_MuMu;
-        }
     }
     else if (lep1.isMu && lep2.isEl) {
         eff_lep1_leg1 = m_hlt_efficiencies.at("IsoMu23leg")->get(p_hlt_lep1)[0];
