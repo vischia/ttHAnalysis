@@ -17,6 +17,8 @@ if runOnData :
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
 
+process.framework.treeFlushSize = cms.untracked.uint64(5 * 1024 * 1024)
+
 framework.addAnalyzer('hh_analyzer', cms.PSet(
         type = cms.string('hh_analyzer'),
         prefix = cms.string('hh_'),

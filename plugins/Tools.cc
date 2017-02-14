@@ -340,10 +340,12 @@ void HHAnalyzer::matchOfflineLepton(const HLTProducer& hlt, HH::Dilepton& dilept
 }
 
 float HHAnalyzer::getL1TPhi(int charge, const LorentzVector& p) {
-    float pt = p.Pt();
+    /*float pt = p.Pt();
     float phi = p.Phi();
     float theta = p.Theta();
-    return phi + charge * (1. / pt) * (10.48 - 5.1412 * theta + 0.02308 * theta * theta);
+    return phi + charge * (1. / pt) * (10.48 - 5.1412 * theta + 0.02308 * theta * theta);*/
+    // FIXME
+    return p.Phi();
 }
 
 bool HHAnalyzer::sameEndCap(const LorentzVector& p1, const LorentzVector& p2) {
