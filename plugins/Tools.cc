@@ -394,16 +394,16 @@ bool HHAnalyzer::isCSCWithOverlap(const Lepton& lep1, const Lepton& lep2) {
     float phi1 = translatePhi(getL1TPhi(lep1.charge, lep1.p4));
     float phi2 = translatePhi(getL1TPhi(lep2.charge, lep2.p4));
 
-    int sector1 = getPhiSector(phi1, 15*M_PI/180, 55*M_PI/180);
-    int sector2 = getPhiSector(phi2, 15*M_PI/180, 55*M_PI/180);
+    int sector1 = getPhiSector(phi1, 15*M_PI/180, 65*M_PI/180);
+    int sector2 = getPhiSector(phi2, 15*M_PI/180, 65*M_PI/180);
 
     int overlap1 = getPhiSector(phi1, 5*M_PI/180, 15*M_PI/180);
     int overlap2 = getPhiSector(phi2, 5*M_PI/180, 15*M_PI/180);
 
-    if (sector1 >= 0 && overlap2 >= 0 && sector1 == overlap2)
+    if (sector1 >= 0 && overlap2 >= 0 && (sector1 == overlap2 || sector1 + 1 == overlap2))
         return true;
 
-    if (sector2 >= 0 && overlap1 >= 0 && sector2 == overlap1)
+    if (sector2 >= 0 && overlap1 >= 0 && (sector2 == overlap1 || sector2 + 1 == overlap1))
         return true;
 
     return false;
