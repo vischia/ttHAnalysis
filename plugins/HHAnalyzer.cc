@@ -339,6 +339,8 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.hlt_leg1 = false;
             ele.hlt_leg2 = false;
 
+            ele.sc_eta = allelectrons.products[ielectron]->superCluster()->eta();
+
             leptons.push_back(ele);
         }
     }//end of loop on electrons

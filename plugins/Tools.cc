@@ -431,6 +431,13 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     Parameters p_hlt_lep1 = {{BinningVariable::Eta, lep1.p4.Eta()}, {BinningVariable::Pt, lep1.p4.Pt()}};
     Parameters p_hlt_lep2 = {{BinningVariable::Eta, lep2.p4.Eta()}, {BinningVariable::Pt, lep2.p4.Pt()}};
 
+    // Replace eta by supercluster eta for electrons
+    if (lep1.isEl)
+        p_hlt_lep1.setEta(lep1.sc_eta);
+
+    if (lep2.isEl)
+        p_hlt_lep2.setEta(lep2.sc_eta);
+
     if (lep1.isMu && lep2.isMu) {
         eff_lep1_leg1 = m_hlt_efficiencies.at("IsoMu17leg")->get(p_hlt_lep1)[0];
         eff_lep1_leg2 = m_hlt_efficiencies.at("IsoMu8orIsoTkMu8leg")->get(p_hlt_lep1)[0];
