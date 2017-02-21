@@ -3,6 +3,7 @@
      <version ClassVersion="11" checksum="3678847574"/>
      <version ClassVersion="10" checksum="1833596599"/>
      <field name="hlt_already_tried_matching" transient="true"/>
+     <field name="sc_eta" transient="true"/>
     </class>
     <class name="std::vector<HH::Lepton>"/>
     <class name="HH::Dilepton" ClassVersion="12">

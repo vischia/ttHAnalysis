@@ -31,6 +31,7 @@ namespace HH {
         bool gen_matched;
         float gen_DR;
         float gen_DPtOverPt;
+        float sc_eta; // Only valid for electrons, transient
     };
     struct Dilepton {
         LorentzVector p4;
