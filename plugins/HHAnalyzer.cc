@@ -442,9 +442,17 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             if (!dilep.isOS)
                 continue;
 
-            // FIXME L1 EMTF bug mitigation -- cut the overlap on both MC and data
-            if (dilep.isMuMu && isCSCWithOverlap(leptons[ilep1], leptons[ilep2]))
-                continue;
+            // FIXME L1 EMTF bug mitigation -- cut the overlap on data if it's a run affected by the bug
+            // On MC, apply the fraction of lumi the bug was not present
+            if (dilep.isMuMu && isCSCWithOverlap(leptons[ilep1], leptons[ilep2])) {
+                if (event.isRealData() && fwevent.run < 278167) {
+                    continue;
+                } else if (!event.isRealData()) {
+                   dilep.trigger_efficiency *= 0.5265;
+                   dilep.trigger_efficiency_downVariated *= 0.5265;
+                   dilep.trigger_efficiency_upVariated *= 0.5265;
+                }
+            }
 
             // Throw event if there is no matched dilepton trigger path (only on data)
             if (event.isRealData()
