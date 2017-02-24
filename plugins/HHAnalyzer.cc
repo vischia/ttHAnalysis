@@ -314,6 +314,25 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // Leptons and dileptons
     // ********** 
 
+    static auto electron_pass_HLT_ID = [&allelectrons, this](size_t index) {
+        auto electron = allelectrons.products[index];
+
+        // Use POG HLT-safe id
+
+        bool result = allelectrons.ids[index][m_electron_hlt_safe_wp_name];
+
+        // Add dxy and dz cuts described at https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Offline_selection_criteria
+        if (electron->isEB()) {
+            result &= std::abs(allelectrons.dz[index]) < 0.1;
+            result &= std::abs(allelectrons.dxy[index]) < 0.05;
+        } else {
+            result &= std::abs(allelectrons.dz[index]) < 0.2;
+            result &= std::abs(allelectrons.dxy[index]) < 0.1;
+        }
+
+        return result;
+    };
+
     // Fill lepton structures
     for (unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
@@ -331,6 +350,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             ele.idx = ielectron;
             ele.isMu = false;
             ele.isEl = true;
+            ele.ele_hlt_id = electron_pass_HLT_ID(ielectron);
 
             ele.gen_matched = allelectrons.matched[ielectron];
             ele.gen_p4 = ele.gen_matched ? allelectrons.gen_p4[ielectron] : null_p4;

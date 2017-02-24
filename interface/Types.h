@@ -21,6 +21,7 @@ namespace HH {
         bool hlt_leg2;
         bool isMu;
         bool isEl;
+        bool ele_hlt_id;
         //bool id_L; // Loose
         //bool id_M; // Medium
         //bool id_T; // Tight
