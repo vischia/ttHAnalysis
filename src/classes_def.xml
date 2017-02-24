@@ -1,5 +1,6 @@
 <lcgdict>
-    <class name="HH::Lepton" ClassVersion="11">
+    <class name="HH::Lepton" ClassVersion="12">
+     <version ClassVersion="12" checksum="1045553155"/>
      <version ClassVersion="11" checksum="3678847574"/>
      <version ClassVersion="10" checksum="1833596599"/>
      <field name="hlt_already_tried_matching" transient="true"/>
