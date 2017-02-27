@@ -420,8 +420,8 @@ void HHAnalyzer::fillTriggerEfficiencies(const Lepton & lep1, const Lepton & lep
     // See https://cp3-llbb.slack.com/archives/hh/p1486482180001053
     constexpr float DZ_filter_eff_MuMu = 0.982;
     constexpr float DZ_filter_eff_ElEl = 0.983;
-    constexpr float DZ_filter_eff_MuEl = 0.954;
-    constexpr float DZ_filter_eff_ElMu = 0.969;
+    constexpr float DZ_filter_eff_MuEl = 0.988;
+    constexpr float DZ_filter_eff_ElMu = 0.982;
 
     // See https://cp3-llbb.slack.com/archives/hh/p1486566100001301
     constexpr float L1_EMTF_bug_eff_MuMu = 0.5265;
