@@ -46,7 +46,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
 
 
-    if (!event.isRealData() && !doingSystematics()) {
+    if (!event.isRealData()) {
 
         // FIXME Moriond 2017
         // BR for taus included in HH sample is not correct (BR is tau -> all instead of tau -> e / mu)
