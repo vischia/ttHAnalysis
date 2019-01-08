@@ -10,3 +10,10 @@ source setup.sh
 cd ${CMSSW_BASE}/src/
 scram b -j 20
 ```
+
+
+   * TODO:
+      - Update JEC, electron corrections, muon corrections
+      - Implement baseline event selection
+      - Implement datacards creator
+      - Import unfolding software
