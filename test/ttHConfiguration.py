@@ -113,20 +113,20 @@ process = framework.create()
 
 if runOnData: 
     process.source.fileNames = cms.untracked.vstring(
-            '/store/data/Run2016F/DoubleMuon/MINIAOD/23Sep2016-v1/50000/040EDEBA-0490-E611-A424-008CFA110C68.root'
+        '/store/data/Run2017C/DoubleMuon/MINIAOD/31Mar2018-v1/00000/1E30A24E-8E39-E811-8AD3-8CDCD4A99E08.root'
         )
 else: 
     process.framework.treeFlushSize = cms.untracked.uint64(5 * 1024 * 1024)
 
     process.source.fileNames = cms.untracked.vstring(
-            # Signal
-            '/store/mc/RunIISummer16MiniAODv2/GluGluTottHTo2B2VTo2L2Nu_node_SM_13TeV-madgraph-v2/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/60000/2E1015E2-71D9-E611-911E-02163E019E19.root'
+        # Signal
+        '/store/mc/RunIIFall17MiniAODv2/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v2/00000/10AE80AC-C94C-E811-9E46-FA163E6C5A08.root'
+        
+        # TT
+        # '/store/mc/RunIIFall17MiniAODv2/TTTo2L2Nu_widthx1p15_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/110000/42928F17-F6B2-E811-B466-FA163E6E1BE8.root'
 
-            # TT
-            # '/store/mc/RunIISummer16MiniAODv2/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/00ED79D3-CFC1-E611-B748-3417EBE64483.root'
-
-            # DY
-            # '/store/mc/RunIISummer16MiniAODv2/DYToLL_2J_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/100000/00CEFB4F-C1D2-E611-BBF4-7845C4FC3C11.root<Paste>'
+        # DY
+        # '/store/mc/RunIIFall17MiniAODv2/DYJetsToLL_M-4to50_HT-70to100_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/110000/F2DF6219-3FBA-E811-BEF5-02163E019FB4.root'
         )
 
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
