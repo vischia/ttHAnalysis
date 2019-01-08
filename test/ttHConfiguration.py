@@ -1,4 +1,3 @@
-
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -9,15 +8,22 @@ from cp3_llbb.Framework.CmdLine import CmdLine
 options = CmdLine()
 runOnData = options.runOnData == 1
 
+print('Now starting')
+# Not sure it's the correct way to add a new era
+options.changeDefaults(era='2016')
+print('Changed era')
+
 # 2017 tags from https://twiki.cern.ch/twiki/bin/view/CMS/PdmV2017Analysis
-globalTag_ = '94X_mc2017_realistic_v14'
-processName_ = 'PAT'
 if runOnData :
-    globalTag_ = '94X_dataRun2_ReReco_EOY17_v6'
-    processName_ = 'RECO'
+    options.changeDefaults(globalTag='94X_dataRun2_ReReco_EOY17_v6', process='RECO')
+else:
+    options.changeDefaults(globalTag='94X_mc2017_realistic_v14', process='PAT')
 
-framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
+print('Changed defaults')
 
+framework = Framework.Framework(options)
+
+print('Created framework object')
 framework.addAnalyzer('tth_analyzer', cms.PSet(
         type = cms.string('tth_analyzer'),
         prefix = cms.string('tth_'),
@@ -100,10 +106,12 @@ framework.getProducer('electrons').parameters.scale_factors.id_mediumplushltsafe
 if runOnData:
     framework.redoJEC()
 
-framework.applyMuonCorrection('rochester')
+# Must activate Rochester correction (input file missing)
+# framework.applyMuonCorrection('rochester', input='')
 
-framework.applyElectronRegression()
-framework.applyElectronSmearing()
+# Missing regressionWeights_cfi
+# framework.applyElectronRegression()
+# framework.applyElectronSmearing()
 
 if not runOnData:
     framework.smearJets(resolutionFile='cp3_llbb/Framework/data/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt', scaleFactorFile='cp3_llbb/Framework/data/Spring16_25nsV10_MC_SF_AK4PFchs.txt')

@@ -2,4 +2,4 @@
 
 #include <cp3_llbb/ttHAnalysis/interface/ttHAnalyzer.h>
 
-DEFINE_EDM_PLUGIN(ExTreeMakerAnalyzerFactory, ttHAnalyzer, "hh_analyzer");
+DEFINE_EDM_PLUGIN(ExTreeMakerAnalyzerFactory, ttHAnalyzer, "tth_analyzer");
