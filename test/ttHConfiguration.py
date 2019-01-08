@@ -18,9 +18,9 @@ if runOnData :
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
 
-framework.addAnalyzer('hh_analyzer', cms.PSet(
-        type = cms.string('hh_analyzer'),
-        prefix = cms.string('hh_'),
+framework.addAnalyzer('tth_analyzer', cms.PSet(
+        type = cms.string('tth_analyzer'),
+        prefix = cms.string('tth_'),
         enable = cms.bool(True),
         categories_parameters = cms.PSet(
             # Per-category lepton pt cuts
