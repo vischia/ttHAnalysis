@@ -1,24 +1,24 @@
-#include <cp3_llbb/HHAnalysis/interface/Types.h>
+#include <cp3_llbb/ttHAnalysis/interface/Types.h>
 #include <vector>
 
 namespace {
     struct dictionnary {
-        HH::Lepton dummy;
-        std::vector<HH::Lepton> dummy2;
-        HH::Dilepton dummy3;
-        std::vector<HH::Dilepton> dummy4;
-        HH::Met dummy5;
-        std::vector<HH::Met> dummy6;
-        HH::DileptonMet dummy7;
-        std::vector<HH::DileptonMet> dummy8;
+        ttH::Lepton dummy;
+        std::vector<ttH::Lepton> dummy2;
+        ttH::Dilepton dummy3;
+        std::vector<ttH::Dilepton> dummy4;
+        ttH::Met dummy5;
+        std::vector<ttH::Met> dummy6;
+        ttH::DileptonMet dummy7;
+        std::vector<ttH::DileptonMet> dummy8;
         std::vector< std::vector<int> > dummy9;
-        HH::Jet dummy10;
-        std::vector<HH::Jet> dummy11;
-        HH::Dijet dummy12;
-        std::vector<HH::Dijet> dummy13;
-        HH::DileptonMetDijet dummy14;
-        std::vector<HH::DileptonMetDijet> dummy15;
+        ttH::Jet dummy10;
+        std::vector<ttH::Jet> dummy11;
+        ttH::Dijet dummy12;
+        std::vector<ttH::Dijet> dummy13;
+        ttH::DileptonMetDijet dummy14;
+        std::vector<ttH::DileptonMetDijet> dummy15;
         std::pair<int8_t, int8_t>  dummy16;
-        HH::MELAAngles dummy17;
+        ttH::MELAAngles dummy17;
     };
 }

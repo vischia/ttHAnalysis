@@ -1,41 +1,48 @@
 <lcgdict>
-    <class name="HH::Lepton" ClassVersion="12">
+    <class name="ttH::Lepton" ClassVersion="13">
+     <version ClassVersion="13" checksum="3821253531"/>
      <version ClassVersion="12" checksum="1045553155"/>
      <version ClassVersion="11" checksum="3678847574"/>
      <version ClassVersion="10" checksum="1833596599"/>
      <field name="hlt_already_tried_matching" transient="true"/>
      <field name="sc_eta" transient="true"/>
     </class>
-    <class name="std::vector<HH::Lepton>"/>
-    <class name="HH::Dilepton" ClassVersion="12">
+    <class name="std::vector<ttH::Lepton>"/>
+    <class name="ttH::Dilepton" ClassVersion="13">
+     <version ClassVersion="13" checksum="4049330718"/>
      <version ClassVersion="12" checksum="1015244358"/>
      <version ClassVersion="11" checksum="3795415179"/>
      <version ClassVersion="10" checksum="2433355583"/>
     </class>
-    <class name="std::vector<HH::Dilepton>"/>
-    <class name="HH::Met" ClassVersion="10">
+    <class name="std::vector<ttH::Dilepton>"/>
+    <class name="ttH::Met" ClassVersion="11">
+     <version ClassVersion="11" checksum="1324938339"/>
      <version ClassVersion="10" checksum="1356748875"/>
     </class>
-    <class name="std::vector<HH::Met>"/>
-    <class name="HH::DileptonMet" ClassVersion="12">
+    <class name="std::vector<ttH::Met>"/>
+    <class name="ttH::DileptonMet" ClassVersion="13">
+     <version ClassVersion="13" checksum="2686107161"/>
      <version ClassVersion="12" checksum="1019123979"/>
      <version ClassVersion="11" checksum="3666464930"/>
      <field name="ill" transient="true"/>
     </class>
-    <class name="std::vector<HH::DileptonMet>"/>
+    <class name="std::vector<ttH::DileptonMet>"/>
     <class name="std::vector< std::vector<int> >"/>
-    <class name="HH::Jet" ClassVersion="12">
+    <class name="ttH::Jet" ClassVersion="13">
+     <version ClassVersion="13" checksum="293951462"/>
      <version ClassVersion="12" checksum="700635934"/>
      <version ClassVersion="11" checksum="1040758844"/>
      <version ClassVersion="10" checksum="194867656"/>
     </class>
-    <class name="std::vector<HH::Jet>"/>
-    <class name="HH::Dijet" ClassVersion="11">
+    <class name="std::vector<ttH::Jet>"/>
+    <class name="ttH::Dijet" ClassVersion="12">
+     <version ClassVersion="12" checksum="456262048"/>
      <version ClassVersion="11" checksum="667858264"/>
      <version ClassVersion="10" checksum="2119876344"/>
     </class>
-    <class name="std::vector<HH::Dijet>"/>
-    <class name="HH::DileptonMetDijet" ClassVersion="12">
+    <class name="std::vector<ttH::Dijet>"/>
+    <class name="ttH::DileptonMetDijet" ClassVersion="13">
+     <version ClassVersion="13" checksum="3763263789"/>
      <version ClassVersion="12" checksum="2284378963"/>
      <version ClassVersion="11" checksum="4193054634"/>
      <field name="ill" transient="true"/>
@@ -45,9 +52,10 @@
      <field name="jet2_p4" transient="true"/>
      <field name="met_p4" transient="true"/>
     </class>
-    <class name="std::vector<HH::DileptonMetDijet>"/>
+    <class name="std::vector<ttH::DileptonMetDijet>"/>
     <class name="std::pair<int8_t, int8_t>"/>
-    <class name="HH::MELAAngles" ClassVersion="10">
+    <class name="ttH::MELAAngles" ClassVersion="11">
+     <version ClassVersion="11" checksum="3446628141"/>
      <version ClassVersion="10" checksum="2939888277"/>
     </class>
 </lcgdict>

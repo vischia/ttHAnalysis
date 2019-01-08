@@ -1,25 +1,25 @@
-#ifndef HHANALYZER_H
-#define HHANALYZER_H
+#ifndef TTHANALYZER_H
+#define TTHANALYZER_H
 
 #include <cp3_llbb/Framework/interface/Analyzer.h>
 #include <cp3_llbb/Framework/interface/Category.h>
 #include <cp3_llbb/Framework/interface/BinnedValuesJSONParser.h>
 #include <cp3_llbb/Framework/interface/WeightedBinnedValues.h>
 
-#include <cp3_llbb/HHAnalysis/interface/Types.h>
-#include <cp3_llbb/HHAnalysis/interface/lester_mt2_bisect.h>
+#include <cp3_llbb/ttHAnalysis/interface/Types.h>
+#include <cp3_llbb/ttHAnalysis/interface/lester_mt2_bisect.h>
 #include <cp3_llbb/Framework/interface/HLTProducer.h>
 
 #include <Math/VectorUtil.h>
 
 #include <random>
 
-using namespace HH;
-using namespace HHAnalysis;
+using namespace ttH;
+using namespace ttHAnalysis;
 
-class HHAnalyzer: public Framework::Analyzer {
+class ttHAnalyzer: public Framework::Analyzer {
     public:
-        HHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
+        ttHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
             Analyzer(name, tree_, config), random_generator(42), br_generator(0, 1)
         {
             // Not untracked as these parameters are mandatory
@@ -74,26 +74,26 @@ class HHAnalyzer: public Framework::Analyzer {
         }
         virtual void endJob(MetadataManager&) override;
 
-        BRANCH(leptons, std::vector<HH::Lepton>);
-        BRANCH(met, std::vector<HH::Met>);
-        BRANCH(jets, std::vector<HH::Jet>);
-        std::vector<HH::Dilepton> ll;
-        std::vector<HH::DileptonMet> llmet;
-        std::vector<HH::Dijet> jj;
+        BRANCH(leptons, std::vector<ttH::Lepton>);
+        BRANCH(met, std::vector<ttH::Met>);
+        BRANCH(jets, std::vector<ttH::Jet>);
+        std::vector<ttH::Dilepton> ll;
+        std::vector<ttH::DileptonMet> llmet;
+        std::vector<ttH::Dijet> jj;
 
-        //std::vector<HH::DileptonMetDijet> llmetjj;
-        //std::vector<HH::DileptonMetDijet> llmetjj_cmva;
+        //std::vector<ttH::DileptonMetDijet> llmetjj;
+        //std::vector<ttH::DileptonMetDijet> llmetjj_cmva;
         // some few custom candidates, for convenience
         // Januray 2016: preapproval freezing custom candidates
-        //BRANCH(llmetjj_HWWleptons_nobtag_cmva, std::vector<HH::DileptonMetDijet>);
-        //BRANCH(llmetjj_HWWleptons_btagL_cmva, std::vector<HH::DileptonMetDijet>);
-        //BRANCH(llmetjj_HWWleptons_btagM_cmva, std::vector<HH::DileptonMetDijet>);
-        //BRANCH(llmetjj_HWWleptons_btagT_cmva, std::vector<HH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_nobtag_cmva, std::vector<ttH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagL_cmva, std::vector<ttH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagM_cmva, std::vector<ttH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagT_cmva, std::vector<ttH::DileptonMetDijet>);
         //// October 2016: adding some asymmetric btag candidates, for study
-        //BRANCH(llmetjj_HWWleptons_btagLM_cmva, std::vector<HH::DileptonMetDijet>);
-        //BRANCH(llmetjj_HWWleptons_btagMT_cmva, std::vector<HH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagLM_cmva, std::vector<ttH::DileptonMetDijet>);
+        //BRANCH(llmetjj_HWWleptons_btagMT_cmva, std::vector<ttH::DileptonMetDijet>);
 
-        BRANCH(llmetjj, std::vector<HH::DileptonMetDijet>);
+        BRANCH(llmetjj, std::vector<ttH::DileptonMetDijet>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
         virtual void registerCategories(CategoryManager& manager, const edm::ParameterSet& config) override;
@@ -182,7 +182,7 @@ class HHAnalyzer: public Framework::Analyzer {
         ONLY_NOMINAL_BRANCH(gen_iH2, char);
         ONLY_NOMINAL_BRANCH(gen_H1, LorentzVector);
         ONLY_NOMINAL_BRANCH(gen_H2, LorentzVector);
-        ONLY_NOMINAL_BRANCH(gen_mHH, double);
+        ONLY_NOMINAL_BRANCH(gen_mttH, double);
         ONLY_NOMINAL_BRANCH(gen_costhetastar, double);
         ONLY_NOMINAL_BRANCH(gen_iH1_afterFSR, char);
         ONLY_NOMINAL_BRANCH(gen_iH2_afterFSR, char);
@@ -260,7 +260,7 @@ class HHAnalyzer: public Framework::Analyzer {
 };
 
 // Some macros for gen information
-#define ASSIGN_HH_GEN_INFO_2(X, Y, ERROR) \
+#define ASSIGN_ttH_GEN_INFO_2(X, Y, ERROR) \
         /* Before FSR. Use isHardProcess (7) flag */ \
         if (flags.test(7)) { \
             if (gen_i##X == -1) { \
@@ -285,7 +285,7 @@ class HHAnalyzer: public Framework::Analyzer {
             } \
         }
 
-#define ASSIGN_HH_GEN_INFO_2_NO_FSR(X, Y, ERROR) \
+#define ASSIGN_ttH_GEN_INFO_2_NO_FSR(X, Y, ERROR) \
         /* Before FSR. Use isHardProcess (7) flag */ \
         if (flags.test(7)) { \
             if (gen_i##X == -1) { \
@@ -299,7 +299,7 @@ class HHAnalyzer: public Framework::Analyzer {
             } \
         }
 
-#define ASSIGN_HH_GEN_INFO(X, ERROR) \
+#define ASSIGN_ttH_GEN_INFO(X, ERROR) \
         /* Before FSR. Use isHardProcess (7) flag */ \
         if (flags.test(7)) { \
             if (gen_i##X == -1) { \
@@ -318,7 +318,7 @@ class HHAnalyzer: public Framework::Analyzer {
             } \
         }
 
-#define ASSIGN_HH_GEN_INFO_NO_FSR(X, ERROR) \
+#define ASSIGN_ttH_GEN_INFO_NO_FSR(X, ERROR) \
         /* Before FSR. Use isHardProcess (7) flag */ \
         if (flags.test(7)) { \
             if (gen_i##X == -1) { \

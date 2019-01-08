@@ -1,7 +1,7 @@
-#include <cp3_llbb/HHAnalysis/interface/HHAnalyzer.h>
+#include <cp3_llbb/ttHAnalysis/interface/ttHAnalyzer.h>
 #include <cp3_llbb/Framework/interface/BTagsAnalyzer.h>
-#include <cp3_llbb/HHAnalysis/interface/Categories.h>
-#include <cp3_llbb/HHAnalysis/interface/GenStatusFlags.h>
+#include <cp3_llbb/ttHAnalysis/interface/Categories.h>
+#include <cp3_llbb/ttHAnalysis/interface/GenStatusFlags.h>
 
 #include <cp3_llbb/Framework/interface/EventProducer.h>
 #include <cp3_llbb/Framework/interface/GenParticlesProducer.h>
@@ -14,10 +14,10 @@
 
 #include <cmath>
 
-#define HH_GEN_DEBUG (false)
+#define ttH_GEN_DEBUG (false)
 #define TT_GEN_DEBUG (false)
 
-void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
+void ttHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
     edm::ParameterSet newconfig = edm::ParameterSet(config);
     newconfig.addUntrackedParameter("m_analyzer_name", this->m_name);
     manager.new_category<MuMuCategory>("mumu", "Category with leading leptons as two muons", newconfig);
@@ -27,7 +27,7 @@ void HHAnalyzer::registerCategories(CategoryManager& manager, const edm::Paramet
 }
 
 
-void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const AnalyzersManager&, const CategoryManager&) {
+void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const AnalyzersManager&, const CategoryManager&) {
 
     // Reset event
     leptons.clear();
@@ -49,7 +49,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     if (!event.isRealData()) {
 
         // FIXME Moriond 2017
-        // BR for taus included in HH sample is not correct (BR is tau -> all instead of tau -> e / mu)
+        // BR for taus included in ttH sample is not correct (BR is tau -> all instead of tau -> e / mu)
         // If we run over a signal sample, randomly throw events according to BR(tau -> e / mu)
 
 // ***** ***** *****
@@ -81,7 +81,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
         const GenParticlesProducer& gp = producers.get<GenParticlesProducer>("gen_particles");
 
-#if HH_GEN_DEBUG
+#if ttH_GEN_DEBUG
     std::function<void(size_t)> print_mother_chain = [&gp, &print_mother_chain](size_t p) {
 
         if (gp.pruned_mothers_index[p].empty()) {
@@ -150,7 +150,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
             int64_t pdg_id = gp.pruned_pdg_id[ip];
 
-#if HH_GEN_DEBUG
+#if ttH_GEN_DEBUG
             std::cout << "[" << ip << "] pdg id: " << pdg_id << "  flags: " << flags << "  p = " << gp.pruned_p4[ip] << std::endl;
             print_mother_chain(ip);
 #endif
@@ -158,9 +158,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             auto p4 = gp.pruned_p4[ip];
 
             if (std::abs(pdg_id) == 35 || std::abs(pdg_id) == 39) {
-                ASSIGN_HH_GEN_INFO_NO_FSR(X, "X");
+                ASSIGN_ttH_GEN_INFO_NO_FSR(X, "X");
             } else if (pdg_id == 25) {
-                ASSIGN_HH_GEN_INFO_2(H1, H2, "Higgs");
+                ASSIGN_ttH_GEN_INFO_2(H1, H2, "Higgs");
             }
 
             // Only look for Higgs decays if we have found the two Higgs
@@ -178,9 +178,9 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
                 continue;
 
             if (pdg_id == 5) {
-                ASSIGN_HH_GEN_INFO(B, "B");
+                ASSIGN_ttH_GEN_INFO(B, "B");
             } else if (pdg_id == -5) {
-                ASSIGN_HH_GEN_INFO(Bbar, "Bbar");
+                ASSIGN_ttH_GEN_INFO(Bbar, "Bbar");
             }
 
             // Ignore B decays
@@ -193,13 +193,13 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             }
 
             if ((pdg_id == 11) || (pdg_id == 13) || (pdg_id == 15)) {
-                ASSIGN_HH_GEN_INFO(Lminus, "L-");
+                ASSIGN_ttH_GEN_INFO(Lminus, "L-");
             } else if ((pdg_id == -11) || (pdg_id == -13) || (pdg_id == -15)) {
-                ASSIGN_HH_GEN_INFO(Lplus, "L+");
+                ASSIGN_ttH_GEN_INFO(Lplus, "L+");
             } else if ((pdg_id == 23) || (std::abs(pdg_id) == 24)) {
-                ASSIGN_HH_GEN_INFO_2(V1, V2, "W/Z bosons");
+                ASSIGN_ttH_GEN_INFO_2(V1, V2, "W/Z bosons");
             } else if ((std::abs(pdg_id) == 12) || (std::abs(pdg_id) == 14) || (std::abs(pdg_id) == 16)) {
-                ASSIGN_HH_GEN_INFO_2_NO_FSR(Nu1, Nu2, "neutrinos");
+                ASSIGN_ttH_GEN_INFO_2_NO_FSR(Nu1, Nu2, "neutrinos");
             }
         }
 
@@ -224,11 +224,11 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
 
         if ((gen_iH1 != -1) && (gen_iH2 != -1)) {
-            gen_mHH = (gen_H1 + gen_H2).M();
+            gen_mttH = (gen_H1 + gen_H2).M();
             gen_costhetastar = getCosThetaStar_CS(gen_H1, gen_H2);
         }
 
-#if HH_GEN_DEBUG
+#if ttH_GEN_DEBUG
         PRINT_PARTICULE(X);
         PRINT_RESONANCE(H1, H2);
         PRINT_RESONANCE(B, Bbar);
@@ -344,7 +344,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             if (!allelectrons.ids[ielectron][m_electron_medium_wp_name])
                 continue;
 
-            HH::Lepton ele;
+            ttH::Lepton ele;
             ele.p4 = allelectrons.p4[ielectron];
             ele.charge = allelectrons.charge[ielectron];
             ele.idx = ielectron;
@@ -374,7 +374,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             if (!allmuons.isTight[imuon] || allmuons.relativeIsoR04_deltaBeta[imuon] >= m_muonTightIsoCut)
                 continue;
 
-            HH::Lepton mu;
+            ttH::Lepton mu;
             mu.p4 = allmuons.p4[imuon];
             mu.charge = allmuons.charge[imuon];
             mu.idx = imuon;
@@ -392,7 +392,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     }//end of loop on muons
 
     // sort leptons by pt (ignoring flavour, id and iso)
-    std::sort(leptons.begin(), leptons.end(), [](const HH::Lepton& lep1, const HH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });
+    std::sort(leptons.begin(), leptons.end(), [](const ttH::Lepton& lep1, const ttH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });
 
     for (unsigned int ilep1 = 0; ilep1 < leptons.size(); ilep1++)
     {
@@ -400,7 +400,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
         for (unsigned int ilep2 = ilep1+1; ilep2 < leptons.size(); ilep2++)
         {
-            HH::Dilepton dilep;
+            ttH::Dilepton dilep;
             dilep.p4 = leptons[ilep1].p4 + leptons[ilep2].p4;
             dilep.idxs = std::make_pair(leptons[ilep1].idx, leptons[ilep2].idx);
             dilep.ilep1 = ilep1;
@@ -497,7 +497,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
     // have the ll collection sorted by ht
-    std::sort(ll.begin(), ll.end(), [&](HH::Dilepton& a, HH::Dilepton& b){return a.ht_l_l > b.ht_l_l;});
+    std::sort(ll.begin(), ll.end(), [&](ttH::Dilepton& a, ttH::Dilepton& b){return a.ht_l_l > b.ht_l_l;});
 
     // Keep only the first ll candidate
     if (ll.size() > 1) {
@@ -507,7 +507,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     // ***** 
     // Adding MET(s)
     // ***** 
-    HH::Met mymet;
+    ttH::Met mymet;
     mymet.p4 = pf_met.p4;
     mymet.isNoHF = false;
     mymet.gen_matched = false;
@@ -541,7 +541,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     {
         for (unsigned int ill = 0; ill < ll.size(); ill++)
         {
-            HH::DileptonMet myllmet;
+            ttH::DileptonMet myllmet;
 // DileptonMet inherits from Dilepton struct, initalize everything properly
 // FIXME: there is very probably a cleaner way to do
             myllmet.p4 = ll[ill].p4 + met[imet].p4;
@@ -585,7 +585,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmet.DR_l_l = ll[ill].DR_l_l;
             myllmet.DPhi_l_l = ll[ill].DPhi_l_l;
             myllmet.ht_l_l = ll[ill].ht_l_l;
-            // content specific to HH:DileptonMet
+            // content specific to ttH:DileptonMet
             myllmet.ill = ill;
             myllmet.imet = imet;
             myllmet.isNoHF = met[imet].isNoHF;
@@ -629,7 +629,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             if (!alljets.passLooseID[ijet])
                 continue;
 
-            HH::Jet myjet;
+            ttH::Jet myjet;
             myjet.p4 = alljets.p4[ijet] * correctionFactor;
             myjet.idx = ijet;
 
@@ -669,7 +669,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     {
         for (unsigned int ijet2 = ijet1 + 1; ijet2 < jets.size(); ijet2++)
         {
-            HH::Dijet myjj;
+            ttH::Dijet myjj;
             myjj.p4 = jets[ijet1].p4 + jets[ijet2].p4;
             myjj.idxs = std::make_pair(jets[ijet1].idx, jets[ijet2].idx);
             myjj.ijet1 = ijet1;
@@ -708,7 +708,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
     }
 
     // have the jj collection sorted by ht
-    std::sort(jj.begin(), jj.end(), [&](HH::Dijet& a, HH::Dijet& b){return a.p4.Pt() > b.p4.Pt();});
+    std::sort(jj.begin(), jj.end(), [&](ttH::Dijet& a, ttH::Dijet& b){return a.p4.Pt() > b.p4.Pt();});
 
     // ********** 
     // lljj, llbb, +pf_met
@@ -723,7 +723,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             unsigned int ijet2 = jj[ijj].ijet2;
             unsigned int ilep1 = ll[ill].ilep1;
             unsigned int ilep2 = ll[ill].ilep2;
-            HH::DileptonMetDijet myllmetjj;
+            ttH::DileptonMetDijet myllmetjj;
             myllmetjj.p4 = ll[ill].p4 + jj[ijj].p4 + met[imet].p4;
             myllmetjj.lep1_p4 = leptons[ilep1].p4;
             myllmetjj.lep2_p4 = leptons[ilep2].p4;
@@ -826,12 +826,12 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
             myllmetjj.MT = llmet[illmet].MT;
             myllmetjj.MT_formula = llmet[illmet].MT_formula;
             myllmetjj.projectedMet = llmet[illmet].projectedMet;
-            // content specific to HH::DijetMet
+            // content specific to ttH::DijetMet
             // NB: computed for the first time here, no intermediate jjmet collection
             myllmetjj.DPhi_jj_met = fabs(ROOT::Math::VectorUtil::DeltaPhi(jj[ijj].p4, met[imet].p4));
             myllmetjj.minDPhi_j_met = std::min(fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
             myllmetjj.maxDPhi_j_met = std::max(fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet1].p4, met[imet].p4)), fabs(ROOT::Math::VectorUtil::DeltaPhi(jets[jj[ijj].ijet2].p4, met[imet].p4)));
-            // content specific to HH::DileptonMetDijet
+            // content specific to ttH::DileptonMetDijet
             //myllmetjj.illmet = illmet;
             //myllmetjj.ijj = ijj;
             float DR_j1l1, DR_j1l2, DR_j2l1, DR_j2l2;
@@ -890,7 +890,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
         }
     }
 
-    std::sort(llmetjj.begin(), llmetjj.end(), [&](HH::DileptonMetDijet& a, const HH::DileptonMetDijet& b){ return a.sumCMVAv2 > b.sumCMVAv2; });
+    std::sort(llmetjj.begin(), llmetjj.end(), [&](ttH::DileptonMetDijet& a, const ttH::DileptonMetDijet& b){ return a.sumCMVAv2 > b.sumCMVAv2; });
 
     // Keep only the first candidate
     if (llmetjj.size() > 1) {
@@ -1311,7 +1311,7 @@ void HHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const 
 
 }
 
-void HHAnalyzer::endJob(MetadataManager& metadata) {
+void ttHAnalyzer::endJob(MetadataManager& metadata) {
 
     if (! doingSystematics()) {
         metadata.add(this->m_name + "_count_has2leptons", count_has2leptons);
