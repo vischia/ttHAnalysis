@@ -9,10 +9,11 @@ from cp3_llbb.Framework.CmdLine import CmdLine
 options = CmdLine()
 runOnData = options.runOnData == 1
 
-globalTag_ = '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
+# 2017 tags from https://twiki.cern.ch/twiki/bin/view/CMS/PdmV2017Analysis
+globalTag_ = '94X_mc2017_realistic_v14'
 processName_ = 'PAT'
 if runOnData :
-    globalTag_ = '80X_dataRun2_2016SeptRepro_v7'
+    globalTag_ = '94X_dataRun2_ReReco_EOY17_v6'
     processName_ = 'RECO'
 
 framework = Framework.Framework(runOnData, eras.Run2_25ns, globalTag=globalTag_, processName=processName_)
