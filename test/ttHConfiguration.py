@@ -127,8 +127,11 @@ else:
     process.framework.treeFlushSize = cms.untracked.uint64(5 * 1024 * 1024)
 
     process.source.fileNames = cms.untracked.vstring(
+        # Sync
+        '/store/mc/RunIIFall17MiniAOD/ttHJetToNonbb_M125_TuneCP5_13TeV_amcatnloFXFX_madspin_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/0CF65340-0200-E811-ABB7-0025905C53F0.root'
+        
         # Signal
-        '/store/mc/RunIIFall17MiniAODv2/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v2/00000/10AE80AC-C94C-E811-9E46-FA163E6C5A08.root'
+        #'/store/mc/RunIIFall17MiniAODv2/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v2/00000/10AE80AC-C94C-E811-9E46-FA163E6C5A08.root'
         
         # TT
         # '/store/mc/RunIIFall17MiniAODv2/TTTo2L2Nu_widthx1p15_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/110000/42928F17-F6B2-E811-B466-FA163E6E1BE8.root'
