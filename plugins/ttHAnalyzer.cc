@@ -341,7 +341,7 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
 // I use the Electron veto from https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPATExampleTopQuarks to reject all electrons    
         if (allelectrons.p4[ielectron].Pt() > 15
             && fabs(allelectrons.p4[ielectron].Eta()) < 2.5)
-                    continue;
+            continue;
         {
             // some selection
             // Ask for medium ID
