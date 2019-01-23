@@ -336,8 +336,12 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
     // Fill lepton structures
     for (unsigned int ielectron = 0; ielectron < allelectrons.p4.size(); ielectron++)
     {
-        if (allelectrons.p4[ielectron].Pt() > m_subleadingElectronPtCut
-            && fabs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
+//        if (allelectrons.p4[ielectron].Pt() > m_subleadingElectronPtCut
+//            && fabs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut)
+// I use the Electron veto from https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookPATExampleTopQuarks to reject all electrons    
+        if (allelectrons.p4[ielectron].Pt() > 15
+            && fabs(allelectrons.p4[ielectron].Eta()) < 2.5)
+                    continue;
         {
             // some selection
             // Ask for medium ID
@@ -367,8 +371,12 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
 
     for (unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
-        if (allmuons.p4[imuon].Pt() > m_subleadingMuonPtCut
-            && fabs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
+//        if (allmuons.p4[imuon].Pt() > m_subleadingMuonPtCut
+//            && fabs(allmuons.p4[imuon].Eta()) < m_muonEtaCut)
+// Using the same Twiki page, here I select only loose muons and then the tight selection will reject them all?        
+        if (allmuons.p4[imuon].Pt() > 10
+            && fabs(allmuons.p4[imuon].Eta()) < 2.5)
+            continue;        
         {
             // Ask for tight ID & tight ISO
             if (!allmuons.isTight[imuon] || allmuons.relativeIsoR04_deltaBeta[imuon] >= m_muonTightIsoCut)
