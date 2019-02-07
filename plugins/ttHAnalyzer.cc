@@ -13,9 +13,10 @@
 #include <cp3_llbb/Framework/interface/HLTProducer.h>
 
 #include <cmath>
-
+#include <vector>
 #define ttH_GEN_DEBUG (false)
 #define TT_GEN_DEBUG (false)
+
 
 void ttHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
     edm::ParameterSet newconfig = edm::ParameterSet(config);
@@ -37,7 +38,6 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
     jj.clear();
     //llmetjj.clear();
     //llmetjj_cmva.clear();
-
     const JetsProducer& alljets = producers.get<JetsProducer>(m_jets_producer);
     const ElectronsProducer& allelectrons = producers.get<ElectronsProducer>(m_electrons_producer);
     const MuonsProducer& allmuons = producers.get<MuonsProducer>(m_muons_producer);
@@ -339,9 +339,15 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
         if (allelectrons.p4[ielectron].Pt() > m_subleadingElectronPtCut
             && fabs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
         {
+
             // some selection
             // Ask for medium ID
-            if (!allelectrons.ids[ielectron][m_electron_medium_wp_name])
+	 // for(auto& mapelement : allelectrons.ids[ielectron])
+	 //   {
+	 //     std::cout << mapelement.first << std::endl;
+	 //   }
+
+            if (!allelectrons.ids[ielectron][m_electron_loose_wp_name])
                 continue;
 
             ttH::Lepton ele;
@@ -361,9 +367,17 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
 
             ele.sc_eta = allelectrons.products[ielectron]->superCluster()->eta();
 
+
             leptons.push_back(ele);
+            //selElectrons.push_back(ele);
         }
+       
     }//end of loop on electrons
+
+    int nElectrons=leptons.size();
+    //std::cout<<"  # of ele:  "<< nElectrons <<std::endl;
+    if(nElectrons!=1)  return;
+
 
     for (unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
@@ -389,8 +403,9 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
 
             leptons.push_back(mu);
         }
+    //int nMuons=selMuons.size();
+   // if(nMuons!=1) continue; 
     }//end of loop on muons
-
     // sort leptons by pt (ignoring flavour, id and iso)
     std::sort(leptons.begin(), leptons.end(), [](const ttH::Lepton& lep1, const ttH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });
 

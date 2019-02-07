@@ -77,10 +77,15 @@ class ttHAnalyzer: public Framework::Analyzer {
         BRANCH(leptons, std::vector<ttH::Lepton>);
         BRANCH(met, std::vector<ttH::Met>);
         BRANCH(jets, std::vector<ttH::Jet>);
+
+
+        //std::vector<ttH::Lepton> selElectrons;
+        //std::vector<ttH::Lepton> selMuons;
+        //std::vector<ttH::Lepton> selleptons;
+
         std::vector<ttH::Dilepton> ll;
         std::vector<ttH::DileptonMet> llmet;
         std::vector<ttH::Dijet> jj;
-
         //std::vector<ttH::DileptonMetDijet> llmetjj;
         //std::vector<ttH::DileptonMetDijet> llmetjj_cmva;
         // some few custom candidates, for convenience
