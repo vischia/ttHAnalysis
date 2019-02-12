@@ -14,9 +14,9 @@
 
 #include <cmath>
 #include <vector>
+#include <TCanvas.h>
 #define ttH_GEN_DEBUG (false)
 #define TT_GEN_DEBUG (false)
-
 
 void ttHAnalyzer::registerCategories(CategoryManager& manager, const edm::ParameterSet& config) {
     edm::ParameterSet newconfig = edm::ParameterSet(config);
@@ -26,7 +26,6 @@ void ttHAnalyzer::registerCategories(CategoryManager& manager, const edm::Parame
     manager.new_category<ElMuCategory>("elmu", "Category with leading leptons as electron, subleading as muon", newconfig);
     manager.new_category<MuElCategory>("muel", "Category with leading leptons as muon, subleading as electron", newconfig);
 }
-
 
 void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const AnalyzersManager&, const CategoryManager&) {
 
@@ -44,7 +43,6 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
     const EventProducer& fwevent = producers.get<EventProducer>("event");
     const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
     const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
-
 
     if (!event.isRealData()) {
 
@@ -341,7 +339,7 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
         {
 
             // some selection
-            // Ask for medium ID
+            // Ask for loose ID
 	 // for(auto& mapelement : allelectrons.ids[ielectron])
 	 //   {
 	 //     std::cout << mapelement.first << std::endl;
@@ -366,18 +364,17 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
             ele.hlt_leg2 = false;
 
             ele.sc_eta = allelectrons.products[ielectron]->superCluster()->eta();
-
-
+            
             leptons.push_back(ele);
             //selElectrons.push_back(ele);
         }
-       
     }//end of loop on electrons
 
-    int nElectrons=leptons.size();
-    //std::cout<<"  # of ele:  "<< nElectrons <<std::endl;
-    if(nElectrons!=1)  return;
+//histo is defined in the header file and added as a class member
 
+   int nElectrons=leptons.size(); //leptons is first filled by ele
+        if (nElectrons==1)  m_f1->Fill(0); //filling the histo m_f1 bin 0
+   m_f1->Draw(); //drawing the histo
 
     for (unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
@@ -402,10 +399,11 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
             mu.hlt_leg2 = false;
 
             leptons.push_back(mu);
+            //selMuons.push_back(mu);
         }
-    //int nMuons=selMuons.size();
-   // if(nMuons!=1) continue; 
+
     }//end of loop on muons
+
     // sort leptons by pt (ignoring flavour, id and iso)
     std::sort(leptons.begin(), leptons.end(), [](const ttH::Lepton& lep1, const ttH::Lepton& lep2) { return lep1.p4.Pt() > lep2.p4.Pt(); });
 
@@ -511,6 +509,7 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
             ll.push_back(dilep); 
         }
     }
+
     // have the ll collection sorted by ht
     std::sort(ll.begin(), ll.end(), [&](ttH::Dilepton& a, ttH::Dilepton& b){return a.ht_l_l > b.ht_l_l;});
 
@@ -1327,7 +1326,6 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
 }
 
 void ttHAnalyzer::endJob(MetadataManager& metadata) {
-
     if (! doingSystematics()) {
         metadata.add(this->m_name + "_count_has2leptons", count_has2leptons);
         metadata.add(this->m_name + "_count_has2leptons_elel", count_has2leptons_elel);
@@ -1344,5 +1342,10 @@ void ttHAnalyzer::endJob(MetadataManager& metadata) {
         metadata.add(this->m_name + "_count_has2leptons_elmu_1llmetjj_2btagM", count_has2leptons_elmu_1llmetjj_2btagM);
         metadata.add(this->m_name + "_count_has2leptons_muel_1llmetjj_2btagM", count_has2leptons_muel_1llmetjj_2btagM);
         metadata.add(this->m_name + "_count_has2leptons_mumu_1llmetjj_2btagM", count_has2leptons_mumu_1llmetjj_2btagM);
+
     }
+   m_f1->Write(); //writing the histo to htest.root
+   m_f->Close();  //closing htest.root which is defined in header and added as a class member
+   delete m_f;
 }
+
