@@ -13,7 +13,8 @@
 #include <cp3_llbb/Framework/interface/HLTProducer.h>
 
 #include <cmath>
-
+#include <vector>
+#include <TCanvas.h>
 #define ttH_GEN_DEBUG (false)
 #define TT_GEN_DEBUG (false)
 
@@ -26,7 +27,6 @@ void ttHAnalyzer::registerCategories(CategoryManager& manager, const edm::Parame
     manager.new_category<MuElCategory>("muel", "Category with leading leptons as muon, subleading as electron", newconfig);
 }
 
-
 void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const ProducersManager& producers, const AnalyzersManager&, const CategoryManager&) {
 
     // Reset event
@@ -37,14 +37,12 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
     jj.clear();
     //llmetjj.clear();
     //llmetjj_cmva.clear();
-
     const JetsProducer& alljets = producers.get<JetsProducer>(m_jets_producer);
     const ElectronsProducer& allelectrons = producers.get<ElectronsProducer>(m_electrons_producer);
     const MuonsProducer& allmuons = producers.get<MuonsProducer>(m_muons_producer);
     const EventProducer& fwevent = producers.get<EventProducer>("event");
     const HLTProducer& hlt = producers.get<HLTProducer>("hlt");
     const METProducer& pf_met = producers.get<METProducer>(m_met_producer);
-
 
     if (!event.isRealData()) {
 
@@ -339,9 +337,15 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
         if (allelectrons.p4[ielectron].Pt() > m_subleadingElectronPtCut
             && fabs(allelectrons.p4[ielectron].Eta()) < m_electronEtaCut) 
         {
+
             // some selection
-            // Ask for medium ID
-            if (!allelectrons.ids[ielectron][m_electron_medium_wp_name])
+            // Ask for loose ID
+	 // for(auto& mapelement : allelectrons.ids[ielectron])
+	 //   {
+	 //     std::cout << mapelement.first << std::endl;
+	 //   }
+
+            if (!allelectrons.ids[ielectron][m_electron_loose_wp_name])
                 continue;
 
             ttH::Lepton ele;
@@ -360,10 +364,17 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
             ele.hlt_leg2 = false;
 
             ele.sc_eta = allelectrons.products[ielectron]->superCluster()->eta();
-
+            
             leptons.push_back(ele);
+            //selElectrons.push_back(ele);
         }
     }//end of loop on electrons
+
+//histo is defined in the header file and added as a class member
+
+   int nElectrons=leptons.size(); //leptons is first filled by ele
+        if (nElectrons==1)  m_f1->Fill(0); //filling the histo m_f1 bin 0
+   m_f1->Draw(); //drawing the histo
 
     for (unsigned int imuon = 0; imuon < allmuons.p4.size(); imuon++)
     {
@@ -388,7 +399,9 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
             mu.hlt_leg2 = false;
 
             leptons.push_back(mu);
+            //selMuons.push_back(mu);
         }
+
     }//end of loop on muons
 
     // sort leptons by pt (ignoring flavour, id and iso)
@@ -496,6 +509,7 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
             ll.push_back(dilep); 
         }
     }
+
     // have the ll collection sorted by ht
     std::sort(ll.begin(), ll.end(), [&](ttH::Dilepton& a, ttH::Dilepton& b){return a.ht_l_l > b.ht_l_l;});
 
@@ -1312,7 +1326,6 @@ void ttHAnalyzer::analyze(const edm::Event& event, const edm::EventSetup&, const
 }
 
 void ttHAnalyzer::endJob(MetadataManager& metadata) {
-
     if (! doingSystematics()) {
         metadata.add(this->m_name + "_count_has2leptons", count_has2leptons);
         metadata.add(this->m_name + "_count_has2leptons_elel", count_has2leptons_elel);
@@ -1329,5 +1342,10 @@ void ttHAnalyzer::endJob(MetadataManager& metadata) {
         metadata.add(this->m_name + "_count_has2leptons_elmu_1llmetjj_2btagM", count_has2leptons_elmu_1llmetjj_2btagM);
         metadata.add(this->m_name + "_count_has2leptons_muel_1llmetjj_2btagM", count_has2leptons_muel_1llmetjj_2btagM);
         metadata.add(this->m_name + "_count_has2leptons_mumu_1llmetjj_2btagM", count_has2leptons_mumu_1llmetjj_2btagM);
+
     }
+   m_f1->Write(); //writing the histo to htest.root
+   m_f->Close();  //closing htest.root which is defined in header and added as a class member
+   delete m_f;
 }
+

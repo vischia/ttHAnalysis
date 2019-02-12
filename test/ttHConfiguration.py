@@ -30,7 +30,7 @@ framework.addAnalyzer('tth_analyzer', cms.PSet(
         enable = cms.bool(True),
         categories_parameters = cms.PSet(
             # Per-category lepton pt cuts
-            mumu_leadingLeptonPtCut = cms.untracked.double(20), # muon
+            mumu_leadingLeptonPtCut = cms.untracked.double(0), # muon
             mumu_subleadingLeptonPtCut = cms.untracked.double(10), # muon
             elel_leadingLeptonPtCut = cms.untracked.double(25), # electron
             elel_subleadingLeptonPtCut = cms.untracked.double(15), # electron
@@ -57,7 +57,14 @@ framework.addAnalyzer('tth_analyzer', cms.PSet(
             muonLooseIsoCut = cms.untracked.double(.25), # https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO 
             muonTightIsoCut = cms.untracked.double(.15), # https://twiki.cern.ch/twiki/bin/view/CMS/TopMUO 
             muonEtaCut = cms.untracked.double(2.4),
-            electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-loose"),
+            #electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-loose"), #old working point
+            
+            #cutBasedElectronID-Fall17-94X-V2-loose
+            #cutBasedElectronID-Fall17-94X-V2-medium
+            #cutBasedElectronID-Fall17-94X-V2-tight
+            #cutBasedElectronID-Fall17-94X-V2-veto
+
+            electrons_loose_wp_name = cms.untracked.string("cutBasedElectronID-Fall17-94X-V2-loose"), #new working point
             electrons_medium_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-medium"),
             electrons_tight_wp_name = cms.untracked.string("cutBasedElectronID-Summer16-80X-V1-tight"),
             electrons_hlt_safe_wp_name = cms.untracked.string("cutBasedElectronHLTPreselection-Summer16-V1"),
@@ -142,4 +149,4 @@ else:
 
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
 #process.source.skipEvents = cms.untracked.uint32(10)
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))

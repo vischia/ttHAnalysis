@@ -11,7 +11,7 @@
 #include <cp3_llbb/Framework/interface/HLTProducer.h>
 
 #include <Math/VectorUtil.h>
-
+#include <TH1.h>
 #include <random>
 
 using namespace ttH;
@@ -22,6 +22,9 @@ class ttHAnalyzer: public Framework::Analyzer {
         ttHAnalyzer(const std::string& name, const ROOT::TreeGroup& tree_, const edm::ParameterSet& config):
             Analyzer(name, tree_, config), random_generator(42), br_generator(0, 1)
         {
+
+            m_f  = TFile::Open("htest.root","RECREATE"); //new root file
+            m_f1 = new TH1F   ("f1","object",3,0.,3.  ); //new histo
             // Not untracked as these parameters are mandatory
             m_electrons_producer = config.getParameter<std::string>("electronsProducer");
             m_muons_producer = config.getParameter<std::string>("muonsProducer");
@@ -77,22 +80,26 @@ class ttHAnalyzer: public Framework::Analyzer {
         BRANCH(leptons, std::vector<ttH::Lepton>);
         BRANCH(met, std::vector<ttH::Met>);
         BRANCH(jets, std::vector<ttH::Jet>);
+
+        std::vector<ttH::Lepton> selElectrons;
+        std::vector<ttH::Lepton> selMuons;
+        //std::vector<ttH::Lepton> selleptons;
         std::vector<ttH::Dilepton> ll;
         std::vector<ttH::DileptonMet> llmet;
         std::vector<ttH::Dijet> jj;
-
         //std::vector<ttH::DileptonMetDijet> llmetjj;
         //std::vector<ttH::DileptonMetDijet> llmetjj_cmva;
+        
         // some few custom candidates, for convenience
         // Januray 2016: preapproval freezing custom candidates
         //BRANCH(llmetjj_HWWleptons_nobtag_cmva, std::vector<ttH::DileptonMetDijet>);
         //BRANCH(llmetjj_HWWleptons_btagL_cmva, std::vector<ttH::DileptonMetDijet>);
         //BRANCH(llmetjj_HWWleptons_btagM_cmva, std::vector<ttH::DileptonMetDijet>);
         //BRANCH(llmetjj_HWWleptons_btagT_cmva, std::vector<ttH::DileptonMetDijet>);
+        
         //// October 2016: adding some asymmetric btag candidates, for study
         //BRANCH(llmetjj_HWWleptons_btagLM_cmva, std::vector<ttH::DileptonMetDijet>);
         //BRANCH(llmetjj_HWWleptons_btagMT_cmva, std::vector<ttH::DileptonMetDijet>);
-
         BRANCH(llmetjj, std::vector<ttH::DileptonMetDijet>);
 
         virtual void analyze(const edm::Event&, const edm::EventSetup&, const ProducersManager&, const AnalyzersManager&, const CategoryManager&) override;
@@ -236,6 +243,8 @@ class ttHAnalyzer: public Framework::Analyzer {
 
 
     private:
+        TFile *m_f; //declaring the file in ttHAnalyzer.cc by adding it as a class member
+        TH1F *m_f1; //same for histo
         // Producers name
         std::string m_electrons_producer;
         std::string m_muons_producer;
